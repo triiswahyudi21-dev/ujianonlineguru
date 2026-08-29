@@ -16,10 +16,10 @@
   <style>
     body { user-select: none; -webkit-user-select: none; }
     .rich-editor {
-      min-height: 120px;
-      max-height: 250px;
+      min-height: 140px;
+      max-height: 280px;
       overflow-y: auto;
-      border: 1px solid #cbd5e1;
+      border: 2px dashed #cbd5e1;
       border-radius: 0.5rem;
       padding: 0.75rem;
       background-color: #f8fafc;
@@ -261,9 +261,17 @@
         </div>
 
         <div class="bg-white p-5 rounded-xl shadow border border-slate-200">
-          <h3 class="font-bold text-slate-700 border-b pb-2 mb-2">Import Soal Massal dari Word</h3>
-          <p class="text-xs text-slate-500 mb-2">Dukungan penuh Gambar, pembersih nomor otomatis & layout rata kanan-kiri.</p>
+          <div class="flex justify-between items-center border-b pb-2 mb-2">
+            <h3 class="font-bold text-slate-700">Import Soal Massal dari Word</h3>
+            <label class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 px-2 py-1 rounded cursor-pointer border border-blue-200 font-semibold">
+              + Sisipkan Gambar
+              <input type="file" id="input-single-image" accept="image/*" onchange="insertManualImage(event)" class="hidden">
+            </label>
+          </div>
+          <p class="text-xs text-slate-500 mb-2">Paste teks & gambar dari Word. <i>Catatan: Jika gambar terblokir Word, gunakan tombol "+ Sisipkan Gambar" di atas.</i></p>
+          
           <div id="mass-paste-box" class="rich-editor h-40 bg-white" contenteditable="true" data-placeholder="Paste nomor soal beserta opsinya dari Word di sini..."></div>
+          
           <button id="btn-parse-soal" onclick="parseMassPasteSoal()" class="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-semibold shadow">Ekstrak Soal & Buat Tabel Kunci</button>
         </div>
       </div>
@@ -493,6 +501,49 @@
     document.addEventListener('MSFullscreenChange', onFullscreenChangeEvent);
     document.addEventListener("contextmenu", (e) => { if (stateUjianSiswa.isExamActive) e.preventDefault(); });
 
+    // PASTE INTERCEPTOR: MENANGKAP FILE GAMBAR DARI CLIPBOARD SECARA LANGSUNG
+    document.addEventListener('DOMContentLoaded', function() {
+      const pasteBox = document.getElementById('mass-paste-box');
+      if (pasteBox) {
+        pasteBox.addEventListener('paste', function(e) {
+          const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+          for (let item of items) {
+            if (item.kind === 'file' && item.type.startsWith('image/')) {
+              e.preventDefault();
+              const blob = item.getAsFile();
+              const reader = new FileReader();
+              reader.onload = function(evt) {
+                const img = document.createElement('img');
+                img.src = evt.target.result;
+                const sel = window.getSelection();
+                if (sel.rangeCount > 0) {
+                  const range = sel.getRangeAt(0);
+                  range.insertNode(img);
+                } else {
+                  pasteBox.appendChild(img);
+                }
+              };
+              reader.readAsDataURL(blob);
+            }
+          }
+        });
+      }
+    });
+
+    function insertManualImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const pasteBox = document.getElementById('mass-paste-box');
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        pasteBox.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
     window.onload = function() {
       db.ref('token').on('value', snap => {
         appData.token = snap.val() || 'EXAM88';
@@ -616,15 +667,17 @@
       let temp = document.createElement('div');
       temp.innerHTML = html;
       
-      // Amankan tag gambar dari pembungkus spesifik Word (o:p, v:shape, v:imagedata)
+      // Hapus tag gambar yang memuat tautan file lokal terblokir (file:///)
+      temp.querySelectorAll('img').forEach(img => {
+        let src = img.getAttribute('src') || '';
+        if (src.startsWith('file://')) {
+          img.remove();
+        }
+      });
+
       temp.querySelectorAll('o\\:p, v\\:shape, v\\:imagedata').forEach(el => {
         let imgs = el.querySelectorAll('img');
         imgs.forEach(img => el.parentNode.insertBefore(img, el));
-        if (el.getAttribute('src') && el.tagName.toLowerCase() !== 'img') {
-          let newImg = document.createElement('img');
-          newImg.src = el.getAttribute('src');
-          el.parentNode.insertBefore(newImg, el);
-        }
         el.remove();
       });
 
@@ -673,7 +726,6 @@
       return temp.innerHTML.trim();
     }
 
-    // UNGGAH GAMBAR (Dukungan penuh untuk Vercel + Fallback Base64 jika Firebase Storage CORS)
     async function processAndUploadImages(htmlString) {
       let temp = document.createElement('div');
       temp.innerHTML = htmlString;
@@ -681,14 +733,11 @@
 
       for (let img of imgs) {
         let src = img.getAttribute('src');
-        if (!src || src.includes('firebasestorage.googleapis.com')) continue;
+        if (!src || src.startsWith('file://') || src.includes('firebasestorage.googleapis.com')) continue;
 
         try {
           let blob;
           if (src.startsWith('data:image') || src.startsWith('blob:')) {
-            const response = await fetch(src);
-            blob = await response.blob();
-          } else {
             const response = await fetch(src);
             blob = await response.blob();
           }
@@ -703,22 +752,7 @@
             img.setAttribute('src', downloadURL);
           }
         } catch (err) {
-          console.warn("Upload Storage/CORS di Vercel terdeteksi, mengonversi ke Base64 Data URL...", err);
-          if (src.startsWith('blob:')) {
-            try {
-              const res = await fetch(src);
-              const b = await res.blob();
-              const base64 = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(b);
-              });
-              img.setAttribute('src', base64);
-            } catch(e) {
-              console.error("Gagal fallback Base64: ", e);
-            }
-          }
+          console.warn("Storage upload fallback Base64 aktif", err);
         }
       }
       return temp.innerHTML;
@@ -821,7 +855,7 @@
       if (tempParsedSoal.length === 0) return showToast("Format nomor/opsi soal Word tidak terdeteksi!");
 
       renderTabelKunciMassal();
-      showToast(`${tempParsedSoal.length} Soal Berhasil Diproses & Gambar Diunggah!`);
+      showToast(`${tempParsedSoal.length} Soal Berhasil Diproses!`);
     }
 
     function renderTabelKunciMassal() {
