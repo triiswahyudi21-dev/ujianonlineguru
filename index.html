@@ -8,9 +8,10 @@
   <!-- Pustaka Excel SheetJS -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   
-  <!-- SDK Firebase CDN (v9 Compatibility Mode) -->
+  <!-- SDK Firebase CDN (v9 Compatibility Mode) + Storage -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
   <style>
     body { user-select: none; -webkit-user-select: none; }
@@ -35,7 +36,6 @@
     }
     .rich-editor:empty:before { content: attr(data-placeholder); color: #9ca3af; }
     
-    /* STYLE KHAS LAYOUT ANBK */
     .anbk-header { background-color: #1a252f; }
     .anbk-sidebar { background-color: #ebedef; border-left: 1px solid #cbd5e1; }
     
@@ -77,7 +77,6 @@
     .soal-content p { margin-bottom: 0.5rem !important; }
     .soal-content p:last-child { margin-bottom: 0 !important; }
 
-    /* TOMBOL NAVIGASI NOMOR ANBK */
     .btn-nav-soal {
       width: 100%;
       height: 40px;
@@ -265,7 +264,7 @@
           <h3 class="font-bold text-slate-700 border-b pb-2 mb-2">Import Soal Massal dari Word</h3>
           <p class="text-xs text-slate-500 mb-2">Dukungan penuh Gambar, pembersih nomor otomatis & layout rata kanan-kiri.</p>
           <div id="mass-paste-box" class="rich-editor h-40 bg-white" contenteditable="true" data-placeholder="Paste nomor soal beserta opsinya dari Word di sini..."></div>
-          <button onclick="parseMassPasteSoal()" class="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-semibold shadow">Ekstrak Soal & Buat Tabel Kunci</button>
+          <button id="btn-parse-soal" onclick="parseMassPasteSoal()" class="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-semibold shadow">Ekstrak Soal & Buat Tabel Kunci</button>
         </div>
       </div>
 
@@ -310,7 +309,6 @@
             <p class="text-xs text-slate-500">Nilai hasil pengerjaan ujian siswa terkini dari seluruh perangkat.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <!-- FILTER KELAS PEMANTAUAN -->
             <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg border">
               <label for="filter-kelas-monitoring" class="text-xs font-semibold text-slate-600 px-1">Kelas:</label>
               <select id="filter-kelas-monitoring" onchange="onFilterKelasChange(this.value)" class="text-xs font-bold bg-white border rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 outline-none">
@@ -357,7 +355,6 @@
 
   <!-- HALAMAN SIMULASI / TAMPILAN UJIAN ANBK FULLSCREEN -->
   <div id="page-siswa" class="hidden min-h-screen h-screen flex flex-col bg-slate-100 overflow-hidden select-none">
-    <!-- HEADER ANBK -->
     <div class="anbk-header text-white px-6 py-3 shadow-md flex justify-between items-center shrink-0 z-10">
       <div class="flex items-center gap-4">
         <div class="text-xl font-black tracking-widest text-blue-400">CAT ANBK SYSTEM</div>
@@ -375,10 +372,7 @@
       </div>
     </div>
 
-    <!-- AREA UJIAN ANBK (AREA SOAL KIRI + SIDEBAR KANAN) -->
     <div class="flex-grow flex overflow-hidden">
-      
-      <!-- KIRI: AREA SOAL -->
       <div class="flex-1 flex flex-col overflow-y-auto bg-white p-6 md:p-8">
         <div class="flex justify-between items-center border-b pb-3 mb-4">
           <div class="flex items-center gap-3">
@@ -393,10 +387,8 @@
           <div id="display-teks-soal" class="soal-content"></div>
         </div>
 
-        <!-- PILIHAN JAWABAN -->
         <div class="space-y-3 pt-4 border-t" id="options-container"></div>
 
-        <!-- FOOTER NAVIGASI ANBK (BAWAH SOAL) -->
         <div class="mt-8 border-t pt-4 flex justify-between items-center shrink-0">
           <button id="btn-prev" onclick="navSoal(-1)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm shadow transition">SOAL SEBELUMNYA</button>
           
@@ -410,43 +402,23 @@
         </div>
       </div>
 
-      <!-- KANAN: SIDEBAR NAVIGASI NOMOR ANBK -->
       <div class="w-72 anbk-sidebar p-4 flex flex-col shrink-0 overflow-y-auto">
         <h3 class="font-bold text-slate-800 text-sm border-b border-slate-300 pb-2 mb-3 uppercase tracking-wider">Navigasi Soal</h3>
         
-        <div id="grid-nav-soal" class="grid grid-cols-4 gap-2 mb-6">
-          <!-- Tombol Nomor Soal di-render secara otomatis via JS -->
-        </div>
+        <div id="grid-nav-soal" class="grid grid-cols-4 gap-2 mb-6"></div>
 
-        <!-- KETERANGAN WARNA -->
         <div class="mt-auto bg-white p-3 rounded-lg border border-slate-300 text-xs space-y-2">
           <div class="font-bold text-slate-700 border-b pb-1">Keterangan Warna:</div>
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-4 bg-blue-600 rounded"></span>
-            <span>Sedang Dilihat</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-4 bg-emerald-600 rounded"></span>
-            <span>Sudah Dijawab</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-4 bg-amber-600 rounded"></span>
-            <span>Ragu - Ragu</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-4 bg-white border border-slate-400 rounded"></span>
-            <span>Belum Dijawab</span>
-          </div>
+          <div class="flex items-center gap-2"><span class="w-4 h-4 bg-blue-600 rounded"></span><span>Sedang Dilihat</span></div>
+          <div class="flex items-center gap-2"><span class="w-4 h-4 bg-emerald-600 rounded"></span><span>Sudah Dijawab</span></div>
+          <div class="flex items-center gap-2"><span class="w-4 h-4 bg-amber-600 rounded"></span><span>Ragu - Ragu</span></div>
+          <div class="flex items-center gap-2"><span class="w-4 h-4 bg-white border border-slate-400 rounded"></span><span>Belum Dijawab</span></div>
         </div>
       </div>
-
     </div>
   </div>
 
   <script>
-    // -----------------------------------------------------------------
-    // KONFIGURASI FIREBASE REALTIME DATABASE
-    // -----------------------------------------------------------------
     const firebaseConfig = {
       apiKey: "AIzaSyBxQCgLQlLPkueDp0lpuLarGwWWLIpEwnM",
       authDomain: "ujianonline-937d4.firebaseapp.com",
@@ -462,6 +434,7 @@
       firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.database();
+    const storage = firebase.storage();
 
     let appData = {
       guruPass: 'guru123',
@@ -483,41 +456,23 @@
       isExamActive: false
     };
 
-    // AKTIVASI FULLSCREEN LINTAS BROWSER
     function launchFullscreen(element) {
-      if (element.requestFullscreen) {
-        element.requestFullscreen().catch(() => {});
-      } else if (element.mozRequestFullScreen) {
-        element.mozRequestFullScreen().catch(() => {});
-      } else if (element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen().catch(() => {});
-      } else if (element.msRequestFullscreen) {
-        element.msRequestFullscreen().catch(() => {});
-      }
+      if (element.requestFullscreen) { element.requestFullscreen().catch(() => {}); }
+      else if (element.mozRequestFullScreen) { element.mozRequestFullScreen().catch(() => {}); }
+      else if (element.webkitRequestFullscreen) { element.webkitRequestFullscreen().catch(() => {}); }
+      else if (element.msRequestFullscreen) { element.msRequestFullscreen().catch(() => {}); }
     }
 
     function exitFullscreenSafely() {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen().catch(() => {});
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen().catch(() => {});
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen().catch(() => {});
-      }
+      if (document.exitFullscreen) { document.exitFullscreen().catch(() => {}); }
+      else if (document.webkitExitFullscreen) { document.webkitExitFullscreen().catch(() => {}); }
+      else if (document.mozCancelFullScreen) { document.mozCancelFullScreen().catch(() => {}); }
+      else if (document.msExitFullscreen) { document.msExitFullscreen().catch(() => {}); }
     }
 
-    // PAKSA FULLSCREEN TANPA TERPUTUS DAN BLOKIR PINTASAN KEYBOARD (HANYA LOGOUT YANG BISA KELUAR)
     window.addEventListener('keydown', function(e) {
       if (!stateUjianSiswa.isExamActive) return;
-
-      if (
-        e.key === 'Escape' || 
-        e.key === 'F11' || 
-        (e.altKey && e.key === 'Tab') || 
-        (e.ctrlKey && (e.key === 'w' || e.key === 'W' || e.key === 'r' || e.key === 'R'))
-      ) {
+      if (e.key === 'Escape' || e.key === 'F11' || (e.altKey && e.key === 'Tab') || (e.ctrlKey && (e.key === 'w' || e.key === 'W' || e.key === 'r' || e.key === 'R'))) {
         e.preventDefault();
         e.stopPropagation();
         launchFullscreen(document.documentElement);
@@ -536,9 +491,7 @@
     document.addEventListener('webkitfullscreenchange', onFullscreenChangeEvent);
     document.addEventListener('mozfullscreenchange', onFullscreenChangeEvent);
     document.addEventListener('MSFullscreenChange', onFullscreenChangeEvent);
-    document.addEventListener("contextmenu", (e) => {
-      if (stateUjianSiswa.isExamActive) e.preventDefault();
-    });
+    document.addEventListener("contextmenu", (e) => { if (stateUjianSiswa.isExamActive) e.preventDefault(); });
 
     window.onload = function() {
       db.ref('token').on('value', snap => {
@@ -550,7 +503,6 @@
       db.ref('config').on('value', snap => {
         if(snap.exists()) {
           appData.config = snap.val();
-          
           const kelasDipilih = appData.config.kelasAktif || appData.config.kelas || '7A';
           appData.config.kelasAktif = kelasDipilih;
 
@@ -560,12 +512,8 @@
           document.getElementById('cfg-tp').value = appData.config.tp || '2025/2026';
           document.getElementById('cfg-waktu').value = appData.config.waktu || 60;
           
-          if (document.getElementById('cfg-kelas')) {
-            document.getElementById('cfg-kelas').value = kelasDipilih;
-          }
-          if (document.getElementById('filter-kelas-monitoring')) {
-            document.getElementById('filter-kelas-monitoring').value = kelasDipilih;
-          }
+          if (document.getElementById('cfg-kelas')) document.getElementById('cfg-kelas').value = kelasDipilih;
+          if (document.getElementById('filter-kelas-monitoring')) document.getElementById('filter-kelas-monitoring').value = kelasDipilih;
 
           populateSiswaClasses();
         }
@@ -599,7 +547,6 @@
 
     function simpanPengaturan() {
       const kelasDipilih = document.getElementById('cfg-kelas').value;
-      
       const cfg = {
         jenis: document.getElementById('cfg-jenis-ujian').value,
         mapel: document.getElementById('cfg-mapel').value,
@@ -616,7 +563,6 @@
       db.ref('config').update(cfg).then(() => {
         showToast(`Kelas ${kelasDipilih} Diaktifkan untuk Ujian!`);
       });
-
       renderMonitoringTable();
     }
 
@@ -633,10 +579,7 @@
     function downloadHasilExcel() {
       const filterKelas = document.getElementById('filter-kelas-monitoring')?.value || 'SEMUA';
       let dataFiltered = appData.siswa;
-
-      if (filterKelas !== 'SEMUA') {
-        dataFiltered = dataFiltered.filter(s => s.kelas === filterKelas);
-      }
+      if (filterKelas !== 'SEMUA') dataFiltered = dataFiltered.filter(s => s.kelas === filterKelas);
 
       if (dataFiltered.length === 0) return showToast("Tidak ada data siswa untuk diunduh!");
 
@@ -668,7 +611,6 @@
       showToast("Hasil Ujian Berhasil Diunduh!");
     }
 
-    // PERBAIKAN: Fungsi pembersih format Word yang mempertahankan tag gambar (<img>) beserta atributnya (src, dll)
     function cleanWordFormatting(html) {
       if (!html) return '';
       let temp = document.createElement('div');
@@ -679,12 +621,14 @@
           el.removeAttribute('style');
           el.removeAttribute('class');
           el.removeAttribute('align');
+        } else {
+          el.style.maxWidth = '100%';
+          el.style.height = 'auto';
         }
       });
       return temp.innerHTML.trim();
     }
 
-    // PERBAIKAN: Sanitasi Opsi tanpa menghilangkan tag elemen HTML gambar
     function sanitizeOptionText(rawHtml) {
       if (!rawHtml) return '';
       let cleanedHtml = cleanWordFormatting(rawHtml);
@@ -700,7 +644,6 @@
       return temp.innerHTML.trim();
     }
 
-    // PERBAIKAN: Sanitasi Teks Soal tanpa menghilangkan tag elemen HTML gambar
     function sanitizeSoalText(rawHtml) {
       if (!rawHtml) return '';
       let cleanedHtml = cleanWordFormatting(rawHtml);
@@ -716,6 +659,31 @@
           .trim();
       }
       return temp.innerHTML.trim();
+    }
+
+    // UNGGAH GAMBAR BASE64/FILE WORD KE FIREBASE STORAGE
+    async function processAndUploadImages(htmlString) {
+      let temp = document.createElement('div');
+      temp.innerHTML = htmlString;
+      let imgs = temp.querySelectorAll('img');
+
+      for (let img of imgs) {
+        let src = img.getAttribute('src');
+        if (src && src.startsWith('data:image')) {
+          try {
+            let fileExt = src.substring("data:image/".length, src.indexOf(";base64"));
+            let fileName = 'soal_img_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7) + '.' + (fileExt || 'png');
+            let storageRef = storage.ref('gambar_soal/' + fileName);
+            
+            let snapshot = await storageRef.putString(src, 'data_url');
+            let downloadURL = await snapshot.ref.getDownloadURL();
+            img.setAttribute('src', downloadURL);
+          } catch (err) {
+            console.error("Gagal Upload Gambar ke Firebase Storage: ", err);
+          }
+        }
+      }
+      return temp.innerHTML;
     }
 
     function detectHotsOrLots(htmlContent) {
@@ -742,11 +710,15 @@
       }
     }
 
-    function parseMassPasteSoal() {
+    async function parseMassPasteSoal() {
       const pasteBox = document.getElementById('mass-paste-box');
+      const btnParse = document.getElementById('btn-parse-soal');
       let rawHtml = pasteBox.innerHTML.trim();
 
       if (!rawHtml || pasteBox.innerText.trim() === '') return showToast("Paste soal dari Word terlebih dahulu!");
+
+      btnParse.disabled = true;
+      btnParse.innerText = "Mengunggah Gambar & Memproses Soal...";
 
       let tempContainer = document.createElement('div');
       tempContainer.innerHTML = rawHtml;
@@ -767,15 +739,17 @@
       let currentSoal = null;
       let currentOptKey = null;
 
-      lines.forEach(lineHtml => {
+      for (let lineHtml of lines) {
         let dummy = document.createElement('div');
         dummy.innerHTML = cleanWordFormatting(lineHtml);
         let lineText = dummy.innerText.replace(/[\u00A0\s]+/g, ' ').trim();
 
-        if (!lineText && !dummy.querySelector('img')) return;
+        if (!lineText && !dummy.querySelector('img')) continue;
 
         let isNewSoal = /^\s*(Soal\s*)?[0-9]+[\.\)\-–\:]/i.test(lineText);
         let optMatch = lineText.match(/^\s*([a-dA-D])[\.\)\-–]/);
+
+        let processedHtml = await processAndUploadImages(lineHtml);
 
         if (isNewSoal) {
           if (currentSoal) tempParsedSoal.push(currentSoal);
@@ -784,28 +758,32 @@
 
           currentSoal = {
             nomor: num,
-            teks: sanitizeSoalText(lineHtml),
+            teks: sanitizeSoalText(processedHtml),
             opts: {},
             kunci: 'A'
           };
           currentOptKey = null;
         } else if (optMatch && currentSoal) {
           currentOptKey = optMatch[1].toUpperCase();
-          currentSoal.opts[currentOptKey] = sanitizeOptionText(lineHtml);
+          currentSoal.opts[currentOptKey] = sanitizeOptionText(processedHtml);
         } else if (currentSoal) {
           if (currentOptKey) {
-            currentSoal.opts[currentOptKey] += '<br>' + sanitizeOptionText(lineHtml);
+            currentSoal.opts[currentOptKey] += '<br>' + sanitizeOptionText(processedHtml);
           } else {
-            currentSoal.teks += '<br>' + sanitizeSoalText(lineHtml);
+            currentSoal.teks += '<br>' + sanitizeSoalText(processedHtml);
           }
         }
-      });
+      }
 
       if (currentSoal) tempParsedSoal.push(currentSoal);
+
+      btnParse.disabled = false;
+      btnParse.innerText = "Ekstrak Soal & Buat Tabel Kunci";
+
       if (tempParsedSoal.length === 0) return showToast("Format nomor/opsi soal Word tidak terdeteksi!");
 
       renderTabelKunciMassal();
-      showToast(`${tempParsedSoal.length} Soal Berhasil Diproses!`);
+      showToast(`${tempParsedSoal.length} Soal Berhasil Diproses & Gambar Diunggah!`);
     }
 
     function renderTabelKunciMassal() {
@@ -815,7 +793,6 @@
       tbody.innerHTML = '';
 
       tempParsedSoal.forEach((soal, idx) => {
-        // PERBAIKAN: Menggunakan DOM Parser agar text preview tidak menghapus tampilan gambar dalam parsing internal
         let cleanText = soal.teks.replace(/<[^>]*>?/gm, '');
         let availableOpts = Object.keys(soal.opts);
         if(availableOpts.length === 0) availableOpts = ['A','B','C','D'];
@@ -881,14 +858,44 @@
       });
     }
 
-    function hapusSoal(id) {
-      db.ref('soal').child(id).remove();
-    }
+    function hapusSoal(id) { db.ref('soal').child(id).remove(); }
 
     function kosongkanSoal() {
       if(confirm("Hapus seluruh bank soal di Firebase Cloud?")) {
         db.ref('soal').remove();
       }
+    }
+
+    function prosesImportSiswa() {
+      const raw = document.getElementById('import-siswa-raw').value.trim();
+      if (!raw) return showToast("Masukkan data siswa!");
+
+      const lines = raw.split('\n');
+      let payload = {};
+      lines.forEach(line => {
+        const parts = line.split(/[\t,]/);
+        if (parts.length >= 2) {
+          const nama = parts[0].trim();
+          const kelas = parts[1].trim();
+          if (nama && kelas) {
+            const key = db.ref('siswa').push().key;
+            payload[key] = {
+              nama: nama,
+              kelas: kelas,
+              status: 'Belum',
+              nilai: 0,
+              mekerjakan: false
+            };
+          }
+        }
+      });
+
+      db.ref('siswa').update(payload, (err) => {
+        if(!err) {
+          document.getElementById('import-siswa-raw').value = '';
+          showToast("Data siswa berhasil diimpor!");
+        }
+      });
     }
 
     function switchLoginTab(tab) {
@@ -921,7 +928,6 @@
       selectKelas.innerHTML = '<option value="">-- Pilih Kelas --</option>';
 
       let availableClasses = [...new Set(appData.siswa.map(s => s.kelas))];
-
       const targetKelas = appData.config ? (appData.config.kelasAktif || appData.config.kelas) : null;
       if (targetKelas) {
         availableClasses = availableClasses.filter(c => c === targetKelas);
@@ -1013,9 +1019,7 @@
 
     function prosesKeluarSiswa(setuju) {
       document.getElementById('modal-confirm-logout').classList.add('hidden');
-      if (setuju) {
-        keluarSimulasi();
-      }
+      if (setuju) keluarSimulasi();
     }
 
     function keluarSimulasi() {
@@ -1168,7 +1172,6 @@
       showToast("Token Baru Disimpan: " + res);
     }
 
-    // UPDATE MONITORING REALTIME
     function renderMonitoringTable() {
       const tbody = document.getElementById('table-monitoring');
       if (!tbody) return;
