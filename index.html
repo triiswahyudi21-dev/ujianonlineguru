@@ -268,7 +268,7 @@
               <input type="file" id="input-single-image" accept="image/*" onchange="insertManualImage(event)" class="hidden">
             </label>
           </div>
-          <p class="text-xs text-slate-500 mb-2">Paste teks & gambar dari Word. <i>Catatan: Jika gambar terblokir Word, gunakan tombol "+ Sisipkan Gambar" di atas.</i></p>
+          <p class="text-xs text-slate-500 mb-2">Paste teks & gambar dari Word (Ctrl+C & Ctrl+V langsung ke kotak bawah).</p>
           
           <div id="mass-paste-box" class="rich-editor h-40 bg-white" contenteditable="true" data-placeholder="Paste nomor soal beserta opsinya dari Word di sini..."></div>
           
@@ -501,34 +501,159 @@
     document.addEventListener('MSFullscreenChange', onFullscreenChangeEvent);
     document.addEventListener("contextmenu", (e) => { if (stateUjianSiswa.isExamActive) e.preventDefault(); });
 
-    // PASTE INTERCEPTOR: MENANGKAP FILE GAMBAR DARI CLIPBOARD SECARA LANGSUNG
+    // EKSTRAKTOR GAMBAR BINARI DARI RTF MEMORI CLIPBOARD MS WORD
+    function extractImagesFromRTF(rtfData) {
+      if (!rtfData) return [];
+      const images = [];
+      const pictMatches = rtfData.split('{\\pict');
+
+      for (let i = 1; i < pictMatches.length; i++) {
+        let block = pictMatches[i];
+        let mime = 'image/png';
+        if (block.includes('\\jpegblip')) mime = 'image/jpeg';
+        else if (block.includes('\\pngblip')) mime = 'image/png';
+
+        let hexMatch = block.match(/(?:\\pngblip|\\jpegblip|\\emfblip|\\wmetafile\d*|\\dibitmap\d*)\s+([0-9a-fA-F\s]+)/);
+        if (!hexMatch) {
+          hexMatch = block.match(/[\r\n\s]+([0-9a-fA-F]{100,})/);
+        }
+
+        if (hexMatch && hexMatch[1]) {
+          let hex = hexMatch[1].replace(/[\r\n\s]/g, '');
+          if (hex.length % 2 !== 0) hex = hex.substring(0, hex.length - 1);
+
+          try {
+            const bytes = new Uint8Array(hex.length / 2);
+            for (let j = 0; j < hex.length; j += 2) {
+              bytes[j / 2] = parseInt(hex.substr(j, 2), 16);
+            }
+
+            let binary = '';
+            const chunkSize = 8192;
+            for (let j = 0; j < bytes.length; j += chunkSize) {
+              const subArray = bytes.subarray(j, j + chunkSize);
+              binary += String.fromCharCode.apply(null, subArray);
+            }
+
+            const base64 = btoa(binary);
+            images.push(`data:${mime};base64,${base64}`);
+          } catch (e) {
+            console.warn("Gagal ekstrak RTF hex image:", e);
+          }
+        }
+      }
+      return images;
+    }
+
+    // PASTE INTERCEPTOR: MENANGKAP GAMBAR DARI WORD TERMASUK RTF BINARI
     document.addEventListener('DOMContentLoaded', function() {
       const pasteBox = document.getElementById('mass-paste-box');
       if (pasteBox) {
         pasteBox.addEventListener('paste', function(e) {
-          const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-          for (let item of items) {
-            if (item.kind === 'file' && item.type.startsWith('image/')) {
-              e.preventDefault();
-              const blob = item.getAsFile();
-              const reader = new FileReader();
-              reader.onload = function(evt) {
-                const img = document.createElement('img');
-                img.src = evt.target.result;
-                const sel = window.getSelection();
-                if (sel.rangeCount > 0) {
-                  const range = sel.getRangeAt(0);
-                  range.insertNode(img);
-                } else {
-                  pasteBox.appendChild(img);
+          e.preventDefault();
+
+          const clipboardData = e.clipboardData || window.clipboardData;
+          const htmlData = clipboardData.getData('text/html');
+          const rtfData = clipboardData.getData('text/rtf');
+          const plainText = clipboardData.getData('text/plain');
+
+          const rtfImages = extractImagesFromRTF(rtfData);
+
+          if (htmlData) {
+            let tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlData;
+
+            // Pindahkan tag gambar dari pembungkus khusus Word
+            tempDiv.querySelectorAll('v\\:shape, v\\:imagedata, o\\:p').forEach(el => {
+              let imgs = el.querySelectorAll('img');
+              imgs.forEach(img => el.parentNode.insertBefore(img, el));
+              if (el.tagName.toLowerCase().includes('imagedata')) {
+                let imgEl = document.createElement('img');
+                let src = el.getAttribute('src') || el.getAttribute('v:src');
+                if (src) imgEl.setAttribute('src', src);
+                el.parentNode.insertBefore(imgEl, el);
+              }
+            });
+
+            // Ganti URL lokal 'file:///' yang terblokir dengan Data Base64 hasil ekstraksi RTF
+            let imgElements = tempDiv.querySelectorAll('img');
+            let imgIdx = 0;
+
+            imgElements.forEach(img => {
+              let src = img.getAttribute('src') || '';
+              if (src.startsWith('file://') || src.startsWith('blob:') || !src || src.includes('msohtmlclip')) {
+                if (rtfImages[imgIdx]) {
+                  img.setAttribute('src', rtfImages[imgIdx]);
+                  imgIdx++;
                 }
-              };
-              reader.readAsDataURL(blob);
+              } else if (src.startsWith('data:image')) {
+                // Gambar sudah berupa base64
+              } else if (rtfImages[imgIdx]) {
+                img.setAttribute('src', rtfImages[imgIdx]);
+                imgIdx++;
+              }
+            });
+
+            let cleanedHtml = cleanWordFormattingHTML(tempDiv.innerHTML);
+
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount > 0) {
+              const range = sel.getRangeAt(0);
+              range.deleteContents();
+              const container = document.createElement('div');
+              container.innerHTML = cleanedHtml;
+              let frag = document.createDocumentFragment(), node, lastNode;
+              while ((node = container.firstChild)) {
+                lastNode = frag.appendChild(node);
+              }
+              range.insertNode(frag);
+              if (lastNode) {
+                range.setStartAfter(lastNode);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+              }
+            } else {
+              pasteBox.innerHTML += cleanedHtml;
             }
+          } else if (plainText) {
+            document.execCommand('insertText', false, plainText);
           }
         });
       }
     });
+
+    function cleanWordFormattingHTML(html) {
+      if (!html) return '';
+      let temp = document.createElement('div');
+      temp.innerHTML = html;
+
+      // Hapus hanya tag img yang masih berstatus file:// (jika gagal diekstraksi)
+      temp.querySelectorAll('img').forEach(img => {
+        let src = img.getAttribute('src') || '';
+        if (src.startsWith('file://')) {
+          img.remove();
+        }
+      });
+
+      temp.querySelectorAll('o\\:p, v\\:shape, v\\:imagedata').forEach(el => {
+        let imgs = el.querySelectorAll('img');
+        imgs.forEach(img => el.parentNode.insertBefore(img, el));
+        el.remove();
+      });
+
+      temp.querySelectorAll('*').forEach(el => {
+        if (el.tagName.toLowerCase() !== 'img') {
+          el.removeAttribute('style');
+          el.removeAttribute('class');
+          el.removeAttribute('align');
+        } else {
+          el.style.maxWidth = '100%';
+          el.style.height = 'auto';
+        }
+      });
+      return temp.innerHTML.trim();
+    }
 
     function insertManualImage(event) {
       const file = event.target.files[0];
@@ -662,41 +787,9 @@
       showToast("Hasil Ujian Berhasil Diunduh!");
     }
 
-    function cleanWordFormatting(html) {
-      if (!html) return '';
-      let temp = document.createElement('div');
-      temp.innerHTML = html;
-      
-      // Hapus tag gambar yang memuat tautan file lokal terblokir (file:///)
-      temp.querySelectorAll('img').forEach(img => {
-        let src = img.getAttribute('src') || '';
-        if (src.startsWith('file://')) {
-          img.remove();
-        }
-      });
-
-      temp.querySelectorAll('o\\:p, v\\:shape, v\\:imagedata').forEach(el => {
-        let imgs = el.querySelectorAll('img');
-        imgs.forEach(img => el.parentNode.insertBefore(img, el));
-        el.remove();
-      });
-
-      temp.querySelectorAll('*').forEach(el => {
-        if (el.tagName.toLowerCase() !== 'img') {
-          el.removeAttribute('style');
-          el.removeAttribute('class');
-          el.removeAttribute('align');
-        } else {
-          el.style.maxWidth = '100%';
-          el.style.height = 'auto';
-        }
-      });
-      return temp.innerHTML.trim();
-    }
-
     function sanitizeOptionText(rawHtml) {
       if (!rawHtml) return '';
-      let cleanedHtml = cleanWordFormatting(rawHtml);
+      let cleanedHtml = cleanWordFormattingHTML(rawHtml);
       let temp = document.createElement('div');
       temp.innerHTML = cleanedHtml;
       let textNodes = [];
@@ -711,7 +804,7 @@
 
     function sanitizeSoalText(rawHtml) {
       if (!rawHtml) return '';
-      let cleanedHtml = cleanWordFormatting(rawHtml);
+      let cleanedHtml = cleanWordFormattingHTML(rawHtml);
       let temp = document.createElement('div');
       temp.innerHTML = cleanedHtml;
       let textNodes = [];
@@ -813,7 +906,7 @@
 
       for (let lineHtml of lines) {
         let dummy = document.createElement('div');
-        dummy.innerHTML = cleanWordFormatting(lineHtml);
+        dummy.innerHTML = cleanWordFormattingHTML(lineHtml);
         let lineText = dummy.innerText.replace(/[\u00A0\s]+/g, ' ').trim();
 
         if (!lineText && !dummy.querySelector('img')) continue;
