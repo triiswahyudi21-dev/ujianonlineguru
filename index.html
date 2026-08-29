@@ -26,12 +26,14 @@
       outline: none;
     }
     .rich-editor:focus { background-color: #ffffff; border-color: #2563eb; }
-    .rich-editor img, #display-teks-soal img, .opt-display img {
+    
+    /* Styling Gambar Universal */
+    .rich-editor img, #display-teks-soal img, .opt-display img, #tbody-tabel-kunci img {
       max-width: 100% !important; 
       height: auto !important; 
       max-height: 300px !important; 
       border-radius: 0.375rem; 
-      margin: 10px 0 !important; 
+      margin: 8px 0 !important; 
       display: block !important;
     }
     .rich-editor:empty:before { content: attr(data-placeholder); color: #9ca3af; }
@@ -615,7 +617,11 @@
       if (!html) return '';
       let temp = document.createElement('div');
       temp.innerHTML = html;
-      temp.querySelectorAll('[style*="mso-list"], [class*="MsoList"], o\\:p').forEach(el => el.remove());
+      
+      // Hapus sampah metadata Word
+      temp.querySelectorAll('[style*="mso-list"], [class*="MsoList"], o\\:p, xml, script, style').forEach(el => el.remove());
+      
+      // Pertahankan elemen gambar dan atur atribut styling-nya
       temp.querySelectorAll('*').forEach(el => {
         if (el.tagName.toLowerCase() !== 'img') {
           el.removeAttribute('style');
@@ -624,6 +630,9 @@
         } else {
           el.style.maxWidth = '100%';
           el.style.height = 'auto';
+          el.style.maxHeight = '300px';
+          el.style.display = 'block';
+          el.style.margin = '8px 0';
         }
       });
       return temp.innerHTML.trim();
@@ -663,6 +672,7 @@
 
     // UNGGAH GAMBAR BASE64/FILE WORD KE FIREBASE STORAGE
     async function processAndUploadImages(htmlString) {
+      if (!htmlString) return '';
       let temp = document.createElement('div');
       temp.innerHTML = htmlString;
       let imgs = temp.querySelectorAll('img');
@@ -671,16 +681,18 @@
         let src = img.getAttribute('src');
         if (src && src.startsWith('data:image')) {
           try {
-            let fileExt = src.substring("data:image/".length, src.indexOf(";base64"));
-            let fileName = 'soal_img_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7) + '.' + (fileExt || 'png');
+            let fileExt = src.substring("data:image/".length, src.indexOf(";base64")) || 'png';
+            let fileName = 'soal_img_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7) + '.' + fileExt;
             let storageRef = storage.ref('gambar_soal/' + fileName);
             
-            let snapshot = await storageRef.putString(src, 'data_url');
+            let snapshot = await storageRef.putString(src, 'data_url', { contentType: `image/${fileExt}` });
             let downloadURL = await snapshot.ref.getDownloadURL();
             img.setAttribute('src', downloadURL);
           } catch (err) {
             console.error("Gagal Upload Gambar ke Firebase Storage: ", err);
           }
+        } else if (src && src.startsWith('file://')) {
+          img.remove();
         }
       }
       return temp.innerHTML;
@@ -720,57 +732,52 @@
       btnParse.disabled = true;
       btnParse.innerText = "Mengunggah Gambar & Memproses Soal...";
 
-      let tempContainer = document.createElement('div');
-      tempContainer.innerHTML = rawHtml;
+      let cleanedHtml = cleanWordFormatting(rawHtml);
+      let htmlWithUploadedImages = await processAndUploadImages(cleanedHtml);
 
-      let blocks = tempContainer.querySelectorAll('p, div, li, tr');
-      let lines = [];
-
-      if (blocks.length > 0) {
-        blocks.forEach(b => {
-          let h = b.innerHTML.trim();
-          if (h) lines.push(h);
-        });
-      } else {
-        lines = rawHtml.split(/<br\s*[\/]?>/gi).map(l => l.trim()).filter(l => l !== '');
-      }
+      let tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlWithUploadedImages;
 
       tempParsedSoal = [];
       let currentSoal = null;
       let currentOptKey = null;
 
-      for (let lineHtml of lines) {
-        let dummy = document.createElement('div');
-        dummy.innerHTML = cleanWordFormatting(lineHtml);
-        let lineText = dummy.innerText.replace(/[\u00A0\s]+/g, ' ').trim();
+      let children = Array.from(tempDiv.children);
+      if (children.length === 0 && tempDiv.innerHTML.trim() !== '') {
+        let wrapper = document.createElement('div');
+        wrapper.innerHTML = tempDiv.innerHTML;
+        children = [wrapper];
+      }
 
-        if (!lineText && !dummy.querySelector('img')) continue;
+      for (let node of children) {
+        let nodeText = node.innerText ? node.innerText.replace(/[\u00A0\s]+/g, ' ').trim() : '';
+        let hasImage = node.querySelector('img') !== null;
 
-        let isNewSoal = /^\s*(Soal\s*)?[0-9]+[\.\)\-–\:]/i.test(lineText);
-        let optMatch = lineText.match(/^\s*([a-dA-D])[\.\)\-–]/);
+        if (!nodeText && !hasImage) continue;
 
-        let processedHtml = await processAndUploadImages(lineHtml);
+        let isNewSoal = /^\s*(Soal\s*)?[0-9]+[\.\)\-–\:]/i.test(nodeText);
+        let optMatch = nodeText.match(/^\s*([a-dA-D])[\.\)\-–]/);
 
         if (isNewSoal) {
           if (currentSoal) tempParsedSoal.push(currentSoal);
-          let matchNum = lineText.match(/^\s*(?:Soal\s*)?([0-9]+)/i);
+          let matchNum = nodeText.match(/^\s*(?:Soal\s*)?([0-9]+)/i);
           let num = matchNum ? parseInt(matchNum[1]) : tempParsedSoal.length + 1;
 
           currentSoal = {
             nomor: num,
-            teks: sanitizeSoalText(processedHtml),
+            teks: sanitizeSoalText(node.outerHTML),
             opts: {},
             kunci: 'A'
           };
           currentOptKey = null;
         } else if (optMatch && currentSoal) {
           currentOptKey = optMatch[1].toUpperCase();
-          currentSoal.opts[currentOptKey] = sanitizeOptionText(processedHtml);
+          currentSoal.opts[currentOptKey] = sanitizeOptionText(node.outerHTML);
         } else if (currentSoal) {
           if (currentOptKey) {
-            currentSoal.opts[currentOptKey] += '<br>' + sanitizeOptionText(processedHtml);
+            currentSoal.opts[currentOptKey] += sanitizeOptionText(node.outerHTML);
           } else {
-            currentSoal.teks += '<br>' + sanitizeSoalText(processedHtml);
+            currentSoal.teks += sanitizeSoalText(node.outerHTML);
           }
         }
       }
@@ -793,7 +800,7 @@
       tbody.innerHTML = '';
 
       tempParsedSoal.forEach((soal, idx) => {
-        let cleanText = soal.teks.replace(/<[^>]*>?/gm, '');
+        let cleanText = soal.teks;
         let availableOpts = Object.keys(soal.opts);
         if(availableOpts.length === 0) availableOpts = ['A','B','C','D'];
 
@@ -806,7 +813,7 @@
         tbody.innerHTML += `
           <tr class="border-b hover:bg-slate-50">
             <td class="p-2 border text-center font-bold text-blue-600">${soal.nomor}</td>
-            <td class="p-2 border text-xs text-slate-700">${cleanText.substring(0, 90)}...</td>
+            <td class="p-2 border text-xs text-slate-700">${cleanText}</td>
             <td class="p-2 border text-center">${selectHtml}</td>
           </tr>
         `;
@@ -845,12 +852,11 @@
       container.innerHTML = '';
       
       appData.soal.sort((a,b) => a.nomor - b.nomor).forEach((s) => {
-        const cleanText = s.teks.replace(/<[^>]*>?/gm, '');
         container.innerHTML += `
           <div class="p-3 border rounded-lg bg-slate-50 flex justify-between items-start text-xs">
-            <div>
+            <div class="max-w-xl">
               <span class="font-bold text-blue-600">No. ${s.nomor}</span> (Kunci: <b class="text-emerald-700">${s.kunci}</b>)
-              <p class="text-slate-700 mt-1">${cleanText.substring(0, 70)}...</p>
+              <div class="text-slate-700 mt-1">${s.teks}</div>
             </div>
             <button onclick="hapusSoal('${s.id}')" class="text-red-500 font-semibold hover:underline">Hapus</button>
           </div>
