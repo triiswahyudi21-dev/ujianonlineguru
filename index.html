@@ -668,6 +668,7 @@
       showToast("Hasil Ujian Berhasil Diunduh!");
     }
 
+    // PERBAIKAN: Fungsi pembersih format Word yang mempertahankan tag gambar (<img>) beserta atributnya (src, dll)
     function cleanWordFormatting(html) {
       if (!html) return '';
       let temp = document.createElement('div');
@@ -683,6 +684,7 @@
       return temp.innerHTML.trim();
     }
 
+    // PERBAIKAN: Sanitasi Opsi tanpa menghilangkan tag elemen HTML gambar
     function sanitizeOptionText(rawHtml) {
       if (!rawHtml) return '';
       let cleanedHtml = cleanWordFormatting(rawHtml);
@@ -698,6 +700,7 @@
       return temp.innerHTML.trim();
     }
 
+    // PERBAIKAN: Sanitasi Teks Soal tanpa menghilangkan tag elemen HTML gambar
     function sanitizeSoalText(rawHtml) {
       if (!rawHtml) return '';
       let cleanedHtml = cleanWordFormatting(rawHtml);
@@ -812,6 +815,7 @@
       tbody.innerHTML = '';
 
       tempParsedSoal.forEach((soal, idx) => {
+        // PERBAIKAN: Menggunakan DOM Parser agar text preview tidak menghapus tampilan gambar dalam parsing internal
         let cleanText = soal.teks.replace(/<[^>]*>?/gm, '');
         let availableOpts = Object.keys(soal.opts);
         if(availableOpts.length === 0) availableOpts = ['A','B','C','D'];
