@@ -16,10 +16,10 @@
   <style>
     body { user-select: none; -webkit-user-select: none; }
     .rich-editor {
-      min-height: 140px;
-      max-height: 280px;
+      min-height: 120px;
+      max-height: 250px;
       overflow-y: auto;
-      border: 2px dashed #cbd5e1;
+      border: 1px solid #cbd5e1;
       border-radius: 0.5rem;
       padding: 0.75rem;
       background-color: #f8fafc;
@@ -112,46 +112,6 @@
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
   <div id="toast" class="hidden fixed top-4 right-4 z-50 bg-red-600 text-white px-4 py-2.5 rounded-lg shadow-xl text-sm font-semibold"></div>
-
-  <!-- MODAL SISIPKAN GAMBAR ALA GOOGLE -->
-  <div id="modal-insert-gambar" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 border border-slate-200 overflow-hidden">
-      <div class="flex justify-between items-center bg-slate-900 text-white px-5 py-4">
-        <h3 class="font-bold text-base flex items-center gap-2">
-          <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-          Sisipkan Gambar (Google Style)
-        </h3>
-        <button onclick="closeModalInsertGambar()" class="text-slate-400 hover:text-white font-bold text-lg">&times;</button>
-      </div>
-
-      <!-- Tab Navigation Google Style -->
-      <div class="flex border-b border-slate-200 bg-slate-50">
-        <button id="tab-btn-upload" onclick="switchTabGambar('upload')" class="flex-1 py-3 font-bold text-sm text-blue-600 border-b-2 border-blue-600">Upload File</button>
-        <button id="tab-btn-url" onclick="switchTabGambar('url')" class="flex-1 py-3 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-700">Link / URL Gambar</button>
-      </div>
-
-      <div class="p-6">
-        <!-- Content Tab Upload File -->
-        <div id="tab-content-upload" class="space-y-4">
-          <label class="border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50 hover:bg-blue-50/50 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition">
-            <svg class="w-12 h-12 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-            <span class="text-sm font-semibold text-slate-700">Pilih gambar dari perangkat</span>
-            <span class="text-xs text-slate-400 mt-1">PNG, JPG, GIF, WebP (Maks 5MB)</span>
-            <input type="file" accept="image/*" onchange="prosesInsertGambarFile(event)" class="hidden">
-          </label>
-        </div>
-
-        <!-- Content Tab URL Gambar -->
-        <div id="tab-content-url" class="space-y-4 hidden">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tempelkan Link / URL Gambar</label>
-            <input type="url" id="input-img-url" placeholder="https://example.com/gambar.jpg" class="w-full p-2.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-          </div>
-          <button onclick="prosesInsertGambarUrl()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow transition text-sm">Sisipkan ke Soal</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- MODAL KONFIRMASI KELUAR SISWA -->
   <div id="modal-confirm-logout" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -301,17 +261,9 @@
         </div>
 
         <div class="bg-white p-5 rounded-xl shadow border border-slate-200">
-          <div class="flex justify-between items-center border-b pb-2 mb-2">
-            <h3 class="font-bold text-slate-700">Import Soal Massal dari Word</h3>
-            <button onclick="openModalInsertGambar()" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 font-bold flex items-center gap-1 shadow-sm transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              + Sisipkan Gambar
-            </button>
-          </div>
-          <p class="text-xs text-slate-500 mb-2">Paste teks & gambar dari Word (Ctrl+C & Ctrl+V) atau gunakan tombol Sisipkan Gambar.</p>
-          
+          <h3 class="font-bold text-slate-700 border-b pb-2 mb-2">Import Soal Massal dari Word</h3>
+          <p class="text-xs text-slate-500 mb-2">Dukungan penuh Gambar, pembersih nomor otomatis & layout rata kanan-kiri.</p>
           <div id="mass-paste-box" class="rich-editor h-40 bg-white" contenteditable="true" data-placeholder="Paste nomor soal beserta opsinya dari Word di sini..."></div>
-          
           <button id="btn-parse-soal" onclick="parseMassPasteSoal()" class="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-semibold shadow">Ekstrak Soal & Buat Tabel Kunci</button>
         </div>
       </div>
@@ -541,216 +493,6 @@
     document.addEventListener('MSFullscreenChange', onFullscreenChangeEvent);
     document.addEventListener("contextmenu", (e) => { if (stateUjianSiswa.isExamActive) e.preventDefault(); });
 
-    // MANAJEMEN MODAL SISIPKAN GAMBAR ALA GOOGLE
-    function openModalInsertGambar() {
-      document.getElementById('modal-insert-gambar').classList.remove('hidden');
-    }
-
-    function closeModalInsertGambar() {
-      document.getElementById('modal-insert-gambar').classList.add('hidden');
-      document.getElementById('input-img-url').value = '';
-    }
-
-    function switchTabGambar(tab) {
-      const btnUpload = document.getElementById('tab-btn-upload');
-      const btnUrl = document.getElementById('tab-btn-url');
-      const contentUpload = document.getElementById('tab-content-upload');
-      const contentUrl = document.getElementById('tab-content-url');
-
-      if (tab === 'upload') {
-        btnUpload.className = "flex-1 py-3 font-bold text-sm text-blue-600 border-b-2 border-blue-600";
-        btnUrl.className = "flex-1 py-3 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-700";
-        contentUpload.classList.remove('hidden');
-        contentUrl.classList.add('hidden');
-      } else {
-        btnUrl.className = "flex-1 py-3 font-bold text-sm text-blue-600 border-b-2 border-blue-600";
-        btnUpload.className = "flex-1 py-3 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-700";
-        contentUrl.classList.remove('hidden');
-        contentUpload.classList.add('hidden');
-      }
-    }
-
-    function appendImgToEditor(src) {
-      const editor = document.getElementById('mass-paste-box');
-      const img = document.createElement('img');
-      img.src = src;
-      img.style.maxWidth = '100%';
-      img.style.height = 'auto';
-      editor.appendChild(img);
-      editor.appendChild(document.createElement('br'));
-      showToast("Gambar berhasil disisipkan!");
-    }
-
-    function prosesInsertGambarFile(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        appendImgToEditor(evt.target.result);
-        closeModalInsertGambar();
-      };
-      reader.readAsDataURL(file);
-      e.target.value = '';
-    }
-
-    function prosesInsertGambarUrl() {
-      const url = document.getElementById('input-img-url').value.trim();
-      if (!url) return showToast("Masukkan URL Gambar!");
-      appendImgToEditor(url);
-      closeModalInsertGambar();
-    }
-
-    // EKSTRAKTOR GAMBAR BINARI DARI RTF MEMORI CLIPBOARD MS WORD
-    function extractImagesFromRTF(rtfData) {
-      if (!rtfData) return [];
-      const images = [];
-      const pictMatches = rtfData.split('{\\pict');
-
-      for (let i = 1; i < pictMatches.length; i++) {
-        let block = pictMatches[i];
-        let mime = 'image/png';
-        if (block.includes('\\jpegblip')) mime = 'image/jpeg';
-        else if (block.includes('\\pngblip')) mime = 'image/png';
-
-        let hexMatch = block.match(/(?:\\pngblip|\\jpegblip|\\emfblip|\\wmetafile\d*|\\dibitmap\d*)\s+([0-9a-fA-F\s]+)/);
-        if (!hexMatch) {
-          hexMatch = block.match(/[\r\n\s]+([0-9a-fA-F]{100,})/);
-        }
-
-        if (hexMatch && hexMatch[1]) {
-          let hex = hexMatch[1].replace(/[\r\n\s]/g, '');
-          if (hex.length % 2 !== 0) hex = hex.substring(0, hex.length - 1);
-
-          try {
-            const bytes = new Uint8Array(hex.length / 2);
-            for (let j = 0; j < hex.length; j += 2) {
-              bytes[j / 2] = parseInt(hex.substr(j, 2), 16);
-            }
-
-            let binary = '';
-            const chunkSize = 8192;
-            for (let j = 0; j < bytes.length; j += chunkSize) {
-              const subArray = bytes.subarray(j, j + chunkSize);
-              binary += String.fromCharCode.apply(null, subArray);
-            }
-
-            const base64 = btoa(binary);
-            images.push(`data:${mime};base64,${base64}`);
-          } catch (e) {
-            console.warn("Gagal ekstrak RTF hex image:", e);
-          }
-        }
-      }
-      return images;
-    }
-
-    // PASTE INTERCEPTOR: MENANGKAP GAMBAR DARI WORD TERMASUK RTF BINARI
-    document.addEventListener('DOMContentLoaded', function() {
-      const pasteBox = document.getElementById('mass-paste-box');
-      if (pasteBox) {
-        pasteBox.addEventListener('paste', function(e) {
-          e.preventDefault();
-
-          const clipboardData = e.clipboardData || window.clipboardData;
-          const htmlData = clipboardData.getData('text/html');
-          const rtfData = clipboardData.getData('text/rtf');
-          const plainText = clipboardData.getData('text/plain');
-
-          const rtfImages = extractImagesFromRTF(rtfData);
-
-          if (htmlData) {
-            let tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlData;
-
-            tempDiv.querySelectorAll('v\\:shape, v\\:imagedata, o\\:p').forEach(el => {
-              let imgs = el.querySelectorAll('img');
-              imgs.forEach(img => el.parentNode.insertBefore(img, el));
-              if (el.tagName.toLowerCase().includes('imagedata')) {
-                let imgEl = document.createElement('img');
-                let src = el.getAttribute('src') || el.getAttribute('v:src');
-                if (src) imgEl.setAttribute('src', src);
-                el.parentNode.insertBefore(imgEl, el);
-              }
-            });
-
-            let imgElements = tempDiv.querySelectorAll('img');
-            let imgIdx = 0;
-
-            imgElements.forEach(img => {
-              let src = img.getAttribute('src') || '';
-              if (src.startsWith('file://') || src.startsWith('blob:') || !src || src.includes('msohtmlclip')) {
-                if (rtfImages[imgIdx]) {
-                  img.setAttribute('src', rtfImages[imgIdx]);
-                  imgIdx++;
-                }
-              } else if (src.startsWith('data:image')) {
-                // Gambar base64
-              } else if (rtfImages[imgIdx]) {
-                img.setAttribute('src', rtfImages[imgIdx]);
-                imgIdx++;
-              }
-            });
-
-            let cleanedHtml = cleanWordFormattingHTML(tempDiv.innerHTML);
-
-            const sel = window.getSelection();
-            if (sel && sel.rangeCount > 0) {
-              const range = sel.getRangeAt(0);
-              range.deleteContents();
-              const container = document.createElement('div');
-              container.innerHTML = cleanedHtml;
-              let frag = document.createDocumentFragment(), node, lastNode;
-              while ((node = container.firstChild)) {
-                lastNode = frag.appendChild(node);
-              }
-              range.insertNode(frag);
-              if (lastNode) {
-                range.setStartAfter(lastNode);
-                range.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(range);
-              }
-            } else {
-              pasteBox.innerHTML += cleanedHtml;
-            }
-          } else if (plainText) {
-            document.execCommand('insertText', false, plainText);
-          }
-        });
-      }
-    });
-
-    function cleanWordFormattingHTML(html) {
-      if (!html) return '';
-      let temp = document.createElement('div');
-      temp.innerHTML = html;
-
-      temp.querySelectorAll('img').forEach(img => {
-        let src = img.getAttribute('src') || '';
-        if (src.startsWith('file://')) {
-          img.remove();
-        }
-      });
-
-      temp.querySelectorAll('o\\:p, v\\:shape, v\\:imagedata').forEach(el => {
-        let imgs = el.querySelectorAll('img');
-        imgs.forEach(img => el.parentNode.insertBefore(img, el));
-        el.remove();
-      });
-
-      temp.querySelectorAll('*').forEach(el => {
-        if (el.tagName.toLowerCase() !== 'img') {
-          el.removeAttribute('style');
-          el.removeAttribute('class');
-          el.removeAttribute('align');
-        } else {
-          el.style.maxWidth = '100%';
-          el.style.height = 'auto';
-        }
-      });
-      return temp.innerHTML.trim();
-    }
-
     window.onload = function() {
       db.ref('token').on('value', snap => {
         appData.token = snap.val() || 'EXAM88';
@@ -869,9 +611,39 @@
       showToast("Hasil Ujian Berhasil Diunduh!");
     }
 
+    function cleanWordFormatting(html) {
+      if (!html) return '';
+      let temp = document.createElement('div');
+      temp.innerHTML = html;
+      
+      // Amankan tag gambar dari pembungkus spesifik Word (o:p, v:shape, v:imagedata)
+      temp.querySelectorAll('o\\:p, v\\:shape, v\\:imagedata').forEach(el => {
+        let imgs = el.querySelectorAll('img');
+        imgs.forEach(img => el.parentNode.insertBefore(img, el));
+        if (el.getAttribute('src') && el.tagName.toLowerCase() !== 'img') {
+          let newImg = document.createElement('img');
+          newImg.src = el.getAttribute('src');
+          el.parentNode.insertBefore(newImg, el);
+        }
+        el.remove();
+      });
+
+      temp.querySelectorAll('*').forEach(el => {
+        if (el.tagName.toLowerCase() !== 'img') {
+          el.removeAttribute('style');
+          el.removeAttribute('class');
+          el.removeAttribute('align');
+        } else {
+          el.style.maxWidth = '100%';
+          el.style.height = 'auto';
+        }
+      });
+      return temp.innerHTML.trim();
+    }
+
     function sanitizeOptionText(rawHtml) {
       if (!rawHtml) return '';
-      let cleanedHtml = cleanWordFormattingHTML(rawHtml);
+      let cleanedHtml = cleanWordFormatting(rawHtml);
       let temp = document.createElement('div');
       temp.innerHTML = cleanedHtml;
       let textNodes = [];
@@ -886,7 +658,7 @@
 
     function sanitizeSoalText(rawHtml) {
       if (!rawHtml) return '';
-      let cleanedHtml = cleanWordFormattingHTML(rawHtml);
+      let cleanedHtml = cleanWordFormatting(rawHtml);
       let temp = document.createElement('div');
       temp.innerHTML = cleanedHtml;
       let textNodes = [];
@@ -901,6 +673,7 @@
       return temp.innerHTML.trim();
     }
 
+    // UNGGAH GAMBAR (Dukungan penuh untuk Vercel + Fallback Base64 jika Firebase Storage CORS)
     async function processAndUploadImages(htmlString) {
       let temp = document.createElement('div');
       temp.innerHTML = htmlString;
@@ -908,11 +681,14 @@
 
       for (let img of imgs) {
         let src = img.getAttribute('src');
-        if (!src || src.startsWith('file://') || src.includes('firebasestorage.googleapis.com')) continue;
+        if (!src || src.includes('firebasestorage.googleapis.com')) continue;
 
         try {
           let blob;
           if (src.startsWith('data:image') || src.startsWith('blob:')) {
+            const response = await fetch(src);
+            blob = await response.blob();
+          } else {
             const response = await fetch(src);
             blob = await response.blob();
           }
@@ -927,7 +703,22 @@
             img.setAttribute('src', downloadURL);
           }
         } catch (err) {
-          console.warn("Storage upload fallback Base64 aktif", err);
+          console.warn("Upload Storage/CORS di Vercel terdeteksi, mengonversi ke Base64 Data URL...", err);
+          if (src.startsWith('blob:')) {
+            try {
+              const res = await fetch(src);
+              const b = await res.blob();
+              const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(b);
+              });
+              img.setAttribute('src', base64);
+            } catch(e) {
+              console.error("Gagal fallback Base64: ", e);
+            }
+          }
         }
       }
       return temp.innerHTML;
@@ -962,7 +753,7 @@
       const btnParse = document.getElementById('btn-parse-soal');
       let rawHtml = pasteBox.innerHTML.trim();
 
-      if (!rawHtml || pasteBox.innerText.trim() === '') return showToast("Paste soal dari Word atau sisipkan gambar terlebih dahulu!");
+      if (!rawHtml || pasteBox.innerText.trim() === '') return showToast("Paste soal dari Word terlebih dahulu!");
 
       btnParse.disabled = true;
       btnParse.innerText = "Mengunggah Gambar & Memproses Soal...";
@@ -988,7 +779,7 @@
 
       for (let lineHtml of lines) {
         let dummy = document.createElement('div');
-        dummy.innerHTML = cleanWordFormattingHTML(lineHtml);
+        dummy.innerHTML = cleanWordFormatting(lineHtml);
         let lineText = dummy.innerText.replace(/[\u00A0\s]+/g, ' ').trim();
 
         if (!lineText && !dummy.querySelector('img')) continue;
@@ -1027,10 +818,10 @@
       btnParse.disabled = false;
       btnParse.innerText = "Ekstrak Soal & Buat Tabel Kunci";
 
-      if (tempParsedSoal.length === 0) return showToast("Format nomor/opsi soal tidak terdeteksi!");
+      if (tempParsedSoal.length === 0) return showToast("Format nomor/opsi soal Word tidak terdeteksi!");
 
       renderTabelKunciMassal();
-      showToast(`${tempParsedSoal.length} Soal Berhasil Diproses!`);
+      showToast(`${tempParsedSoal.length} Soal Berhasil Diproses & Gambar Diunggah!`);
     }
 
     function renderTabelKunciMassal() {
