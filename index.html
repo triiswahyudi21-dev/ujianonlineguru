@@ -615,7 +615,19 @@
       if (!html) return '';
       let temp = document.createElement('div');
       temp.innerHTML = html;
-      temp.querySelectorAll('[style*="mso-list"], [class*="MsoList"], o\\:p').forEach(el => el.remove());
+      
+      // Amankan tag gambar dari pembungkus spesifik Word (o:p, v:shape, v:imagedata)
+      temp.querySelectorAll('o\\:p, v\\:shape, v\\:imagedata').forEach(el => {
+        let imgs = el.querySelectorAll('img');
+        imgs.forEach(img => el.parentNode.insertBefore(img, el));
+        if (el.getAttribute('src') && el.tagName.toLowerCase() !== 'img') {
+          let newImg = document.createElement('img');
+          newImg.src = el.getAttribute('src');
+          el.parentNode.insertBefore(newImg, el);
+        }
+        el.remove();
+      });
+
       temp.querySelectorAll('*').forEach(el => {
         if (el.tagName.toLowerCase() !== 'img') {
           el.removeAttribute('style');
@@ -661,52 +673,56 @@
       return temp.innerHTML.trim();
     }
 
-   // UNGGAH GAMBAR (Base64 / Blob / File Local Word) KE FIREBASE STORAGE
-async function processAndUploadImages(htmlString) {
-  let temp = document.createElement('div');
-  temp.innerHTML = htmlString;
-  let imgs = temp.querySelectorAll('img');
+    // UNGGAH GAMBAR (Dukungan penuh untuk Vercel + Fallback Base64 jika Firebase Storage CORS)
+    async function processAndUploadImages(htmlString) {
+      let temp = document.createElement('div');
+      temp.innerHTML = htmlString;
+      let imgs = temp.querySelectorAll('img');
 
-  for (let img of imgs) {
-    let src = img.getAttribute('src');
-    
-    // Jika gambar sudah tersimpan di Firebase/Cloud URL, lewati upload
-    if (!src || src.includes('firebasestorage.googleapis.com')) continue;
+      for (let img of imgs) {
+        let src = img.getAttribute('src');
+        if (!src || src.includes('firebasestorage.googleapis.com')) continue;
 
-    try {
-      let blob;
-      
-      // Ambil data gambar (mendukung blob:, data:image, maupun URL lokal)
-      if (src.startsWith('data:image')) {
-        const response = await fetch(src);
-        blob = await response.blob();
-      } else if (src.startsWith('blob:')) {
-        const response = await fetch(src);
-        blob = await response.blob();
-      } else {
-        // Coba konversi URL eksternal/lokal ke Blob
-        const response = await fetch(src);
-        blob = await response.blob();
+        try {
+          let blob;
+          if (src.startsWith('data:image') || src.startsWith('blob:')) {
+            const response = await fetch(src);
+            blob = await response.blob();
+          } else {
+            const response = await fetch(src);
+            blob = await response.blob();
+          }
+
+          if (blob) {
+            let fileExt = blob.type.split('/')[1] || 'png';
+            let fileName = 'soal_img_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7) + '.' + fileExt;
+            let storageRef = storage.ref('gambar_soal/' + fileName);
+            
+            let snapshot = await storageRef.put(blob);
+            let downloadURL = await snapshot.ref.getDownloadURL();
+            img.setAttribute('src', downloadURL);
+          }
+        } catch (err) {
+          console.warn("Upload Storage/CORS di Vercel terdeteksi, mengonversi ke Base64 Data URL...", err);
+          if (src.startsWith('blob:')) {
+            try {
+              const res = await fetch(src);
+              const b = await res.blob();
+              const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(b);
+              });
+              img.setAttribute('src', base64);
+            } catch(e) {
+              console.error("Gagal fallback Base64: ", e);
+            }
+          }
+        }
       }
-
-      if (blob) {
-        let fileExt = blob.type.split('/')[1] || 'png';
-        let fileName = 'soal_img_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7) + '.' + fileExt;
-        let storageRef = storage.ref('gambar_soal/' + fileName);
-        
-        // Unggah Blob ke Firebase Storage
-        let snapshot = await storageRef.put(blob);
-        let downloadURL = await snapshot.ref.getDownloadURL();
-        
-        // Ganti src gambar dengan URL HTTPS Firebase Storage
-        img.setAttribute('src', downloadURL);
-      }
-    } catch (err) {
-      console.error("Gagal Upload Gambar ke Firebase Storage: ", err);
+      return temp.innerHTML;
     }
-  }
-  return temp.innerHTML;
-}
 
     function detectHotsOrLots(htmlContent) {
       const plainText = (htmlContent || '').replace(/<[^>]*>?/gm, '').toLowerCase();
