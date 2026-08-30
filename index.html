@@ -596,7 +596,7 @@
         "Jenis Ujian": jenis,
         "Semester": semester,
         "Tahun Pelajaran": tp,
-        "Status Ujian": s.status || 'Belum Mengerjakan',
+        "Status Ujian": s.status || 'Belum',
         "Nilai Akhir": s.status === 'Selesai' ? s.nilai : 0
       }));
 
@@ -616,7 +616,6 @@
       let temp = document.createElement('div');
       temp.innerHTML = html;
       
-      // Amankan tag gambar dari pembungkus spesifik Word (o:p, v:shape, v:imagedata)
       temp.querySelectorAll('o\\:p, v\\:shape, v\\:imagedata').forEach(el => {
         let imgs = el.querySelectorAll('img');
         imgs.forEach(img => el.parentNode.insertBefore(img, el));
@@ -673,7 +672,6 @@
       return temp.innerHTML.trim();
     }
 
-    // UNGGAH GAMBAR (Dukungan penuh untuk Vercel + Fallback Base64 jika Firebase Storage CORS)
     async function processAndUploadImages(htmlString) {
       let temp = document.createElement('div');
       temp.innerHTML = htmlString;
@@ -703,7 +701,7 @@
             img.setAttribute('src', downloadURL);
           }
         } catch (err) {
-          console.warn("Upload Storage/CORS di Vercel terdeteksi, mengonversi ke Base64 Data URL...", err);
+          console.warn("Upload Storage/CORS terdeteksi, mengonversi ke Base64 Data URL...", err);
           if (src.startsWith('blob:')) {
             try {
               const res = await fetch(src);
@@ -1228,17 +1226,21 @@
       }
 
       listFiltered.forEach((s) => {
-        let statusBadge = `<span class="inline-flex items-center gap-1.5 bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full text-xs font-semibold">
-          <span class="w-2 h-2 rounded-full bg-gray-400"></span> Belum
+        // Default Status: BELUM (Warna Kuning / Amber)
+        let statusBadge = `<span class="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-semibold border border-amber-300">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span> Belum
         </span>`;
 
-        if (s.status === 'Berlangsung' || s.status === 'Sedang Mengerjakan' || s.mekerjakan) {
+        // PRIORITAS 1: Jika Status SELESAI -> Warna Merah
+        if (s.status === 'Selesai') {
+          statusBadge = `<span class="inline-flex items-center gap-1.5 bg-red-100 text-red-800 px-2.5 py-1 rounded-full text-xs font-bold border border-red-300">
+            <span class="w-2 h-2 rounded-full bg-red-600"></span> Selesai
+          </span>`;
+        } 
+        // PRIORITAS 2: Jika Sedang Mengerjakan / Berlangsung -> Warna Hijau
+        else if (s.status === 'Berlangsung' || s.status === 'Sedang Mengerjakan' || s.mekerjakan === true) {
           statusBadge = `<span class="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full text-xs font-bold border border-emerald-300">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Berlangsung
-          </span>`;
-        } else if (s.status === 'Selesai') {
-          statusBadge = `<span class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full text-xs font-semibold">
-            <span class="w-2 h-2 rounded-full bg-blue-600"></span> Selesai
           </span>`;
         }
 
