@@ -37,7 +37,6 @@
     .anbk-header { background-color: #1a252f; }
     .anbk-sidebar { background-color: #ebedef; border-left: 1px solid #cbd5e1; }
     
-    /* Perbaikan Tata Letak Nomor & Teks Soal */
     .soal-wrapper {
       display: flex;
       align-items: flex-start;
@@ -130,7 +129,6 @@
         <p class="text-xs text-slate-500 font-medium mt-1">Portal Pengelola Ujian & Evaluasi Sekolah</p>
       </div>
       
-      <!-- TAB DALAM BENTUK KOTAK BERGARIS -->
       <div class="flex gap-3 mb-6">
         <button id="btn-tab-guru" type="button" onclick="switchLoginTab('guru')" class="flex-1 py-2.5 px-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold text-sm transition-all text-center shadow-sm">Login Guru</button>
         <button id="btn-tab-siswa" type="button" onclick="switchLoginTab('siswa')" class="flex-1 py-2.5 px-3 rounded-xl border border-slate-300 bg-white text-slate-500 font-semibold text-sm transition-all text-center hover:bg-slate-50">Preview Login Siswa</button>
@@ -195,9 +193,15 @@
           <div>
             <label class="text-xs font-semibold">Mata Pelajaran</label>
             <select id="cfg-mapel" onchange="simpanPengaturan()" class="w-full p-2 border rounded-lg text-sm">
-              <option>PAI</option><option>PKn</option><option>IPA</option><option>IPS</option>
-              <option>Bahasa Indonesia</option><option>Bahasa Inggris</option>
-              <option>Matematika</option><option>PJOK</option><option>Seni Budaya</option>
+              <option value="PAI">PAI</option>
+              <option value="PKn">PKn</option>
+              <option value="IPA">IPA</option>
+              <option value="IPS">IPS</option>
+              <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+              <option value="Bahasa Inggris">Bahasa Inggris</option>
+              <option value="Matematika">Matematika</option>
+              <option value="PJOK">PJOK</option>
+              <option value="Seni Budaya">Seni Budaya</option>
             </select>
           </div>
           <div>
@@ -262,6 +266,23 @@
             </button>
           </div>
 
+          <!-- Opsi Peruntukan Kelas Soal saat Impor & Materi -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">📌 Target Kelas</label>
+              <select id="import-soal-kelas" class="w-full p-2 border rounded-lg text-sm font-semibold text-blue-700 bg-blue-50 border-blue-300">
+                <option value="SEMUA">Semua Kelas</option>
+                <option value="7">Kelas 7</option>
+                <option value="8">Kelas 8</option>
+                <option value="9">Kelas 9</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">📖 Nama Materi / Topik</label>
+              <input type="text" id="import-soal-materi" placeholder="Contoh: Perubahan Sosial" class="w-full p-2 border rounded-lg text-sm font-semibold text-slate-800 bg-slate-50">
+            </div>
+          </div>
+
           <div class="mb-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
             <label class="block text-xs font-bold text-slate-700 mb-1">📄 Upload & Preview Dokumen PDF (Preservasi Gambar Utuh)</label>
             <input type="file" id="import-pdf-file" accept="application/pdf" onchange="handlePdfUpload(event)" class="w-full text-xs text-slate-600 file:mr-3 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
@@ -289,10 +310,24 @@
               <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor Soal</label>
               <input type="number" id="manual-no" placeholder="Otomatik" class="w-full p-2 border rounded-lg text-sm font-bold text-blue-700">
             </div>
-            <div class="md:col-span-3">
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Teks Pertama (Pertanyaan Utama)</label>
-              <textarea id="manual-teks" rows="2" placeholder="Tuliskan pertanyaan/teks soal bagian awal di sini..." class="w-full p-2 border rounded-lg text-sm"></textarea>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Target Kelas</label>
+              <select id="manual-kelas" class="w-full p-2 border rounded-lg text-sm font-semibold text-blue-700 bg-blue-50">
+                <option value="SEMUA">Semua Kelas</option>
+                <option value="7">Kelas 7</option>
+                <option value="8">Kelas 8</option>
+                <option value="9">Kelas 9</option>
+              </select>
             </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Materi / Topik</label>
+              <input type="text" id="manual-materi" placeholder="Contoh: Perubahan Sosial" class="w-full p-2 border rounded-lg text-sm font-semibold text-slate-800 bg-slate-50">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Teks Pertama (Pertanyaan Utama)</label>
+            <textarea id="manual-teks" rows="2" placeholder="Tuliskan pertanyaan/teks soal bagian awal di sini..." class="w-full p-2 border rounded-lg text-sm"></textarea>
           </div>
 
           <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -302,7 +337,7 @@
           </div>
 
           <div class="border-t pt-3">
-            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-3">Pilihan Opsi Soal (A, B, C, D) & Gambar Opsi</h4>
+            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-3">Pilihan Ospi Soal (A, B, C, D) & Gambar Opsi</h4>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div class="p-2.5 bg-slate-50 border rounded-lg space-y-1.5">
@@ -408,10 +443,10 @@
 
       <div class="bg-white p-5 rounded-xl shadow border border-slate-200">
         <div class="flex justify-between items-center border-b pb-2 mb-4">
-          <h3 class="font-bold text-slate-700">Daftar Bank Soal Tersimpan (<span id="total-soal">0</span>)</h3>
+          <h3 class="font-bold text-slate-700">Daftar Bank Soal Tersimpan (<span id="total-soal">0</span> Soal)</h3>
           <button onclick="kosongkanSoal()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded shadow">🗑 Hapus Semua Soal</button>
         </div>
-        <div id="list-soal" class="space-y-3 max-h-60 overflow-y-auto"></div>
+        <div id="list-soal" class="space-y-4 max-h-96 overflow-y-auto"></div>
       </div>
 
       <div class="bg-white p-5 rounded-xl shadow border border-slate-200">
@@ -530,7 +565,6 @@
   </div>
 
   <script>
-    // KONFIGURASI FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyBxQCgLQlLPkueDp0lpuLarGwWWLIpEwnM",
       authDomain: "ujianonline-937d4.firebaseapp.com",
@@ -568,6 +602,7 @@
     let stateUjianSiswa = {
       currentSiswaKey: null,
       currentSoalIdx: 0,
+      soalAktif: [],
       jawaban: {},
       ragu: {},
       timerInterval: null,
@@ -575,7 +610,6 @@
       isExamActive: false
     };
 
-    // FUNGSIONALITAS FULLSCREEN & MODES SECURITY
     function launchFullscreen(element) {
       if (element.requestFullscreen) {
         element.requestFullscreen().catch(() => {});
@@ -625,7 +659,6 @@
       if (stateUjianSiswa.isExamActive) e.preventDefault();
     });
 
-    // INISIALISASI LISTENER REALTIME FIREBASE
     window.onload = function() {
       db.ref('token').on('value', snap => {
         appData.token = snap.val() || 'EXAM88';
@@ -682,7 +715,6 @@
       setTimeout(() => toast.classList.add('hidden'), 3000);
     }
 
-    /* FITUR IMPOR & PREVIEW DOKUMEN PDF */
     function handlePdfUpload(e) {
       const file = e.target.files[0];
       const container = document.getElementById('pdf-preview-container');
@@ -697,7 +729,6 @@
       }
     }
 
-    /* SISTEM TAB LOGIN */
     function switchLoginTab(tab) {
       const formGuru = document.getElementById('form-login-guru');
       const formSiswa = document.getElementById('form-login-siswa');
@@ -757,9 +788,9 @@
       };
       db.ref('config').set(cfg);
       showToast("Pengaturan Ujian Berhasil Disimpan!");
+      renderSoalList();
     }
 
-    /* MANAJEMEN SISWA */
     function prosesImportSiswa() {
       const raw = document.getElementById('import-siswa-raw').value.trim();
       if(!raw) return alert("Masukkan data siswa!");
@@ -818,7 +849,6 @@
       selectNama.innerHTML = html;
     }
 
-    /* IMPORT SOAL MASSAL (WORD / PDF TEXT) */
     function downloadTemplateSoal() {
       const content = `CONTOH TEMPLATE FORMAT SOAL (PASTE KE APLIKASI)
 
@@ -940,9 +970,18 @@ Kunci: C
     function simpanSemuaSoalMassal() {
       if (tempParsedSoal.length === 0) return alert("Tidak ada soal untuk disimpan!");
       
+      const targetKelas = document.getElementById('import-soal-kelas') ? document.getElementById('import-soal-kelas').value : 'SEMUA';
+      const targetMateri = document.getElementById('import-soal-materi') ? document.getElementById('import-soal-materi').value.trim() : 'Umum';
+      const currentMapel = appData.config.mapel || 'Umum';
+
+      if (!targetMateri) return alert("Harap isi Nama Materi / Topik untuk Bank Soal ini!");
+
       tempParsedSoal.forEach(s => {
         db.ref('soal').push({
           no: s.no,
+          mapel: currentMapel,
+          kelas: targetKelas,
+          materi: targetMateri,
           teks: s.teks,
           imgSoal: '',
           teksLanjutan: '',
@@ -955,10 +994,9 @@ Kunci: C
       document.getElementById('section-tabel-kunci').classList.add('hidden');
       document.getElementById('mass-paste-box').innerHTML = '';
       tempParsedSoal = [];
-      showToast("Seluruh Soal Massal Berhasil Disimpan ke Cloud!");
+      showToast(`Bank Soal [SOAL ${currentMapel} KELAS ${targetKelas} materi ${targetMateri}] Berhasil Disimpan!`);
     }
 
-    /* FORM INPUT SOAL MANUAL & MEDIA GAMBAR */
     function readFileAsDataURL(file) {
       return new Promise((resolve, reject) => {
         if (!file) return resolve('');
@@ -1039,14 +1077,16 @@ Kunci: C
     async function simpanSoalManual() {
       const noInput = document.getElementById('manual-no').value;
       const noVal = noInput ? parseInt(noInput) : (appData.soal.length + 1);
+      const targetKelas = document.getElementById('manual-kelas') ? document.getElementById('manual-kelas').value : 'SEMUA';
+      const targetMateri = document.getElementById('manual-materi') ? document.getElementById('manual-materi').value.trim() : 'Umum';
+      const currentMapel = appData.config.mapel || 'Umum';
       const teks1 = document.getElementById('manual-teks').value.trim();
       const fileImgSoal = document.getElementById('manual-img-soal').files[0];
       const teksLanjutan = document.getElementById('manual-teks-lanjutan').value.trim();
       const kunci = document.getElementById('manual-kunci').value;
 
-      if(!teks1 && !fileImgSoal) {
-        return alert("Harap isi teks pertanyaan utama atau pilih gambar!");
-      }
+      if (!targetMateri) return alert("Harap isi Nama Materi / Topik!");
+      if(!teks1 && !fileImgSoal) return alert("Harap isi teks pertanyaan utama atau pilih gambar!");
 
       let imgSoalBase64 = '';
       if(fileImgSoal) {
@@ -1070,6 +1110,9 @@ Kunci: C
 
       const payload = {
         no: noVal,
+        mapel: currentMapel,
+        kelas: targetKelas,
+        materi: targetMateri,
         teks: teks1,
         imgSoal: imgSoalBase64,
         teksLanjutan: teksLanjutan,
@@ -1079,9 +1122,8 @@ Kunci: C
       };
 
       db.ref('soal').push(payload);
-      showToast(`Soal No. ${noVal} Berhasil Disimpan!`);
+      showToast(`Soal No. ${noVal} disimpankan ke Bank Soal [SOAL ${currentMapel} KELAS ${targetKelas} materi ${targetMateri}]`);
 
-      // Reset form
       document.getElementById('manual-no').value = '';
       document.getElementById('manual-teks').value = '';
       document.getElementById('manual-img-soal').value = '';
@@ -1100,22 +1142,73 @@ Kunci: C
       container.innerHTML = '';
 
       if (appData.soal.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 italic">Belum ada soal yang tersimpan di cloud.</p>';
+        container.innerHTML = '<p class="text-xs text-slate-400 italic">Belum ada bank soal yang tersimpan di cloud.</p>';
         return;
       }
 
+      // Grouping Soal berdasarkan Bank Soal: SOAL [MAPEL] KELAS [KELAS] materi [MATERI]
+      const bankSoalMap = {};
+
       appData.soal.forEach(s => {
-        container.innerHTML += `
-          <div class="p-3 bg-slate-50 rounded-lg border flex justify-between items-center text-xs">
-            <div>
-              <span class="font-bold text-blue-700 mr-2">No. ${s.no}</span>
-              <span class="text-slate-700 truncate max-w-md inline-block align-middle">${s.teks ? s.teks.replace(/<br>/g, ' ') : '(Gambar/Media)'}</span>
-              <span class="ml-2 bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded text-[10px]">Kunci: ${s.kunci}</span>
+        const mapel = s.mapel || appData.config.mapel || 'Umum';
+        const kelas = s.kelas || 'SEMUA';
+        const materi = s.materi || 'Umum';
+        const bankTitle = `SOAL ${mapel.toUpperCase()} KELAS ${kelas} materi ${materi}`;
+
+        if (!bankSoalMap[bankTitle]) {
+          bankSoalMap[bankTitle] = [];
+        }
+        bankSoalMap[bankTitle].push(s);
+      });
+
+      Object.keys(bankSoalMap).forEach(bankTitle => {
+        const soalList = bankSoalMap[bankTitle];
+        
+        let bankHtml = `
+          <div class="border border-blue-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
+            <div class="bg-blue-900 text-white p-3 flex justify-between items-center">
+              <span class="font-extrabold text-xs tracking-wider uppercase">📂 ${bankTitle} (${soalList.length} Soal)</span>
+              <button onclick="hapusBankSoalGroup('${bankTitle}')" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2.5 py-1 rounded">Hapus Bank Ini</button>
             </div>
-            <button onclick="hapusSoal('${s.key}')" class="text-red-600 font-bold hover:underline">Hapus</button>
+            <div class="p-3 space-y-2">
+        `;
+
+        soalList.forEach(s => {
+          bankHtml += `
+            <div class="p-2.5 bg-white rounded-lg border flex justify-between items-center text-xs">
+              <div>
+                <span class="font-bold text-blue-700 mr-2">No. ${s.no}</span>
+                <span class="text-slate-700 truncate max-w-md inline-block align-middle">${s.teks ? s.teks.replace(/<br>/g, ' ') : '(Gambar/Media)'}</span>
+                <span class="ml-2 bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded text-[10px]">Kunci: ${s.kunci}</span>
+              </div>
+              <button onclick="hapusSoal('${s.key}')" class="text-red-600 font-bold hover:underline">Hapus</button>
+            </div>
+          `;
+        });
+
+        bankHtml += `
+            </div>
           </div>
         `;
+
+        container.innerHTML += bankHtml;
       });
+    }
+
+    function hapusBankSoalGroup(bankTitle) {
+      if(confirm(`Yakin ingin menghapus seluruh soal pada ${bankTitle}?`)) {
+        appData.soal.forEach(s => {
+          const mapel = s.mapel || appData.config.mapel || 'Umum';
+          const kelas = s.kelas || 'SEMUA';
+          const materi = s.materi || 'Umum';
+          const title = `SOAL ${mapel.toUpperCase()} KELAS ${kelas} materi ${materi}`;
+
+          if (title === bankTitle) {
+            db.ref('soal/' + s.key).remove();
+          }
+        });
+        showToast("Bank Soal berhasil dihapus!");
+      }
     }
 
     function hapusSoal(key) {
@@ -1132,7 +1225,6 @@ Kunci: C
       }
     }
 
-    /* MONITORING SISWA REALTIME & EXPORT EXCEL */
     function renderMonitoringTable() {
       const tbody = document.getElementById('table-monitoring');
       const filterKelas = document.getElementById('filter-kelas-monitoring') ? document.getElementById('filter-kelas-monitoring').value : 'SEMUA';
@@ -1223,7 +1315,7 @@ Kunci: C
       XLSX.writeFile(workbook, `Hasil_Nilai_${jenis}_${mapel}.xlsx`);
     }
 
-    /* SISTEM UJIAN CAT ANBK SISWA */
+    /* FILTRASI SOAL BERDASARKAN TINGKAT KELAS SISWA (7, 8, 9) */
     function handleLoginSiswa(e) {
       e.preventDefault();
       const kls = document.getElementById('siswa-kelas').value;
@@ -1233,13 +1325,25 @@ Kunci: C
       if(!kls || !keySiswa) return alert("Pilih Kelas dan Nama Siswa!");
       if(tok !== appData.token) return alert("Kode Ujian (Token) Salah!");
 
-      if(appData.soal.length === 0) return alert("Belum ada soal ujian. Minta Guru mengupload soal!");
-
       const targetSiswa = appData.siswa.find(s => s.key === keySiswa);
       if(!targetSiswa) return alert("Data siswa tidak ditemukan!");
 
       if(targetSiswa.status === 'Selesai') {
         return alert("Anda telah menyelesaikan ujian ini. Silakan hubungi Guru jika butuh reset akses.");
+      }
+
+      // Filter Soal Sesuai Tingkat Kelas Siswa (Misal Kelas "7A" cocok dengan "7" atau "SEMUA")
+      const studentKelasFull = targetSiswa.kelas || kls;
+      const studentLevel = studentKelasFull.charAt(0); // Ambil angka pertama (contoh '7' dari '7A')
+
+      stateUjianSiswa.soalAktif = appData.soal.filter(s => {
+        if (!s.kelas || s.kelas === 'SEMUA') return true;
+        if (s.kelas === studentLevel || s.kelas === studentKelasFull) return true;
+        return false;
+      });
+
+      if(stateUjianSiswa.soalAktif.length === 0) {
+        return alert(`Belum ada soal ujian untuk Tingkat Kelas ${studentLevel}. Minta Guru mengupload soal untuk kelas Anda!`);
       }
 
       stateUjianSiswa.currentSiswaKey = keySiswa;
@@ -1288,7 +1392,7 @@ Kunci: C
 
     function renderSoalSiswa() {
       const idx = stateUjianSiswa.currentSoalIdx;
-      const currentSoal = appData.soal[idx];
+      const currentSoal = stateUjianSiswa.soalAktif[idx];
       if(!currentSoal) return;
 
       document.getElementById('soal-nomor-display').innerText = idx + 1;
@@ -1354,7 +1458,7 @@ Kunci: C
         btnPrev.classList.remove('opacity-50', 'cursor-not-allowed');
       }
 
-      if(idx === appData.soal.length - 1) {
+      if(idx === stateUjianSiswa.soalAktif.length - 1) {
         btnNext.classList.add('hidden');
         btnSubmit.classList.remove('hidden');
       } else {
@@ -1379,14 +1483,14 @@ Kunci: C
 
     function navSoal(dir) {
       const newIdx = stateUjianSiswa.currentSoalIdx + dir;
-      if (newIdx >= 0 && newIdx < appData.soal.length) {
+      if (newIdx >= 0 && newIdx < stateUjianSiswa.soalAktif.length) {
         stateUjianSiswa.currentSoalIdx = newIdx;
         renderSoalSiswa();
       }
     }
 
     function jumpToSoal(idx) {
-      if (idx >= 0 && idx < appData.soal.length) {
+      if (idx >= 0 && idx < stateUjianSiswa.soalAktif.length) {
         stateUjianSiswa.currentSoalIdx = idx;
         renderSoalSiswa();
       }
@@ -1396,7 +1500,7 @@ Kunci: C
       const grid = document.getElementById('grid-nav-soal');
       grid.innerHTML = '';
 
-      appData.soal.forEach((s, i) => {
+      stateUjianSiswa.soalAktif.forEach((s, i) => {
         const isAktif = i === stateUjianSiswa.currentSoalIdx;
         const isDijawab = stateUjianSiswa.jawaban[i] !== undefined;
         const isRagu = stateUjianSiswa.ragu[i] === true;
@@ -1442,7 +1546,7 @@ Kunci: C
     }
 
     function konfirmasiSelesai() {
-      const total = appData.soal.length;
+      const total = stateUjianSiswa.soalAktif.length;
       const dijawabCount = Object.keys(stateUjianSiswa.jawaban).length;
       const adaRagu = Object.values(stateUjianSiswa.ragu).some(r => r === true);
 
@@ -1468,10 +1572,10 @@ Kunci: C
       clearInterval(stateUjianSiswa.timerInterval);
       exitFullscreenSafely();
 
-      const totalSoal = appData.soal.length;
+      const totalSoal = stateUjianSiswa.soalAktif.length;
       let benar = 0;
 
-      appData.soal.forEach((s, idx) => {
+      stateUjianSiswa.soalAktif.forEach((s, idx) => {
         const jwb = stateUjianSiswa.jawaban[idx];
         if (jwb && jwb.toUpperCase() === s.kunci.toUpperCase()) {
           benar++;
