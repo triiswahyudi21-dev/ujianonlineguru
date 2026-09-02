@@ -185,7 +185,13 @@
         <h2 class="text-xl font-bold tracking-wide uppercase">UJIAN ONLINE SEKOLAH</h2>
         <p class="text-xs text-blue-100">Dashboard Pengelola Soal & Evaluasi Ujian</p>
       </div>
-      <button onclick="logoutGuru()" class="bg-blue-900 hover:bg-blue-950 px-4 py-2 rounded-lg text-sm font-semibold">Keluar</button>
+      <div class="flex items-center gap-2">
+        <button onclick="refreshDataGuru()" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+          <span>Refresh</span>
+        </button>
+        <button onclick="logoutGuru()" class="bg-blue-900 hover:bg-blue-950 px-4 py-2 rounded-lg text-sm font-semibold">Keluar</button>
+      </div>
     </nav>
 
     <div class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
@@ -506,6 +512,10 @@
             <p class="text-xs text-slate-500">Nilai hasil pengerjaan & durasi sisa waktu pengerjaan siswa secara realtime.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
+            <button onclick="refreshDataGuru()" class="bg-slate-700 hover:bg-slate-800 text-white font-bold px-3 py-2 rounded-lg text-xs shadow flex items-center gap-1.5 transition">
+              <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+              <span>Refresh Data</span>
+            </button>
             <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg border">
               <label for="filter-kelas-monitoring" class="text-xs font-semibold text-slate-600 px-1">Kelas Ujian:</label>
               <select id="filter-kelas-monitoring" onchange="onFilterKelasChange(this.value)" class="text-xs font-bold bg-white border rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 outline-none">
@@ -745,6 +755,11 @@
     });
 
     window.onload = function() {
+      if (sessionStorage.getItem('isGuruLoggedIn') === 'true') {
+        document.getElementById('page-login').classList.add('hidden');
+        document.getElementById('page-guru').classList.remove('hidden');
+      }
+
       db.ref('token').on('value', snap => {
         appData.token = snap.val() || 'EXAM88';
         const elToken = document.getElementById('cfg-token');
@@ -796,6 +811,12 @@
         window.monitoringInterval = setInterval(updateLiveTimersMonitoring, 1000);
       }
     };
+
+    function refreshDataGuru() {
+      renderSoalList();
+      renderMonitoringTable();
+      showToast("Data dashboard berhasil diperbarui!");
+    }
 
     function updateLiveTimersMonitoring() {
       const timerEls = document.querySelectorAll('.live-timer-monitoring');
@@ -891,6 +912,7 @@
       const u = document.getElementById('guru-user').value;
       const p = document.getElementById('guru-pass').value;
       if (u === 'guru' && p === appData.guruPass) {
+        sessionStorage.setItem('isGuruLoggedIn', 'true');
         document.getElementById('page-login').classList.add('hidden');
         document.getElementById('page-guru').classList.remove('hidden');
         showToast("Selamat Datang, Admin Guru!");
@@ -900,6 +922,7 @@
     }
 
     function logoutGuru() {
+      sessionStorage.removeItem('isGuruLoggedIn');
       document.getElementById('page-guru').classList.add('hidden');
       document.getElementById('page-login').classList.remove('hidden');
     }
@@ -1957,34 +1980,29 @@
       let benar = 0;
 
       stateUjianSiswa.soalAktif.forEach((s, idx) => {
-        const jwb = stateUjianSiswa.jawaban[idx];
-        if (jwb && jwb.toUpperCase() === s.kunci.toUpperCase()) {
+        if (stateUjianSiswa.jawaban[idx] === s.kunci) {
           benar++;
         }
       });
 
-      const nilaiAkhir = Math.round((benar / totalSoal) * 100);
+      const nilai = totalSoal > 0 ? Math.round((benar / totalSoal) * 100) : 0;
       const waktuSelesaiStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-      if (stateUjianSiswa.currentSiswaKey) {
-        localStorage.removeItem('cat_jawaban_' + stateUjianSiswa.currentSiswaKey);
-        localStorage.removeItem('cat_ragu_' + stateUjianSiswa.currentSiswaKey);
+      const key = stateUjianSiswa.currentSiswaKey;
+      db.ref('siswa/' + key).update({
+        status: 'Selesai',
+        mengerjakan: false,
+        nilai: nilai,
+        waktuSelesai: waktuSelesaiStr
+      });
 
-        db.ref('siswa/' + stateUjianSiswa.currentSiswaKey).update({
-          status: 'Selesai',
-          mengerjakan: false,
-          jawaban: stateUjianSiswa.jawaban,
-          ragu: stateUjianSiswa.ragu,
-          nilai: nilaiAkhir,
-          waktuSelesai: waktuSelesaiStr,
-          targetEndTime: null
-        });
-      }
+      localStorage.removeItem('cat_jawaban_' + key);
+      localStorage.removeItem('cat_ragu_' + key);
 
-      document.getElementById('page-siswa').classList.add('hidden');
+      alert(`Ujian telah selesai!\nNilai Anda: ${nilai}\nJawaban Benar: ${benar} dari ${totalSoal} soal.`);
+
       document.getElementById('page-login').classList.remove('hidden');
-
-      alert(`Ujian Selesai!\nJumlah Soal: ${totalSoal}\nBenar: ${benar}\nNilai Anda: ${nilaiAkhir}`);
+      document.getElementById('page-siswa').classList.add('hidden');
     }
   </script>
 </body>
