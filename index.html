@@ -133,6 +133,7 @@
     </div>
   </div>
 
+  <!-- HALAMAN LOGIN -->
   <div id="page-login" class="min-h-screen flex items-center justify-center p-4">
     <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
       <div class="text-center mb-6">
@@ -148,11 +149,11 @@
       <form id="form-login-guru" onsubmit="handleLoginGuru(event)" class="space-y-4 border-2 border-emerald-500 p-4 rounded-xl">
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Username Guru</label>
-          <input type="text" id="guru-user" value="" class="w-full p-2.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" required>
+          <input type="text" id="guru-user" value="" placeholder="Masukkan username" class="w-full p-2.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" required>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Password Guru</label>
-          <input type="password" id="guru-pass" value="" class="w-full p-2.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" required>
+          <input type="password" id="guru-pass" value="" placeholder="Masukkan password" class="w-full p-2.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" required>
         </div>
         <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl shadow-lg transition">Masuk Dashboard Guru</button>
       </form>
@@ -179,11 +180,12 @@
     </div>
   </div>
 
+  <!-- HALAMAN DASHBOARD GURU -->
   <div id="page-guru" class="hidden min-h-screen pb-12">
     <nav class="anbk-header text-white px-6 py-4 flex justify-between items-center shadow-md">
       <div>
         <h2 class="text-xl font-bold tracking-wide uppercase">UJIAN ONLINE SEKOLAH</h2>
-        <p class="text-xs text-blue-100">Dashboard Pengelola Soal & Evaluasi Ujian</p>
+        <p class="text-xs text-blue-100">Dashboard Pengelola Soal & Evaluasi Ujian (<span id="label-guru-aktif" class="font-bold text-emerald-400">Guru</span>)</p>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="refreshDataGuru()" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition">
@@ -196,6 +198,7 @@
 
     <div class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
       
+      <!-- Pengaturan Sesi Ujian -->
       <div class="bg-white p-5 rounded-xl shadow border border-slate-200">
         <h3 class="font-bold text-slate-700 border-b pb-2 mb-4">Pengaturan Sesi Ujian</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
@@ -266,6 +269,37 @@
         </div>
       </div>
 
+      <!-- MANAJEMEN AKUN GURU (DINAMIS) -->
+      <div class="bg-white p-5 rounded-xl shadow border border-emerald-200">
+        <h3 class="font-bold text-emerald-800 border-b pb-2 mb-4 flex items-center justify-between">
+          <span>Manajemen Akun Guru</span>
+          <span class="text-xs font-normal text-slate-500">Tambah / kelola akun guru sekolah</span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Guru</label>
+            <input type="text" id="new-guru-nama" placeholder="Contoh: Pak Budi" class="w-full p-2 border rounded-lg text-sm bg-slate-50 focus:bg-white outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Username Guru Baru</label>
+            <input type="text" id="new-guru-user" placeholder="Contoh: budi123" class="w-full p-2 border rounded-lg text-sm bg-slate-50 focus:bg-white outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Password Guru Baru</label>
+            <input type="password" id="new-guru-pass" placeholder="Masukkan password" class="w-full p-2 border rounded-lg text-sm bg-slate-50 focus:bg-white outline-none">
+          </div>
+        </div>
+        <button onclick="simpanGuruBaru()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow transition mb-4">
+          + Simpan Akun Guru Baru
+        </button>
+
+        <div class="border-t pt-3">
+          <h4 class="text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Daftar Akun Guru Terdaftar di Database:</h4>
+          <div id="list-akun-guru" class="space-y-2 max-h-48 overflow-y-auto"></div>
+        </div>
+      </div>
+
+      <!-- Import Data Siswa & Import Soal Massal -->
       <div class="grid md:grid-cols-2 gap-6">
         <div class="bg-white p-5 rounded-xl shadow border border-slate-200">
           <h3 class="font-bold text-slate-700 border-b pb-2 mb-2">Import Data Siswa</h3>
@@ -320,6 +354,7 @@
         </div>
       </div>
 
+      <!-- Form Manual Input / Edit Soal -->
       <div class="bg-white p-5 rounded-xl shadow border border-slate-200">
         <div class="flex justify-between items-center border-b pb-2 mb-4">
           <h3 class="font-bold text-slate-700" id="form-manual-title">Form Input / Edit Soal Manual</h3>
@@ -474,11 +509,12 @@
         </div>
       </div>
 
+      <!-- Bank Soal -->
       <div class="bg-white p-5 rounded-xl shadow border border-slate-200">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-3 mb-4 gap-3">
           <div>
-            <h3 class="font-bold text-slate-700">Daftar Bank Soal Tersimpan (<span id="total-soal">0</span> Soal)</h3>
-            <p class="text-xs text-slate-500">Gunakan filter untuk memantau, mengedit, atau menghapus soal per tingkat kelas.</p>
+            <h3 class="font-bold text-slate-700">Daftar Bank Soal Saya (<span id="total-soal">0</span> Soal)</h3>
+            <p class="text-xs text-slate-500">Menampilkan bank soal khusus akun Anda. Gunakan filter untuk memantau atau mengedit soal.</p>
           </div>
           
           <div class="flex flex-wrap items-center gap-2">
@@ -497,7 +533,7 @@
             </button>
 
             <button onclick="kosongkanSoal()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded shadow transition">
-              🔥 Hapus Semua Soal
+              🔥 Hapus Semua Soal Saya
             </button>
           </div>
         </div>
@@ -505,6 +541,7 @@
         <div id="list-soal" class="space-y-4 max-h-96 overflow-y-auto"></div>
       </div>
 
+      <!-- Pemantauan Ujian -->
       <div class="bg-white p-5 rounded-xl shadow border border-slate-200">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-3 mb-4 gap-3">
           <div>
@@ -561,6 +598,7 @@
     </div>
   </div>
 
+  <!-- HALAMAN SISWA -->
   <div id="page-siswa" class="hidden min-h-screen h-screen flex flex-col bg-slate-100 overflow-hidden select-none">
     <div class="anbk-header text-white px-6 py-3 shadow-md flex justify-between items-center shrink-0 z-10">
       <div class="flex items-center gap-4">
@@ -673,6 +711,8 @@
 
     let editingSoalKey = null;
     let tempParsedSoal = [];
+    let currentGuruKey = sessionStorage.getItem('currentGuruKey') || 'default_guru';
+
     let stateUjianSiswa = {
       currentSiswaKey: null,
       currentSoalIdx: 0,
@@ -758,7 +798,10 @@
       if (sessionStorage.getItem('isGuruLoggedIn') === 'true') {
         document.getElementById('page-login').classList.add('hidden');
         document.getElementById('page-guru').classList.remove('hidden');
+        updateLabelGuruAktif();
       }
+
+      renderDaftarGuru();
 
       db.ref('token').on('value', snap => {
         appData.token = snap.val() || 'EXAM88';
@@ -782,12 +825,25 @@
         }
       });
 
+      // MENDENGARKAN BANK SOAL DENGAN PRINSIP ISOLASI GURU
       db.ref('soal').on('value', snap => {
         const val = snap.val();
         appData.soal = [];
         if (val) {
           Object.keys(val).forEach(k => {
-            appData.soal.push({ key: k, ...val[k] });
+            const item = val[k];
+            const isGuruLoggedIn = sessionStorage.getItem('isGuruLoggedIn') === 'true';
+
+            if (isGuruLoggedIn) {
+              // Guru hanya dapat melihat soal yang dibuat oleh akunnya sendiri
+              const itemGuruKey = item.guruKey || 'default_guru';
+              if (itemGuruKey === currentGuruKey) {
+                appData.soal.push({ key: k, ...item });
+              }
+            } else {
+              // Untuk mode siswa/preview, muat semua soal yang tersedia
+              appData.soal.push({ key: k, ...item });
+            }
           });
           appData.soal.sort((a,b) => (parseInt(a.no)||0) - (parseInt(b.no)||0));
         }
@@ -812,6 +868,173 @@
       }
     };
 
+    function updateLabelGuruAktif() {
+      const guruAktifStr = sessionStorage.getItem('guruAktif');
+      const labelEl = document.getElementById('label-guru-aktif');
+      if (guruAktifStr && labelEl) {
+        try {
+          const g = JSON.parse(guruAktifStr);
+          labelEl.innerText = g.nama || g.username || "Guru";
+        } catch(e) {
+          labelEl.innerText = "Guru";
+        }
+      }
+    }
+
+    /* -------------------------------------------------------------
+       MANAJEMEN AKUN GURU (DINAMIS & FIREBASE REALTIME)
+    ------------------------------------------------------------- */
+    function handleLoginGuru(e) {
+      e.preventDefault();
+      const u = document.getElementById('guru-user').value.trim();
+      const p = document.getElementById('guru-pass').value.trim();
+
+      db.ref('guru').once('value', snap => {
+        let loginBerhasil = false;
+        let dataGuru = null;
+
+        if (snap.exists()) {
+          snap.forEach(child => {
+            const g = child.val();
+            if (g.username === u && g.password === p) {
+              loginBerhasil = true;
+              dataGuru = { key: child.key, ...g };
+            }
+          });
+        }
+
+        if (!loginBerhasil && u === 'guru' && p === (appData.guruPass || 'guru123')) {
+          loginBerhasil = true;
+          dataGuru = { key: 'default_guru', username: 'guru', nama: 'Guru Utama' };
+          if (!snap.exists()) {
+            db.ref('guru/default_guru').set({
+              username: 'guru',
+              password: 'guru123',
+              nama: 'Guru Utama'
+            });
+          }
+        }
+
+        if (loginBerhasil) {
+          currentGuruKey = dataGuru.key || 'default_guru';
+          sessionStorage.setItem('currentGuruKey', currentGuruKey);
+          sessionStorage.setItem('isGuruLoggedIn', 'true');
+          sessionStorage.setItem('guruAktif', JSON.stringify(dataGuru));
+          
+          document.getElementById('page-login').classList.add('hidden');
+          document.getElementById('page-guru').classList.remove('hidden');
+          updateLabelGuruAktif();
+
+          // Refresh data soal untuk akun guru yang baru login
+          db.ref('soal').once('value', snapshot => {
+            const val = snapshot.val();
+            appData.soal = [];
+            if (val) {
+              Object.keys(val).forEach(k => {
+                const item = val[k];
+                const itemGuruKey = item.guruKey || 'default_guru';
+                if (itemGuruKey === currentGuruKey) {
+                  appData.soal.push({ key: k, ...item });
+                }
+              });
+              appData.soal.sort((a,b) => (parseInt(a.no)||0) - (parseInt(b.no)||0));
+            }
+            renderSoalList();
+            updateManualButtonState();
+          });
+
+          showToast("Selamat Datang, " + (dataGuru ? (dataGuru.nama || dataGuru.username) : "Guru") + "!");
+        } else {
+          alert("Username atau Password Guru Salah!");
+        }
+      });
+    }
+
+    function simpanGuruBaru() {
+      const nama = document.getElementById('new-guru-nama').value.trim();
+      const username = document.getElementById('new-guru-user').value.trim();
+      const password = document.getElementById('new-guru-pass').value.trim();
+
+      if (!username || !password) {
+        return alert('Username dan Password tidak boleh kosong!');
+      }
+
+      db.ref('guru').once('value', (snap) => {
+        let exists = false;
+        if (snap.exists()) {
+          snap.forEach(c => {
+            if (c.val().username === username) exists = true;
+          });
+        }
+
+        if (exists) {
+          alert('Username "' + username + '" sudah digunakan oleh guru lain!');
+          return;
+        }
+
+        db.ref('guru').push({
+          nama: nama || username,
+          username: username,
+          password: password
+        }, (err) => {
+          if (err) {
+            alert('Gagal menyimpan akun guru!');
+          } else {
+            showToast('Akun Guru (' + username + ') berhasil ditambahkan!');
+            document.getElementById('new-guru-nama').value = '';
+            document.getElementById('new-guru-user').value = '';
+            document.getElementById('new-guru-pass').value = '';
+          }
+        });
+      });
+    }
+
+    function renderDaftarGuru() {
+      const listEl = document.getElementById('list-akun-guru');
+      if (!listEl) return;
+
+      db.ref('guru').on('value', (snap) => {
+        listEl.innerHTML = '';
+        if (!snap.exists()) {
+          listEl.innerHTML = '<p class="text-xs text-slate-400 italic p-2">Belum ada akun guru kustom di database. Akun default aktif: username (guru) / password (guru123)</p>';
+          return;
+        }
+
+        snap.forEach((child) => {
+          const g = child.val();
+          const key = child.key;
+          listEl.innerHTML += `
+            <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg border text-xs">
+              <div>
+                <span class="font-bold text-slate-800">${g.nama || g.username}</span>
+                <span class="text-slate-500 ml-2">(User: <strong class="text-blue-700">${g.username}</strong> | Pass: <strong class="text-emerald-700">${g.password}</strong>)</span>
+              </div>
+              <button onclick="hapusAkunGuru('${key}', '${g.username}')" class="text-red-600 font-bold hover:underline bg-red-50 px-2 py-1 rounded border border-red-200">Hapus</button>
+            </div>
+          `;
+        });
+      });
+    }
+
+    function hapusAkunGuru(key, username) {
+      if (confirm(`Yakin ingin menghapus akun guru "${username}"?`)) {
+        db.ref('guru/' + key).remove();
+        showToast(`Akun guru ${username} berhasil dihapus.`);
+      }
+    }
+
+    function logoutGuru() {
+      sessionStorage.removeItem('isGuruLoggedIn');
+      sessionStorage.removeItem('guruAktif');
+      sessionStorage.removeItem('currentGuruKey');
+      currentGuruKey = 'default_guru';
+      document.getElementById('page-guru').classList.add('hidden');
+      document.getElementById('page-login').classList.remove('hidden');
+    }
+
+    /* -------------------------------------------------------------
+       FUNGSI SISTEM UJIAN SEKOLAH (ANBK)
+    ------------------------------------------------------------- */
     function refreshDataGuru() {
       renderSoalList();
       renderMonitoringTable();
@@ -905,26 +1128,6 @@
         btnGuru.className = "flex-1 py-2.5 px-3 rounded-xl border border-slate-300 bg-white text-slate-500 font-semibold text-sm transition-all text-center hover:bg-slate-50";
         populateSiswaClasses();
       }
-    }
-
-    function handleLoginGuru(e) {
-      e.preventDefault();
-      const u = document.getElementById('guru-user').value;
-      const p = document.getElementById('guru-pass').value;
-      if (u === 'guru' && p === appData.guruPass) {
-        sessionStorage.setItem('isGuruLoggedIn', 'true');
-        document.getElementById('page-login').classList.add('hidden');
-        document.getElementById('page-guru').classList.remove('hidden');
-        showToast("Selamat Datang, Admin Guru!");
-      } else {
-        alert("Username atau Password Salah!");
-      }
-    }
-
-    function logoutGuru() {
-      sessionStorage.removeItem('isGuruLoggedIn');
-      document.getElementById('page-guru').classList.add('hidden');
-      document.getElementById('page-login').classList.remove('hidden');
     }
 
     function generateToken() {
@@ -1169,6 +1372,7 @@
 
       tempParsedSoal.forEach(s => {
         db.ref('soal').push({
+          guruKey: currentGuruKey || 'default_guru',
           no: s.no,
           mapel: currentMapel,
           kelas: targetKelas,
@@ -1380,6 +1584,7 @@
       }
 
       const payload = {
+        guruKey: currentGuruKey || 'default_guru',
         no: noVal,
         mapel: currentMapel,
         kelas: targetKelas,
@@ -1431,7 +1636,7 @@
       container.innerHTML = '';
 
       if (filteredSoal.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 italic">Belum ada bank soal yang tersimpan di cloud atau sesuai filter kelas.</p>';
+        container.innerHTML = '<p class="text-xs text-slate-400 italic">Belum ada bank soal yang tersimpan di akun Anda atau sesuai filter kelas.</p>';
         return;
       }
 
@@ -1490,7 +1695,7 @@
     function hapusSoalSesuaiKelas() {
       const filterKelas = document.getElementById('filter-kelas-soal').value;
       if (filterKelas === 'SEMUA') {
-        return alert("Silakan pilih kelas spesifik terlebih dahulu pada dropdown 'Tampilkan Soal' (misalnya Kelas 7, Kelas 8, atau Kelas 9) untuk menghapus soal khusus kelas tersebut!");
+        return alert("Silakan pilih kelas spesifik terlebih dahulu pada dropdown 'Tampilkan Soal' untuk menghapus soal khusus kelas tersebut!");
       }
 
       const targetSoal = appData.soal.filter(s => {
@@ -1500,14 +1705,14 @@
       });
 
       if (targetSoal.length === 0) {
-        return alert(`Tidak ditemukan soal untuk Kelas ${filterKelas}.`);
+        return alert(`Tidak ditemukan soal untuk Kelas ${filterKelas} pada akun Anda.`);
       }
 
-      if (confirm(`Apakah Anda yakin ingin menghapus ${targetSoal.length} soal khusus Kelas ${filterKelas}? Soal kelas lainnya TIDAK akan terhapus.`)) {
+      if (confirm(`Apakah Anda yakin ingin menghapus ${targetSoal.length} soal khusus Kelas ${filterKelas}?`)) {
         targetSoal.forEach(s => {
           db.ref('soal/' + s.key).remove();
         });
-        showToast(`Semua soal khusus Kelas ${filterKelas} berhasil dihapus!`);
+        showToast(`Semua soal khusus Kelas ${filterKelas} pada akun Anda berhasil dihapus!`);
       }
     }
 
@@ -1535,9 +1740,11 @@
     }
 
     function kosongkanSoal() {
-      if(confirm("⚠️ PERINGATAN: Apakah Anda yakin ingin MENGHAPUS SEMUA SOAL di database Cloud?")) {
-        db.ref('soal').remove();
-        showToast("Semua bank soal berhasil dikosongkan.");
+      if(confirm("⚠️ PERINGATAN: Apakah Anda yakin ingin MENGHAPUS SEMUA SOAL pada akun Anda di database Cloud?")) {
+        appData.soal.forEach(s => {
+          db.ref('soal/' + s.key).remove();
+        });
+        showToast("Semua bank soal milik akun Anda berhasil dikosongkan.");
       }
     }
 
