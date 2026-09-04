@@ -120,7 +120,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
-  <div id="toast" class="hidden fixed top-4 right-4 z-50 bg-red-600 text-white px-4 py-2.5 rounded-lg shadow-xl text-sm font-semibold transition-all"></div>
+  <div id="toast" class="hidden fixed top-4 right-4 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-lg shadow-xl text-sm font-semibold transition-all"></div>
 
   <div id="modal-confirm-logout" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full mx-4 border border-slate-200 text-center">
@@ -909,7 +909,6 @@
           return alert("Password yang Anda masukkan salah untuk username tersebut!");
         }
 
-        // AKUN GURU BARU SECARA OTOMATIS DIBUAT JIKA BELUM PERNAH ADA
         if (!loginBerhasil) {
           const newGuruRef = db.ref('guru').push();
           dataGuru = {
@@ -936,7 +935,6 @@
           document.getElementById('page-guru').classList.remove('hidden');
           updateLabelGuruAktif();
 
-          // MUAT SOAL KHUSUS GURU TERSEBUT
           db.ref('soal').once('value', snapshot => {
             const val = snapshot.val();
             appData.soal = [];
@@ -953,7 +951,6 @@
             updateManualButtonState();
           });
 
-          // MUAT SISWA KHUSUS GURU TERSEBUT
           db.ref('siswa').once('value', snapshot => {
             const data = snapshot.val();
             appData.siswa = [];
@@ -1092,7 +1089,6 @@
       showToast("Token baru berhasil dibuat: " + t);
     }
 
-    // PENGATURAN GLOBAL SESI UJIAN
     function simpanPengaturan() {
       const cfg = {
         jenis: document.getElementById('cfg-jenis-ujian').value,
@@ -1109,7 +1105,6 @@
       renderMonitoringTable();
     }
 
-    // IMPORT SISWA DENGAN PENANDA GURU
     function prosesImportSiswa() {
       const raw = document.getElementById('import-siswa-raw').value.trim();
       if(!raw) return alert("Masukkan data siswa!");
@@ -1137,7 +1132,7 @@
             noUrut: noUrut,
             nama: nama,
             kelas: kelas,
-            status: 'Belum Ujian',
+            status: 'Belum',
             nilai: 0,
             jawaban: {},
             ragu: {}
@@ -1179,6 +1174,430 @@
         });
       }
       selectNama.innerHTML = html;
+    }
+
+    /* =========================================================
+       LOGIKA LOGIN SISWA & PENGERJAAN UJIAN REALTIME
+       ========================================================= */
+
+    function handleLoginSiswa(e) {
+      e.preventDefault();
+      const kelasVal = document.getElementById('siswa-kelas').value;
+      const siswaKey = document.getElementById('siswa-nama').value;
+      const tokenInput = document.getElementById('siswa-token').value.trim().toUpperCase();
+
+      if (!kelasVal || !siswaKey) {
+        return alert("Harap pilih Kelas dan Nama Siswa terlebih dahulu!");
+      }
+      if (!tokenInput) {
+        return alert("Harap masukkan Kode Ujian (Token)!");
+      }
+      if (tokenInput !== appData.token.toUpperCase()) {
+        return alert("Kode Ujian (Token) yang Anda masukkan salah!");
+      }
+
+      const siswaObj = appData.siswa.find(s => s.key === siswaKey);
+      if (!siswaObj) {
+        return alert("Data siswa tidak ditemukan di database cloud!");
+      }
+
+      if (siswaObj.status === 'Selesai') {
+        return alert("Anda sudah menyelesaikan ujian ini dan tidak dapat masuk kembali.");
+      }
+
+      const studentClassLevel = kelasVal.match(/\d+/)?.[0] || kelasVal;
+      let questions = appData.soal.filter(s => {
+        const k = String(s.kelas || 'SEMUA').toUpperCase();
+        const sLevel = k.match(/\d+/)?.[0] || k;
+        return k === 'SEMUA' || k === kelasVal || sLevel === studentClassLevel;
+      });
+
+      if (questions.length === 0) {
+        questions = [...appData.soal];
+      }
+
+      if (questions.length === 0) {
+        return alert("Belum ada soal ujian yang tersedia untuk kelas Anda.");
+      }
+
+      stateUjianSiswa.currentSiswaKey = siswaKey;
+      stateUjianSiswa.soalAktif = questions;
+      stateUjianSiswa.currentSoalIdx = 0;
+      stateUjianSiswa.jawaban = siswaObj.jawaban || {};
+      stateUjianSiswa.ragu = siswaObj.ragu || {};
+      stateUjianSiswa.isExamActive = true;
+
+      const totalWaktuDetik = (appData.config.waktu || 60) * 60;
+      let targetEndTime = siswaObj.targetEndTime;
+      const now = Date.now();
+
+      if (!targetEndTime || targetEndTime <= now || siswaObj.status === 'Belum') {
+        targetEndTime = now + (totalWaktuDetik * 1000);
+      }
+
+      stateUjianSiswa.waktuSisa = Math.max(0, Math.floor((targetEndTime - now) / 1000));
+
+      // UPDATE STATUS KE 'Masih Berlangsung' (HIJAU)
+      db.ref('siswa/' + siswaKey).update({
+        status: 'Masih Berlangsung',
+        mengerjakan: true,
+        targetEndTime: targetEndTime,
+        waktuMulai: siswaObj.waktuMulai || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+      });
+
+      document.getElementById('view-siswa-nama').innerText = siswaObj.nama + " (" + siswaObj.kelas + ")";
+      document.getElementById('view-siswa-info').innerText = `${appData.config.jenis || 'UH'} | ${appData.config.mapel || 'IPA'} | ${appData.config.semester || 'Ganjil'} TP. ${appData.config.tp || '2025/2026'}`;
+
+      document.getElementById('page-login').classList.add('hidden');
+      document.getElementById('page-siswa').classList.remove('hidden');
+
+      launchFullscreen(document.documentElement);
+
+      startExamTimer();
+      renderSoalSiswa();
+      renderNavSoal();
+      showToast("Selamat mengerjakan ujian, " + siswaObj.nama + "!");
+    }
+
+    function startExamTimer() {
+      if (stateUjianSiswa.timerInterval) clearInterval(stateUjianSiswa.timerInterval);
+
+      const timerDisplay = document.getElementById('timer-display');
+      
+      stateUjianSiswa.timerInterval = setInterval(() => {
+        if (!stateUjianSiswa.isExamActive) return;
+
+        if (stateUjianSiswa.waktuSisa <= 0) {
+          clearInterval(stateUjianSiswa.timerInterval);
+          timerDisplay.innerText = "00:00";
+          alert("Waktu ujian telah habis! Jawaban Anda disimpan otomatis.");
+          selesaiUjian(true);
+          return;
+        }
+
+        stateUjianSiswa.waktuSisa--;
+        const m = Math.floor(stateUjianSiswa.waktuSisa / 60);
+        const s = stateUjianSiswa.waktuSisa % 60;
+        timerDisplay.innerText = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+      }, 1000);
+    }
+
+    function renderSoalSiswa() {
+      const totalSoal = stateUjianSiswa.soalAktif.length;
+      if (totalSoal === 0) return;
+
+      const idx = stateUjianSiswa.currentSoalIdx;
+      const soal = stateUjianSiswa.soalAktif[idx];
+
+      document.getElementById('soal-nomor-display').innerText = (idx + 1) + " / " + totalSoal;
+      document.getElementById('display-soal-num-prefix').innerText = (idx + 1) + ".";
+
+      const hotsEl = document.getElementById('display-hots-lots');
+      if (hotsEl) {
+        if (soal.materi) {
+          hotsEl.innerText = soal.materi.toUpperCase();
+          hotsEl.className = "text-xs font-extrabold px-2.5 py-1 rounded-md border bg-purple-50 border-purple-200 text-purple-700";
+        } else {
+          hotsEl.innerText = "PILGAN";
+          hotsEl.className = "text-xs font-extrabold px-2.5 py-1 rounded-md border bg-slate-50 border-slate-200 text-slate-600";
+        }
+      }
+
+      const displayTeksSoal = document.getElementById('display-teks-soal');
+      let leftContent = soal.teks || '';
+      if (soal.imgSoal) {
+        leftContent += `<img src="${soal.imgSoal}" class="max-w-full h-auto rounded-lg my-2 border" />`;
+      }
+      displayTeksSoal.innerHTML = leftContent || '<p class="text-slate-400 italic">Bacalah pertanyaan di sisi kanan untuk menjawab soal ini.</p>';
+
+      document.getElementById('display-teks-lanjutan-siswa').innerHTML = soal.teksLanjutan || soal.teks || 'Pilihlah salah satu jawaban yang paling tepat:';
+
+      const containerOpts = document.getElementById('options-container');
+      containerOpts.innerHTML = '';
+
+      const selectedJawaban = stateUjianSiswa.jawaban[soal.key] || '';
+
+      ['A', 'B', 'C', 'D'].forEach(optKey => {
+        const optText = (soal.opsi && soal.opsi[optKey]) ? soal.opsi[optKey] : '';
+        const optImg = (soal.opsiImg && soal.opsiImg[optKey]) ? soal.opsiImg[optKey] : '';
+
+        if (!optText && !optImg) return;
+
+        const isSelected = selectedJawaban === optKey;
+        const bgClass = isSelected ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-400' : 'bg-white border-slate-200 hover:bg-slate-50';
+
+        let optImgHtml = '';
+        if (optImg) {
+          optImgHtml = `<img src="${optImg}" class="max-w-xs h-auto rounded my-1 border" />`;
+        }
+
+        containerOpts.innerHTML += `
+          <div onclick="selectJawaban('${soal.key}', '${optKey}')" class="p-3.5 rounded-xl border ${bgClass} cursor-pointer transition flex items-start gap-3 text-left">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 border'}">${optKey}</div>
+            <div class="flex-1 text-xs text-slate-800 font-medium text-left">
+              ${optText ? `<div class="text-left">${optText}</div>` : ''}
+              ${optImgHtml}
+            </div>
+          </div>
+        `;
+      });
+
+      const chkRagu = document.getElementById('chk-ragu');
+      chkRagu.checked = !!stateUjianSiswa.ragu[soal.key];
+
+      const btnPrev = document.getElementById('btn-prev');
+      const btnNext = document.getElementById('btn-next');
+      const btnSubmit = document.getElementById('btn-submit');
+
+      btnPrev.disabled = idx === 0;
+      btnPrev.style.opacity = idx === 0 ? '0.5' : '1';
+
+      if (idx === totalSoal - 1) {
+        btnNext.classList.add('hidden');
+        btnSubmit.classList.remove('hidden');
+      } else {
+        btnNext.classList.remove('hidden');
+        btnSubmit.classList.add('hidden');
+      }
+
+      renderNavSoal();
+    }
+
+    function selectJawaban(soalKey, optKey) {
+      stateUjianSiswa.jawaban[soalKey] = optKey;
+      simpanStateSiswaRealtime();
+      renderSoalSiswa();
+    }
+
+    function toggleRagu() {
+      const idx = stateUjianSiswa.currentSoalIdx;
+      const soal = stateUjianSiswa.soalAktif[idx];
+      if (!soal) return;
+
+      const isChecked = document.getElementById('chk-ragu').checked;
+      stateUjianSiswa.ragu[soal.key] = isChecked;
+      simpanStateSiswaRealtime();
+      renderNavSoal();
+    }
+
+    function simpanStateSiswaRealtime() {
+      if (!stateUjianSiswa.currentSiswaKey) return;
+      db.ref('siswa/' + stateUjianSiswa.currentSiswaKey).update({
+        jawaban: stateUjianSiswa.jawaban,
+        ragu: stateUjianSiswa.ragu
+      });
+    }
+
+    function navSoal(step) {
+      const newIdx = stateUjianSiswa.currentSoalIdx + step;
+      if (newIdx >= 0 && newIdx < stateUjianSiswa.soalAktif.length) {
+        stateUjianSiswa.currentSoalIdx = newIdx;
+        renderSoalSiswa();
+      }
+    }
+
+    function jumpToSoal(index) {
+      if (index >= 0 && index < stateUjianSiswa.soalAktif.length) {
+        stateUjianSiswa.currentSoalIdx = index;
+        renderSoalSiswa();
+      }
+    }
+
+    function renderNavSoal() {
+      const grid = document.getElementById('grid-nav-soal');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      stateUjianSiswa.soalAktif.forEach((soal, i) => {
+        const isCurrent = i === stateUjianSiswa.currentSoalIdx;
+        const isAnswered = !!stateUjianSiswa.jawaban[soal.key];
+        const isRagu = !!stateUjianSiswa.ragu[soal.key];
+
+        let navClass = 'btn-nav-soal ';
+
+        if (isCurrent) {
+          navClass += 'aktif';
+        } else if (isRagu) {
+          navClass += 'ragu';
+        } else if (isAnswered) {
+          navClass += 'dijawab';
+        } else {
+          navClass += 'bg-white text-slate-800 border-slate-300';
+        }
+
+        grid.innerHTML += `
+          <button onclick="jumpToSoal(${i})" class="${navClass}">
+            ${i + 1}
+          </button>
+        `;
+      });
+    }
+
+    function konfirmasiSelesai() {
+      const total = stateUjianSiswa.soalAktif.length;
+      const dijawabCount = Object.keys(stateUjianSiswa.jawaban).filter(k => stateUjianSiswa.jawaban[k]).length;
+      
+      if (dijawabCount < total) {
+        if (!confirm(`Anda baru menjawab ${dijawabCount} dari ${total} soal. Yakin ingin menyelesaikan ujian sekarang?`)) {
+          return;
+        }
+      } else {
+        if (!confirm("Apakah Anda yakin ingin menyelesaikan ujian ini?")) {
+          return;
+        }
+      }
+      selesaiUjian(false);
+    }
+
+    function selesaiUjian(isAutoSubmit = false) {
+      if (!stateUjianSiswa.currentSiswaKey) return;
+
+      stateUjianSiswa.isExamActive = false;
+      if (stateUjianSiswa.timerInterval) clearInterval(stateUjianSiswa.timerInterval);
+
+      let benar = 0;
+      const total = stateUjianSiswa.soalAktif.length;
+
+      stateUjianSiswa.soalAktif.forEach(soal => {
+        const userAns = stateUjianSiswa.jawaban[soal.key];
+        if (userAns && userAns.toUpperCase() === (soal.kunci || '').toUpperCase()) {
+          benar++;
+        }
+      });
+
+      const nilaiAkhir = total > 0 ? Math.round((benar / total) * 100) : 0;
+      const waktuSelesaiStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+      // UPDATE STATUS KE 'Selesai' (MERAH)
+      db.ref('siswa/' + stateUjianSiswa.currentSiswaKey).update({
+        status: 'Selesai',
+        mengerjakan: false,
+        nilai: nilaiAkhir,
+        jawaban: stateUjianSiswa.jawaban,
+        ragu: stateUjianSiswa.ragu,
+        waktuSelesai: waktuSelesaiStr
+      });
+
+      exitFullscreenSafely();
+
+      alert(`Ujian telah selesai!\n\nNama Siswa: ${document.getElementById('view-siswa-nama').innerText}\nNilai Anda: ${nilaiAkhir}\nJumlah Benar: ${benar} / ${total}`);
+
+      document.getElementById('page-siswa').classList.add('hidden');
+      document.getElementById('page-login').classList.remove('hidden');
+
+      document.getElementById('siswa-token').value = '';
+      stateUjianSiswa.currentSiswaKey = null;
+    }
+
+    function mintaKonfirmasiKeluar() {
+      document.getElementById('modal-confirm-logout').classList.remove('hidden');
+    }
+
+    function prosesKeluarSiswa(konfirmasi) {
+      document.getElementById('modal-confirm-logout').classList.add('hidden');
+      if (konfirmasi) {
+        stateUjianSiswa.isExamActive = false;
+        if (stateUjianSiswa.timerInterval) clearInterval(stateUjianSiswa.timerInterval);
+        
+        if (stateUjianSiswa.currentSiswaKey) {
+          db.ref('siswa/' + stateUjianSiswa.currentSiswaKey).update({
+            mengerjakan: false
+          });
+        }
+
+        exitFullscreenSafely();
+        document.getElementById('page-siswa').classList.add('hidden');
+        document.getElementById('page-login').classList.remove('hidden');
+      }
+    }
+
+    /* =========================================================
+       LOGIKA MONITORING SISWA DAN PERUBAHAN STATUS & WARNA
+       ========================================================= */
+
+    function renderMonitoringTable() {
+      const tbody = document.getElementById('table-monitoring');
+      if (!tbody) return;
+      const filterKelas = document.getElementById('filter-kelas-monitoring') ? document.getElementById('filter-kelas-monitoring').value : 'SEMUA';
+      tbody.innerHTML = '';
+
+      let filtered = appData.siswa;
+      if (filterKelas && filterKelas !== 'SEMUA') {
+        filtered = appData.siswa.filter(s => s.kelas === filterKelas);
+      }
+
+      filtered.sort((a,b) => (a.noUrut || 0) - (b.noUrut || 0) || a.nama.localeCompare(b.nama));
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="p-3 text-center text-xs text-slate-400 italic">Tidak ada data siswa untuk kelas ini di akun Anda.</td></tr>';
+        return;
+      }
+
+      const kkmVal = parseInt(appData.config.kkm) || 75;
+
+      filtered.forEach((s, idx) => {
+        let statusBadge = '';
+        let waktuText = '-';
+        let ketBadge = '<span class="text-[11px] text-slate-400 font-medium">-</span>';
+
+        const st = (s.status || 'Belum').trim();
+
+        // 1. STATUS SELESAI (MERAH)
+        if (st === 'Selesai') {
+          statusBadge = `<span class="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-[11px] font-semibold border border-red-200">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span> Selesai
+          </span>`;
+          waktuText = `<span class="text-[11px] text-slate-500 font-medium">Selesai ${s.waktuSelesai ? '('+s.waktuSelesai+')' : ''}</span>`;
+          
+          const score = parseFloat(s.nilai) || 0;
+          if (score < kkmVal) {
+            ketBadge = `<span class="bg-red-100 text-red-800 text-[11px] font-bold px-2 py-0.5 rounded-md border border-red-200">Remedi</span>`;
+          } else {
+            ketBadge = `<span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-md border border-emerald-200">Tuntas</span>`;
+          }
+        } 
+        // 2. STATUS MASIH BERLANGSUNG (HIJAU)
+        else if (st === 'Masih Berlangsung' || st === 'Berlangsung' || st === 'Sedang Mengerjakan' || s.mengerjakan === true) {
+          statusBadge = `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[11px] font-semibold border border-emerald-200">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Masih Berlangsung
+          </span>`;
+
+          if (s.targetEndTime) {
+            const diff = Math.max(0, Math.floor((s.targetEndTime - Date.now()) / 1000));
+            const m = Math.floor(diff / 60);
+            const sSec = diff % 60;
+            waktuText = `<span class="font-mono font-bold text-amber-600 text-[11px] live-timer-monitoring" data-endtime="${s.targetEndTime}">${m < 10 ? '0'+m : m}:${sSec < 10 ? '0'+sSec : sSec}</span>`;
+          } else {
+            waktuText = `<span class="font-mono font-bold text-amber-600 text-[11px]">${appData.config.waktu || 60}:00</span>`;
+          }
+        } 
+        // 3. STATUS BELUM (KUNING)
+        else {
+          statusBadge = `<span class="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-[11px] font-semibold border border-yellow-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span> Belum
+          </span>`;
+          waktuText = `<span class="text-[11px] text-slate-400 font-medium">${appData.config.waktu || 60} Menit</span>`;
+        }
+
+        tbody.innerHTML += `
+          <tr class="border-b text-xs hover:bg-slate-50 transition">
+            <td class="py-2 px-3 text-center font-bold text-slate-500">${s.noUrut || (idx + 1)}</td>
+            <td class="py-2 px-3 font-semibold text-slate-800">${s.nama}</td>
+            <td class="py-2 px-3 text-center"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold text-[11px]">${s.kelas}</span></td>
+            <td class="py-2 px-3 text-center">${statusBadge}</td>
+            <td class="py-2 px-3 text-center font-semibold">${waktuText}</td>
+            <td class="py-2 px-3 text-center font-bold text-slate-800">${st === 'Selesai' ? s.nilai : '-'}</td>
+            <td class="py-2 px-3 text-center font-bold text-slate-600">${kkmVal}</td>
+            <td class="py-2 px-3 text-center">${ketBadge}</td>
+            <td class="py-2 px-3 text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <button onclick="resetAksesSiswa('${s.key}')" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm transition">Reset</button>
+                <button onclick="hapusDataSiswa('${s.key}')" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm transition">Hapus</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
     }
 
     function downloadTemplateSoal() {
@@ -1728,94 +2147,14 @@
       }
     }
 
-    function renderMonitoringTable() {
-      const tbody = document.getElementById('table-monitoring');
-      const filterKelas = document.getElementById('filter-kelas-monitoring') ? document.getElementById('filter-kelas-monitoring').value : 'SEMUA';
-      tbody.innerHTML = '';
-
-      let filtered = appData.siswa;
-      if (filterKelas && filterKelas !== 'SEMUA') {
-        filtered = appData.siswa.filter(s => s.kelas === filterKelas);
-      }
-
-      filtered.sort((a,b) => (a.noUrut || 0) - (b.noUrut || 0) || a.nama.localeCompare(b.nama));
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="p-3 text-center text-xs text-slate-400 italic">Tidak ada data siswa untuk kelas ini di akun Anda.</td></tr>';
-        return;
-      }
-
-      const kkmVal = parseInt(appData.config.kkm) || 75;
-
-      filtered.forEach((s, idx) => {
-        let statusBadge = '';
-        let waktuText = '-';
-        let ketBadge = '<span class="text-[11px] text-slate-400 font-medium">-</span>';
-
-        if (s.status === 'Selesai') {
-          statusBadge = `<span class="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-[11px] font-semibold border border-red-200">
-            <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span> Selesai
-          </span>`;
-          waktuText = `<span class="text-[11px] text-slate-500 font-medium">Selesai ${s.waktuSelesai ? '('+s.waktuSelesai+')' : ''}</span>`;
-          
-          const score = parseFloat(s.nilai) || 0;
-          if (score < kkmVal) {
-            ketBadge = `<span class="bg-red-100 text-red-800 text-[11px] font-bold px-2 py-0.5 rounded-md border border-red-200">Remedi</span>`;
-          } else {
-            ketBadge = `<span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-md border border-emerald-200">Tuntas</span>`;
-          }
-        } 
-        else if (s.status === 'Berlangsung' || s.status === 'Sedang Mengerjakan' || s.mengerjakan === true) {
-          statusBadge = `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[11px] font-semibold border border-emerald-200">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Berlangsung
-          </span>`;
-
-          if (s.targetEndTime) {
-            const diff = Math.max(0, Math.floor((s.targetEndTime - Date.now()) / 1000));
-            const m = Math.floor(diff / 60);
-            const sSec = diff % 60;
-            waktuText = `<span class="font-mono font-bold text-amber-600 text-[11px] live-timer-monitoring" data-endtime="${s.targetEndTime}">${m < 10 ? '0'+m : m}:${sSec < 10 ? '0'+sSec : sSec}</span>`;
-          } else {
-            waktuText = `<span class="font-mono font-bold text-amber-600 text-[11px]">${appData.config.waktu || 60}:00</span>`;
-          }
-        } else {
-          statusBadge = `<span class="inline-flex items-center bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[11px] font-medium border border-slate-200">
-            Belum Ujian
-          </span>`;
-          waktuText = `<span class="text-[11px] text-slate-400 font-medium">${appData.config.waktu || 60} Menit</span>`;
-        }
-
-        tbody.innerHTML += `
-          <tr class="border-b text-xs hover:bg-slate-50 transition">
-            <td class="py-2 px-3 text-center font-bold text-slate-500">${s.noUrut || (idx + 1)}</td>
-            <td class="py-2 px-3 font-semibold text-slate-800">${s.nama}</td>
-            <td class="py-2 px-3 text-center"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold text-[11px]">${s.kelas}</span></td>
-            <td class="py-2 px-3 text-center">${statusBadge}</td>
-            <td class="py-2 px-3 text-center font-semibold">${waktuText}</td>
-            <td class="py-2 px-3 text-center font-bold text-slate-800">${s.status === 'Selesai' ? s.nilai : '-'}</td>
-            <td class="py-2 px-3 text-center font-bold text-slate-600">${kkmVal}</td>
-            <td class="py-2 px-3 text-center">${ketBadge}</td>
-            <td class="py-2 px-3 text-center">
-              <div class="flex items-center justify-center gap-1.5">
-                <button onclick="resetAksesSiswa('${s.key}')" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm transition">Reset</button>
-                <button onclick="hapusDataSiswa('${s.key}')" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm transition">Hapus</button>
-              </div>
-            </td>
-          </tr>
-        `;
-      });
-    }
-
     function onFilterKelasChange(val) {
       renderMonitoringTable();
     }
 
     function resetAksesSiswa(key) {
       if(confirm("Reset status ujian siswa ini agar dapat login kembali?")) {
-        localStorage.removeItem('cat_jawaban_' + key);
-        localStorage.removeItem('cat_ragu_' + key);
         db.ref('siswa/' + key).update({
-          status: 'Belum Ujian',
+          status: 'Belum',
           mengerjakan: false,
           jawaban: {},
           ragu: {},
@@ -1824,14 +2163,12 @@
           waktuMulai: null,
           waktuSelesai: null
         });
-        showToast("Status siswa berhasil direset!");
+        showToast("Status siswa berhasil direset ke Belum!");
       }
     }
 
     function hapusDataSiswa(key) {
       if(confirm("Hapus data siswa ini?")) {
-        localStorage.removeItem('cat_jawaban_' + key);
-        localStorage.removeItem('cat_ragu_' + key);
         db.ref('siswa/' + key).remove();
         showToast("Data siswa berhasil dihapus!");
       }
@@ -1850,8 +2187,6 @@
 
       if (confirm(`Apakah Anda yakin ingin MENGHAPUS SEMUA SISWA di Kelas ${filterKelas} (${targetSiswa.length} siswa)?`)) {
         targetSiswa.forEach(s => {
-          localStorage.removeItem('cat_jawaban_' + s.key);
-          localStorage.removeItem('cat_ragu_' + s.key);
           db.ref('siswa/' + s.key).remove();
         });
         showToast(`Seluruh data siswa Kelas ${filterKelas} berhasil dihapus!`);
@@ -1865,8 +2200,6 @@
 
       if (confirm(`⚠️ PERINGATAN BERSAMA: Apakah Anda yakin ingin MENGHAPUS SELURUH DATA SISWA (${appData.siswa.length} siswa) dari akun Anda?`)) {
         appData.siswa.forEach(s => {
-          localStorage.removeItem('cat_jawaban_' + s.key);
-          localStorage.removeItem('cat_ragu_' + s.key);
           db.ref('siswa/' + s.key).remove();
         });
         showToast("Seluruh data nama siswa milik Anda berhasil dihapus.");
@@ -1897,7 +2230,9 @@
 
       const dataExport = targetSiswa.map((s, idx) => {
         let ket = '-';
-        if (s.status === 'Selesai') {
+        const st = (s.status || 'Belum').trim();
+
+        if (st === 'Selesai') {
           const score = parseFloat(s.nilai) || 0;
           ket = score < kkmVal ? 'Remedi' : 'Tuntas';
         }
@@ -1905,8 +2240,8 @@
           "No Urut": s.noUrut || (idx + 1),
           "Nama Siswa": s.nama,
           "Kelas": s.kelas,
-          "Status Ujian": s.status || 'Belum Ujian',
-          "Nilai": s.status === 'Selesai' ? s.nilai : 0,
+          "Status Ujian": st,
+          "Nilai": st === 'Selesai' ? s.nilai : 0,
           "KKM": kkmVal,
           "Keterangan": ket,
           "Waktu Selesai": s.waktuSelesai || '-'
