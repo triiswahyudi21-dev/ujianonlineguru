@@ -1080,34 +1080,106 @@
       }
     }
 
+    // ==========================================
+    // BANK SOAL (VERSI ASLI)
+    // ==========================================
     function renderSoalList() {
-      const container = document.getElementById('list-soal');
-      const countEl = document.getElementById('total-soal');
-      countEl.innerText = appData.soal.length;
-      container.innerHTML = '';
+      const listEl = document.getElementById('list-soal');
+      const filterKelas = document.getElementById('filter-kelas-soal').value;
+      listEl.innerHTML = '';
 
-      if (appData.soal.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 italic">Belum ada bank soal untuk Mata Pelajaran ${currentMapelAktif}.</p>`;
+      let filtered = appData.soal;
+      if (filterKelas !== 'SEMUA') {
+        filtered = appData.soal.filter(s => s.kelas === filterKelas || s.kelas === 'SEMUA');
+      }
+
+      document.getElementById('total-soal').innerText = filtered.length;
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<p class="text-sm text-slate-400 italic text-center py-4">Belum ada soal untuk mata pelajaran/kelas ini.</p>`;
         return;
       }
 
-      appData.soal.forEach(s => {
-        container.innerHTML += `
-          <div class="p-3 border rounded-lg bg-white flex justify-between items-center text-xs">
-            <div>
-              <span class="font-bold text-blue-700">No. ${s.no}</span> | 
-              <span class="font-semibold text-slate-700">${s.materi || 'Umum'}</span> - 
-              <span>${stripHtmlToText(s.teks || s.teksLanjutan).substring(0, 50)}...</span>
+      filtered.forEach((s) => {
+        const textClean = stripHtmlToText(s.teks || s.teksLanjutan || '');
+        const snippet = textClean.length > 80 ? textClean.substring(0, 80) + '...' : textClean;
+        
+        listEl.innerHTML += `
+          <div class="p-4 border rounded-xl bg-slate-50 hover:bg-white hover:shadow-md transition flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+            <div class="flex-1 space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="bg-blue-600 text-white font-bold text-xs px-2.5 py-0.5 rounded">No. ${s.no || '?'}</span>
+                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded">Kelas: ${s.kelas || 'SEMUA'}</span>
+                <span class="bg-slate-200 text-slate-700 text-xs font-semibold px-2 py-0.5 rounded">${s.materi || 'Umum'}</span>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Kunci: ${s.kunci || '-'}</span>
+              </div>
+              <p class="text-sm text-slate-800 font-medium">${snippet}</p>
             </div>
-            <button onclick="hapusSoal('${s.key}')" class="text-red-600 font-bold hover:underline">Hapus</button>
+            <div class="flex gap-2">
+              <button onclick="editSoal('${s.key}')" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">Edit</button>
+              <button onclick="hapusSoal('${s.key}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">Hapus</button>
+            </div>
           </div>
         `;
       });
     }
 
+    function editSoal(key) {
+      const s = appData.soal.find(item => item.key === key);
+      if (!s) return;
+
+      editingSoalKey = key;
+      document.getElementById('manual-no').value = s.no || '';
+      document.getElementById('manual-kelas').value = s.kelas || 'SEMUA';
+      document.getElementById('manual-materi').value = s.materi || '';
+      document.getElementById('manual-teks').value = s.teks || '';
+      document.getElementById('manual-teks-lanjutan').value = s.teksLanjutan || '';
+      document.getElementById('manual-kunci').value = s.kunci || 'A';
+
+      ['A', 'B', 'C', 'D'].forEach(k => {
+        const optVal = s.opsi ? s.opsi[k] : '';
+        document.getElementById(`manual-opt-text-${k}`).value = optVal || '';
+      });
+
+      document.getElementById('form-manual-title').innerText = "Edit Soal No. " + (s.no || '');
+      document.getElementById('btn-simpan-manual').innerText = "💾 Perbarui Soal";
+      window.scrollTo({ top: document.getElementById('form-manual-title').offsetTop - 20, behavior: 'smooth' });
+    }
+
+    function updateManualButtonState() {
+      if (!editingSoalKey) {
+        document.getElementById('form-manual-title').innerText = "Form Input / Edit Soal Manual";
+        document.getElementById('btn-simpan-manual').innerText = "💾 Simpan Soal";
+      }
+    }
+
     function hapusSoal(key) {
-      if(confirm("Hapus soal ini?")) {
-        db.ref(`soal/${key}`).remove();
+      if (confirm("Yakin ingin menghapus soal ini dari Bank Soal?")) {
+        db.ref('soal/' + key).remove();
+        showToast("Soal berhasil dihapus!");
+      }
+    }
+
+    function hapusSoalSesuaiKelas() {
+      const filterKelas = document.getElementById('filter-kelas-soal').value;
+      if (filterKelas === 'SEMUA') {
+        if (!confirm("Hapus SELURUH soal untuk semua kelas pada mapel ini?")) return;
+      } else {
+        if (!confirm(`Hapus seluruh soal khusus Kelas ${filterKelas}?`)) return;
+      }
+
+      appData.soal.forEach(s => {
+        if (filterKelas === 'SEMUA' || s.kelas === filterKelas) {
+          db.ref('soal/' + s.key).remove();
+        }
+      });
+      showToast("Soal terpilih berhasil dihapus!");
+    }
+
+    function kosongkanSoal() {
+      if (confirm(`Peringatan! Yakin ingin menghapus SEMUA soal dalam Bank Soal ${currentMapelAktif}?`)) {
+        appData.soal.forEach(s => db.ref('soal/' + s.key).remove());
+        showToast(`Bank Soal ${currentMapelAktif} telah dikosongkan.`);
       }
     }
 
