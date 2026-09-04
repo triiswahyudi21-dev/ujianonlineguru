@@ -557,7 +557,7 @@
                 <th class="py-2 px-3 text-center">Nilai</th>
                 <th class="py-2 px-3 text-center">KKM</th>
                 <th class="py-2 px-3 text-center">Keterangan</th>
-                <th class="py-2 px-3 text-center w-36">Aksi Guru</th>
+                <th class="py-2 px-3 text-center w-44">Aksi Guru</th>
               </tr>
             </thead>
             <tbody id="table-monitoring"></tbody>
@@ -1040,14 +1040,21 @@
       if (!tbody) return;
       tbody.innerHTML = '';
 
-      if (appData.siswa.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="p-3 text-center text-xs text-slate-400 italic">Belum ada siswa diupload untuk Mapel ${currentMapelAktif}.</td></tr>`;
+      const filterKelas = document.getElementById('filter-kelas-monitoring') ? document.getElementById('filter-kelas-monitoring').value : 'SEMUA';
+
+      let filteredSiswa = appData.siswa;
+      if (filterKelas !== 'SEMUA') {
+        filteredSiswa = appData.siswa.filter(s => s.kelas === filterKelas);
+      }
+
+      if (filteredSiswa.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-3 text-center text-xs text-slate-400 italic">Belum ada siswa diupload / terpilih untuk Mapel ${currentMapelAktif}.</td></tr>`;
         return;
       }
 
       const kkmVal = parseInt(appData.config.kkm) || 75;
 
-      appData.siswa.forEach((s, idx) => {
+      filteredSiswa.forEach((s, idx) => {
         let statusBadge = `<span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-[11px] font-bold">Belum</span>`;
         if (s.status === 'Selesai') {
           statusBadge = `<span class="bg-red-100 text-red-800 px-2 py-0.5 rounded text-[11px] font-bold">Selesai</span>`;
@@ -1066,17 +1073,39 @@
             <td class="py-2 px-3 text-center font-bold text-slate-600">${kkmVal}</td>
             <td class="py-2 px-3 text-center">${s.status === 'Selesai' ? (s.nilai >= kkmVal ? '<span class="text-emerald-600 font-bold">Tuntas</span>' : '<span class="text-red-600 font-bold">Remedi</span>') : '-'}</td>
             <td class="py-2 px-3 text-center">
-              <button onclick="hapusDataSiswa('${s.key}')" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded">Hapus</button>
+              <div class="flex items-center justify-center gap-1">
+                <button onclick="resetSiswaUjian('${s.key}')" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold px-2 py-1 rounded transition" title="Reset status agar siswa bisa login & ujian ulang">Reset</button>
+                <button onclick="hapusDataSiswa('${s.key}')" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded transition">Hapus</button>
+              </div>
             </td>
           </tr>
         `;
       });
     }
 
+    function resetSiswaUjian(key) {
+      if(confirm("Apakah Anda yakin ingin mereset status ujian siswa ini? Siswa akan dapat mengerjakan ujian kembali dari awal.")) {
+        db.ref(`siswa/${currentMapelAktif}/${key}`).update({
+          status: 'Belum',
+          nilai: 0,
+          jawaban: {},
+          ragu: {}
+        });
+        showToast("Status ujian siswa berhasil direset!");
+      }
+    }
+
     function hapusDataSiswa(key) {
       if(confirm("Hapus data siswa dari mapel ini?")) {
         db.ref(`siswa/${currentMapelAktif}/${key}`).remove();
         showToast("Siswa berhasil dihapus!");
+      }
+    }
+
+    function hapusSemuaSiswa() {
+      if(confirm(`Apakah Anda yakin ingin menghapus SELURUH data siswa untuk Mapel ${currentMapelAktif}?`)) {
+        db.ref(`siswa/${currentMapelAktif}`).remove();
+        showToast(`Data siswa Mapel ${currentMapelAktif} berhasil dikosongkan!`);
       }
     }
 
