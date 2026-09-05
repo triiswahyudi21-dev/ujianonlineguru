@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UJIAN ONLINE SEKOLAH - ISOLASI TOTAL DATA SISWA PER GURU</title>
+  <title>UJIAN ONLINE SEKOLAH - RUANG KERJA GURU</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -132,27 +132,23 @@
     </div>
   </div>
 
-  <!-- HALAMAN LOGIN -->
+  <!-- HALAMAN LOGIN GURU MANDIRI -->
   <div id="page-login" class="min-h-screen flex items-center justify-center p-4">
     <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
       <div class="text-center mb-6">
-        <h1 id="main-login-title" class="text-2xl font-black text-blue-900 tracking-wider uppercase">UJIAN ONLINE SEKOLAH</h1>
+        <h1 id="main-login-title" class="text-2xl font-black text-emerald-800 tracking-wider uppercase">LOGIN GURU</h1>
         <p class="text-xs text-slate-500 font-medium mt-1">Sistem Ujian Terisolasi 100% Per Guru & Mapel</p>
       </div>
-      
-      <div class="flex gap-3 mb-6">
-        <button id="btn-tab-guru" type="button" onclick="switchLoginTab('guru')" class="flex-1 py-2.5 px-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold text-sm transition-all text-center shadow-sm">Login Guru</button>
-        <button id="btn-tab-siswa" type="button" onclick="switchLoginTab('siswa')" class="flex-1 py-2.5 px-3 rounded-xl border border-slate-300 bg-white text-slate-500 font-semibold text-sm transition-all text-center hover:bg-slate-50">Login Siswa</button>
-      </div>
 
-      <form id="form-login-guru" onsubmit="handleLoginGuru(event)" class="space-y-4 border-2 border-emerald-500 p-4 rounded-xl">
+      <!-- FORM LOGIN GURU KHUSUS -->
+      <form id="form-login-guru" onsubmit="handleLoginGuru(event)" class="space-y-4 border-2 border-emerald-500 p-5 rounded-xl bg-emerald-50/30">
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Username Guru</label>
-          <input type="text" id="guru-user" value="" placeholder="Contoh: guru_ips / guru_pai" class="w-full p-2.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" required>
+          <input type="text" id="guru-user" value="" placeholder="Contoh: guru_ips / guru_pai" class="w-full p-2.5 bg-white border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" required>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Mata Pelajaran (Mapel Ujian)</label>
-          <select id="guru-mapel-login" class="w-full p-2.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-emerald-500 font-semibold outline-none" required>
+          <select id="guru-mapel-login" class="w-full p-2.5 bg-white border rounded-lg focus:ring-2 focus:ring-emerald-500 font-semibold outline-none" required>
             <option value="PAI">PAI</option>
             <option value="PKn">PKn</option>
             <option value="IPA">IPA</option>
@@ -167,45 +163,9 @@
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Password Guru</label>
-          <input type="password" id="guru-pass" value="" placeholder="Masukkan password" class="w-full p-2.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" required>
+          <input type="password" id="guru-pass" value="" placeholder="Masukkan password" class="w-full p-2.5 bg-white border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" required>
         </div>
-        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl shadow-lg transition">Masuk Ruang Ujian Guru</button>
-      </form>
-
-      <form id="form-login-siswa" onsubmit="handleLoginSiswa(event)" class="space-y-4 bg-blue-50 border-2 border-blue-600 p-4 rounded-xl hidden">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">1. Pilih Mata Pelajaran Ujian</label>
-          <select id="siswa-mapel" onchange="onSiswaMapelChange()" class="w-full p-2.5 bg-white border rounded-lg font-bold text-blue-700 focus:ring-2 focus:ring-blue-500 outline-none" required>
-            <option value="">-- Pilih Mapel Ujian --</option>
-            <option value="PAI">PAI</option>
-            <option value="PKn">PKn</option>
-            <option value="IPA">IPA</option>
-            <option value="IPS">IPS</option>
-            <option value="Bahasa Indonesia">Bahasa Indonesia</option>
-            <option value="Bahasa Inggris">Bahasa Inggris</option>
-            <option value="Matematika">Matematika</option>
-            <option value="PJOK">PJOK</option>
-            <option value="Seni Budaya">Seni Budaya</option>
-            <option value="Informatika">Informatika</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">2. Pilih Kelas (Sesuai Mapel)</label>
-          <select id="siswa-kelas" onchange="updateSiswaDropdown()" class="w-full p-2.5 bg-white border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-slate-700" required>
-            <option value="">-- Pilih Mapel Terlebih Dahulu --</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">3. Nama Siswa</label>
-          <select id="siswa-nama" class="w-full p-2.5 bg-white border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-slate-800" required>
-            <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">4. Kode Ujian (Token Guru)</label>
-          <input type="text" id="siswa-token" placeholder="Masukkan Token" class="w-full p-2.5 bg-white border rounded-lg uppercase font-mono font-bold tracking-widest focus:ring-2 focus:ring-blue-500 outline-none" required>
-        </div>
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition">MULAI UJIAN ANBK (FULLSCREEN)</button>
+        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl shadow-lg transition">Masuk Ruang Kerja Guru</button>
       </form>
     </div>
   </div>
@@ -588,18 +548,18 @@
         </div>
 
         <div class="overflow-x-auto">
-          <table id="table-monitoring-dom" class="w-full text-sm text-left border-collapse">
+          <table id="table-monitoring-dom" class="w-full text-xs text-left border-collapse">
             <thead>
               <tr class="bg-slate-100 text-slate-600 border-b">
-                <th class="p-3 text-center w-12">No</th>
-                <th class="p-3">Nama Siswa</th>
-                <th class="p-3">Kelas</th>
-                <th class="p-3">Status</th>
-                <th class="p-3">Sisa Waktu (Realtime)</th>
-                <th class="p-3">Nilai</th>
-                <th class="p-3">KKM</th>
-                <th class="p-3">Keterangan</th>
-                <th class="p-3">Aksi Guru</th>
+                <th class="p-2.5 text-center w-10">No</th>
+                <th class="p-2.5">Nama Siswa</th>
+                <th class="p-2.5">Kelas</th>
+                <th class="p-2.5 text-center">Status</th>
+                <th class="p-2.5">Sisa Waktu (Realtime)</th>
+                <th class="p-2.5 text-center">Nilai</th>
+                <th class="p-2.5 text-center">KKM</th>
+                <th class="p-2.5 text-center">Keterangan</th>
+                <th class="p-2.5 text-center">Aksi Guru</th>
               </tr>
             </thead>
             <tbody id="table-monitoring"></tbody>
@@ -659,7 +619,7 @@
     </div>
   </div>
 
-  <!-- HALAMAN SISWA -->
+  <!-- HALAMAN KERJA SISWA -->
   <div id="page-siswa" class="hidden min-h-screen h-screen flex flex-col bg-slate-100 overflow-hidden select-none">
     <div class="anbk-header text-white px-6 py-3 shadow-md flex justify-between items-center shrink-0 z-10">
       <div class="flex items-center gap-4">
@@ -1100,25 +1060,6 @@
         showToast("PDF berhasil diunggah!");
       } else {
         container.classList.add('hidden');
-      }
-    }
-
-    function switchLoginTab(tab) {
-      const formGuru = document.getElementById('form-login-guru');
-      const formSiswa = document.getElementById('form-login-siswa');
-      const btnGuru = document.getElementById('btn-tab-guru');
-      const btnSiswa = document.getElementById('btn-tab-siswa');
-
-      if (tab === 'guru') {
-        formGuru.classList.remove('hidden');
-        formSiswa.classList.add('hidden');
-        btnGuru.className = "flex-1 py-2.5 px-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold text-sm transition-all text-center shadow-sm";
-        btnSiswa.className = "flex-1 py-2.5 px-3 rounded-xl border border-slate-300 bg-white text-slate-500 font-semibold text-sm transition-all text-center hover:bg-slate-50";
-      } else {
-        formGuru.classList.add('hidden');
-        formSiswa.classList.remove('hidden');
-        btnSiswa.className = "flex-1 py-2.5 px-3 rounded-xl border-2 border-blue-600 bg-blue-50 text-blue-700 font-bold text-sm transition-all text-center shadow-sm";
-        btnGuru.className = "flex-1 py-2.5 px-3 rounded-xl border border-slate-300 bg-white text-slate-500 font-semibold text-sm transition-all text-center hover:bg-slate-50";
       }
     }
 
@@ -1643,13 +1584,13 @@
         const nilai = s.nilai !== undefined ? s.nilai : 0;
 
         if (status === 'Selesai') {
-          statusBadge = `<span class="bg-red-100 text-red-800 px-2.5 py-1 rounded-full text-xs font-bold border border-red-300">Selesai</span>`;
+          statusBadge = `<span class="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-[10px] font-bold border border-red-300 inline-block">Selesai</span>`;
           waktuText = `<span class="text-xs text-slate-500 font-semibold">Selesai (${s.waktuSelesai || '-'})</span>`;
           keteranganBadge = nilai < currentKkm ? 
-            `<span class="bg-red-100 text-red-700 font-bold px-2.5 py-1 rounded-md text-xs">Remedi</span>` :
-            `<span class="bg-emerald-100 text-emerald-700 font-bold px-2.5 py-1 rounded-md text-xs">Tuntas</span>`;
+            `<span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[10px] inline-block">Remedi</span>` :
+            `<span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded text-[10px] inline-block">Tuntas</span>`;
         } else if (status === 'Sedang Mengerjakan' || s.mengerjakan === true) {
-          statusBadge = `<span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full text-xs font-bold border border-emerald-300">Berlangsung</span>`;
+          statusBadge = `<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-300 inline-block">Berlangsung</span>`;
           const endTime = s.waktuSelesaiTimestamp;
           if (endTime) {
             const diff = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
@@ -1659,23 +1600,25 @@
             waktuText = `<span class="font-mono font-bold text-amber-600">${appData.config.waktu || 60}:00</span>`;
           }
         } else {
-          statusBadge = `<span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs border">Belum Ujian</span>`;
+          statusBadge = `<span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[10px] border inline-block">Belum Ujian</span>`;
           waktuText = `<span class="text-xs text-slate-400">${appData.config.waktu || 60} Menit</span>`;
         }
 
         tbody.innerHTML += `
           <tr class="border-b text-xs hover:bg-slate-50">
-            <td class="p-3 text-center font-bold text-slate-500">${idx + 1}</td>
-            <td class="p-3 font-semibold text-slate-800">${s.nama}</td>
-            <td class="p-3"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">${s.kelas}</span></td>
-            <td class="p-3">${statusBadge}</td>
-            <td class="p-3 font-semibold">${waktuText}</td>
-            <td class="p-3 font-bold text-slate-800">${status === 'Selesai' ? nilai : '-'}</td>
-            <td class="p-3 font-bold text-slate-600">${currentKkm}</td>
-            <td class="p-3">${keteranganBadge}</td>
-            <td class="p-3 flex gap-2">
-              <button onclick="resetAksesSiswa('${s.key}')" class="bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-bold px-2.5 py-1 rounded transition">Reset Akses Saya</button>
-              <button onclick="hapusDataSiswa('${s.key}')" class="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold px-2.5 py-1 rounded transition">Hapus Siswa</button>
+            <td class="p-2.5 text-center font-bold text-slate-500">${idx + 1}</td>
+            <td class="p-2.5 font-semibold text-slate-800">${s.nama}</td>
+            <td class="p-2.5"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">${s.kelas}</span></td>
+            <td class="p-2.5 text-center">${statusBadge}</td>
+            <td class="p-2.5 font-semibold">${waktuText}</td>
+            <td class="p-2.5 text-center font-bold text-slate-800">${status === 'Selesai' ? nilai : '-'}</td>
+            <td class="p-2.5 text-center font-bold text-slate-600">${currentKkm}</td>
+            <td class="p-2.5 text-center">${keteranganBadge}</td>
+            <td class="p-2.5 text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <button onclick="resetAksesSiswa('${s.key}')" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-semibold px-2 py-1 rounded transition shadow-sm">Reset Akses</button>
+                <button onclick="hapusDataSiswa('${s.key}')" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-semibold px-2 py-1 rounded transition shadow-sm">Hapus</button>
+              </div>
             </td>
           </tr>
         `;
@@ -1887,169 +1830,6 @@
           showToast(`Riwayat Kelas ${filterKelas} berhasil dihapus!`);
         }
       }
-    }
-
-    // TERHUBUNG DENGAN MAPEL: PERBAIKAN LOGIKA PENGAMBILAN KELAS SISWA ACCORDING TO MAPEL
-    function onSiswaMapelChange() {
-      const selectedMapel = document.getElementById('siswa-mapel').value;
-      const selectKelas = document.getElementById('siswa-kelas');
-      const selectNama = document.getElementById('siswa-nama');
-      
-      selectKelas.innerHTML = '<option value="">-- Loading Kelas... --</option>';
-      selectNama.innerHTML = '<option value="">-- Pilih Kelas Terlebih Dahulu --</option>';
-
-      if (!selectedMapel) {
-        selectKelas.innerHTML = '<option value="">-- Pilih Mapel Terlebih Dahulu --</option>';
-        return;
-      }
-
-      db.ref('guru_data').once('value', snap => {
-        const allGuruData = snap.val();
-        let targetSiswaList = [];
-        let targetPath = '';
-
-        if (allGuruData) {
-          Object.keys(allGuruData).forEach(gPath => {
-            const g = allGuruData[gPath];
-            if (g.config && g.config.mapel === selectedMapel) {
-              targetPath = `guru_data/${gPath}`;
-              if (g.siswa) {
-                Object.keys(g.siswa).forEach(sk => {
-                  targetSiswaList.push({ key: sk, ...g.siswa[sk] });
-                });
-              }
-            }
-          });
-        }
-
-        window.siswaListMapelAktif = targetSiswaList;
-        window.targetGuruPathMapelAktif = targetPath;
-
-        if (targetSiswaList.length === 0) {
-          selectKelas.innerHTML = '<option value="">-- Tidak ada kelas untuk mapel ini --</option>';
-          alert(`Belum ada data siswa yang di-upload oleh Guru untuk Mata Pelajaran ${selectedMapel}!`);
-          return;
-        }
-
-        const kelasSet = new Set();
-        targetSiswaList.forEach(s => { 
-          if(s.kelas) kelasSet.add(String(s.kelas).trim().toUpperCase()); 
-        });
-
-        let html = '<option value="">-- Pilih Kelas --</option>';
-        Array.from(kelasSet).sort().forEach(k => {
-          html += `<option value="${k}">Kelas ${k}</option>`;
-        });
-        selectKelas.innerHTML = html;
-      });
-    }
-
-    function updateSiswaDropdown() {
-      const selectedKelas = document.getElementById('siswa-kelas').value;
-      const selectNama = document.getElementById('siswa-nama');
-      if(!selectNama) return;
-      
-      let html = '<option value="">-- Pilih Nama --</option>';
-      if(selectedKelas && window.siswaListMapelAktif) {
-        const siswaInKelas = window.siswaListMapelAktif.filter(s => {
-          return String(s.kelas || '').trim().toUpperCase() === String(selectedKelas).trim().toUpperCase();
-        });
-        siswaInKelas.sort((a,b) => a.nama.localeCompare(b.nama)).forEach(s => {
-          html += `<option value="${s.key}">${s.nama}</option>`;
-        });
-      }
-      selectNama.innerHTML = html;
-    }
-
-    function handleLoginSiswa(e) {
-      e.preventDefault();
-      const selectedMapel = document.getElementById('siswa-mapel').value;
-      const keySiswa = document.getElementById('siswa-nama').value;
-      const inputToken = document.getElementById('siswa-token').value.trim().toUpperCase();
-
-      if(!selectedMapel) return alert("Pilih Mata Pelajaran!");
-      if(!keySiswa) return alert("Pilih Nama Siswa!");
-
-      const pathGuru = window.targetGuruPathMapelAktif;
-
-      db.ref(pathGuru).once('value', snap => {
-        const guruData = snap.val();
-
-        if (!guruData || !guruData.config) {
-          return alert(`Sesi ujian ${selectedMapel} belum diatur oleh guru!`);
-        }
-
-        const cfg = guruData.config;
-        if (inputToken !== (cfg.token || 'EXAM88')) {
-          return alert(`Token Ujian untuk Mapel ${selectedMapel} salah!`);
-        }
-
-        const sData = (guruData.siswa && guruData.siswa[keySiswa]) ? guruData.siswa[keySiswa] : null;
-
-        if (!sData) return alert("Data siswa tidak ditemukan di sistem mapel ini!");
-
-        if (sData.status === 'Selesai') {
-          return alert(`Anda sudah menyelesaikan ujian Mata Pelajaran ${selectedMapel}!`);
-        }
-
-        let targetSoal = [];
-        if (guruData.soal) {
-          Object.keys(guruData.soal).forEach(sk => targetSoal.push({ key: sk, ...guruData.soal[sk] }));
-        }
-
-        stateUjianSiswa.currentSiswaKey = keySiswa;
-        stateUjianSiswa.mapelUjianSiswa = selectedMapel;
-        stateUjianSiswa.guruPathSiswa = pathGuru;
-        stateUjianSiswa.jawaban = sData.jawaban || {};
-        stateUjianSiswa.ragu = sData.ragu || {};
-
-        stateUjianSiswa.soalAktif = targetSoal.filter(s => {
-          const k = String(s.kelas || 'SEMUA').toUpperCase();
-          const sLevel = String(sData.kelas || '').replace(/[^0-9]/g, '');
-          return k === 'SEMUA' || k === sData.kelas || k === sLevel;
-        });
-
-        if (stateUjianSiswa.soalAktif.length === 0) {
-          return alert(`Belum ada soal ujian ${selectedMapel} yang tersedia untuk kelas Anda.`);
-        }
-
-        document.getElementById('page-login').classList.add('hidden');
-        document.getElementById('page-siswa').classList.remove('hidden');
-
-        document.getElementById('view-siswa-nama').innerText = sData.nama;
-        document.getElementById('view-siswa-info').innerText = `${cfg.jenis || 'UH'} | Mapel: ${selectedMapel} | Semester: ${cfg.semester || 'Ganjil'}`;
-
-        launchFullscreen(document.documentElement);
-        stateUjianSiswa.isExamActive = true;
-
-        const durasiMenit = parseInt(cfg.waktu) || 60;
-        let endTime = sData.waktuSelesaiTimestamp;
-
-        if (!endTime) {
-          endTime = Date.now() + (durasiMenit * 60 * 1000);
-          db.ref(`${pathGuru}/siswa/${keySiswa}`).update({
-            status: 'Sedang Mengerjakan',
-            mengerjakan: true,
-            waktuSelesaiTimestamp: endTime
-          });
-        }
-
-        stateUjianSiswa.currentSoalIdx = 0;
-        renderSoalSiswa();
-
-        if (stateUjianSiswa.timerInterval) clearInterval(stateUjianSiswa.timerInterval);
-        stateUjianSiswa.timerInterval = setInterval(() => {
-          const diff = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
-          const m = Math.floor(diff / 60), sSec = diff % 60;
-          document.getElementById('timer-display').innerText = `${m < 10 ? '0'+m : m}:${sSec < 10 ? '0'+sSec : sSec}`;
-
-          if (diff <= 0) {
-            clearInterval(stateUjianSiswa.timerInterval);
-            alert("Waktu Ujian Telah Habis!");
-            selesaiUjian();
-          }
-        }, 1000);
-      });
     }
 
     function renderSoalSiswa() {
