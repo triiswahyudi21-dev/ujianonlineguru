@@ -174,9 +174,15 @@
   <div id="page-guru" class="hidden min-h-screen bg-slate-100 flex flex-col">
     <!-- Header Atas Dashboard -->
     <nav class="anbk-header text-white px-6 py-4 flex justify-between items-center shadow-md sticky top-0 z-30">
-      <div>
-        <h2 class="text-xl font-bold tracking-wide uppercase">UJIAN ONLINE SEKOLAH</h2>
-        <p class="text-xs text-blue-100">Ruang Kerja Khusus: <span id="label-guru-aktif" class="font-bold text-emerald-400">Guru</span></p>
+      <div class="flex items-center gap-3">
+        <!-- TOMBOL TOGGLE SIDEBAR -->
+        <button onclick="toggleSidebar()" class="bg-slate-700 hover:bg-slate-600 text-white p-2 rounded-lg text-sm flex items-center justify-center transition" title="Tampilkan / Sembunyikan Navigasi">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        </button>
+        <div>
+          <h2 class="text-xl font-bold tracking-wide uppercase">UJIAN ONLINE SEKOLAH</h2>
+          <p class="text-xs text-blue-100">Ruang Kerja Khusus: <span id="label-guru-aktif" class="font-bold text-emerald-400">Guru</span></p>
+        </div>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="refreshDataGuru()" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition">
@@ -191,7 +197,7 @@
     <div class="flex flex-col md:flex-row flex-1 min-h-[calc(100vh-65px)]">
       
       <!-- NAVIGASI SIDEBAR SEBELAH KIRI -->
-      <aside class="w-full md:w-64 bg-slate-800 text-slate-200 p-4 shrink-0 shadow-lg border-r border-slate-700">
+      <aside id="guru-sidebar" class="w-full md:w-64 bg-slate-800 text-slate-200 p-4 shrink-0 shadow-lg border-r border-slate-700 transition-all duration-300">
         <div class="px-2 pb-3 mb-2 border-b border-slate-700 text-xs font-bold text-slate-400 uppercase tracking-wider">
           Navigasi Menu Guru
         </div>
@@ -834,6 +840,14 @@
       mapelUjianSiswa: 'IPA',
       guruPathSiswa: ''
     };
+
+    // Tampilkan / Sembunyikan Sidebar Guru
+    function toggleSidebar() {
+      const sidebar = document.getElementById('guru-sidebar');
+      if (sidebar) {
+        sidebar.classList.toggle('hidden');
+      }
+    }
 
     // Ekstrak tag <img> dari HTML string agar gambar dari hasil import Word/Dokumen dapat terdeteksi dan diubah ke preview
     function extractImageFromHtml(htmlStr) {
