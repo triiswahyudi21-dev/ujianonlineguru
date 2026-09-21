@@ -7,6 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -120,6 +122,91 @@
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
   <div id="toast" class="hidden fixed top-4 right-4 z-50 bg-red-600 text-white px-4 py-2.5 rounded-lg shadow-xl text-sm font-semibold transition-all"></div>
+
+  <!-- MODAL ANALISIS SISWA -->
+  <div id="modal-analisis" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-slate-200 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center shrink-0">
+        <div>
+          <h3 class="text-lg font-bold">Analisis Penguasaan Materi Siswa</h3>
+          <p id="analisis-subtitle" class="text-xs text-slate-300">Detail Hasil Pengerjaan Ujian</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="downloadAnalisisPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1.5 transition">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span>Download PDF</span>
+          </button>
+          <button onclick="tutupModalAnalisis()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 hover:text-white rounded-lg p-1.5 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Modal Body -->
+      <div class="p-6 space-y-6 overflow-y-auto flex-1 text-sm">
+        <!-- Rangkuman Ringkas -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+          <div>
+            <span class="text-xs text-slate-500 block uppercase font-bold">Mata Pelajaran</span>
+            <span id="analisis-mapel" class="font-bold text-slate-800 text-base">-</span>
+          </div>
+          <div>
+            <span class="text-xs text-slate-500 block uppercase font-bold">Nilai Akhir / KKM</span>
+            <span id="analisis-nilai" class="font-black text-blue-600 text-lg">-</span>
+          </div>
+          <div>
+            <span class="text-xs text-slate-500 block uppercase font-bold">Status Ketuntasan</span>
+            <span id="analisis-status" class="inline-block mt-1">-</span>
+          </div>
+          <div>
+            <span class="text-xs text-slate-500 block uppercase font-bold">Total Soal Dijawab</span>
+            <span id="analisis-dijawab" class="font-bold text-slate-800 text-base">-</span>
+          </div>
+        </div>
+
+        <!-- Deskripsi Hasil Analisis Penguasaan Materi -->
+        <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl space-y-2">
+          <h4 class="font-bold text-blue-900 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>Deskripsi Evaluasi Penguasaan Materi</span>
+          </h4>
+          <p id="analisis-deskripsi-teks" class="text-slate-700 leading-relaxed text-xs md:text-sm">
+            Memuat analisis...
+          </p>
+        </div>
+
+        <!-- Tabel Perincian Jawaban per Soal & Perbaikan -->
+        <div>
+          <h4 class="font-bold text-slate-800 mb-3 uppercase tracking-wider text-xs">Detail Pengerjaan Soal & Kunci Jawaban</h4>
+          <div class="overflow-x-auto border rounded-xl">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-slate-100 text-slate-700 border-b">
+                  <th class="p-2.5 text-center w-10">No</th>
+                  <th class="p-2.5">Materi / Topik</th>
+                  <th class="p-2.5">Teks Soal</th>
+                  <th class="p-2.5 text-center w-28">Jawaban Siswa</th>
+                  <th class="p-2.5 text-center w-28">Kunci Jawaban</th>
+                  <th class="p-2.5 text-center w-24">Status</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-analisis-detail"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-slate-50 px-6 py-3 border-t flex justify-end gap-2 shrink-0">
+        <button onclick="downloadAnalisisPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg transition text-xs flex items-center gap-1.5">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          <span>Download PDF</span>
+        </button>
+        <button onclick="tutupModalAnalisis()" class="bg-slate-700 hover:bg-slate-800 text-white font-bold px-5 py-2 rounded-lg transition text-xs">Tutup</button>
+      </div>
+    </div>
+  </div>
 
   <div id="modal-confirm-logout" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full mx-4 border border-slate-200 text-center">
@@ -506,10 +593,10 @@
               <div class="w-full md:w-48">
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Kunci Jawaban</label>
                 <select id="manual-kunci" class="w-full p-2 border rounded-lg text-sm font-bold text-emerald-700 bg-emerald-50">
-                  <option value="A">Kunci A</option>
-                  <option value="B">Kunci B</option>
-                  <option value="C">Kunci C</option>
-                  <option value="D">Kunci D</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
                 </select>
               </div>
               
@@ -822,6 +909,7 @@
       }
     };
 
+    let currentAnalisisSiswaData = null;
     let editingSoalKey = null;
     let tempParsedSoal = [];
     
@@ -1638,33 +1726,36 @@
       }
 
       document.getElementById('preview-display-soal').innerHTML = `<div>${teks1.replace(/\n/g, '<br>')}</div>${imgHtml}`;
-      document.getElementById('preview-display-pertanyaan').innerHTML = teksLanjutan ? teksLanjutan.replace(/\n/g, '<br>') : '<span class="italic text-slate-400">Pertanyaan belum diisi...</span>';
+      document.getElementById('preview-display-pertanyaan').innerHTML = teksLanjutan ? teksLanjutan : '(Tanpa Teks Lanjutan)';
 
-      let optsHtml = '';
+      const optsContainer = document.getElementById('preview-display-opts');
+      optsContainer.innerHTML = '';
+
       ['A', 'B', 'C', 'D'].forEach(k => {
-        const optTxt = document.getElementById(`manual-opt-text-${k}`).value;
-        const optFile = document.getElementById(`manual-opt-img-${k}`).files[0];
+        const textVal = document.getElementById(`manual-opt-text-${k}`).value.trim();
+        const fileImgOpt = document.getElementById(`manual-opt-img-${k}`).files[0];
         let optImgSrc = '';
 
-        if (optFile) {
-          optImgSrc = URL.createObjectURL(optFile);
+        if (fileImgOpt) {
+          optImgSrc = URL.createObjectURL(fileImgOpt);
         } else if (editingSoalKey) {
           const found = appData.soal.find(item => item.key === editingSoalKey);
           if (found && found.opsiImg && found.opsiImg[k]) optImgSrc = found.opsiImg[k];
         }
 
-        optsHtml += `
-          <div class="p-2.5 rounded-lg border bg-white flex items-start gap-3 text-xs">
-            <span class="font-bold text-blue-700 w-6">${k}.</span>
+        let optMediaHtml = optImgSrc ? `<img src="${optImgSrc}" class="max-h-28 rounded border my-1" />` : '';
+
+        optsContainer.innerHTML += `
+          <div class="p-2.5 border rounded-lg bg-white flex items-start gap-2.5 text-xs">
+            <span class="font-bold text-blue-700 w-5">${k}.</span>
             <div class="flex-1">
-              ${optTxt ? `<div>${optTxt}</div>` : ''}
-              ${optImgSrc ? `<img src="${optImgSrc}" class="max-w-xs h-auto rounded border my-1" />` : ''}
+              ${optMediaHtml}
+              <div>${textVal}</div>
             </div>
           </div>
         `;
       });
 
-      document.getElementById('preview-display-opts').innerHTML = optsHtml;
       document.getElementById('manual-preview-box').classList.remove('hidden');
     }
 
@@ -1673,551 +1764,750 @@
     }
 
     async function simpanSoalManual() {
+      if (!currentGuruKey || !currentGuruMapel) return alert("Anda harus login sebagai guru terlebih dahulu!");
+
       const noVal = parseInt(document.getElementById('manual-no').value) || (appData.soal.length + 1);
       const targetKelas = document.getElementById('manual-kelas').value;
       const targetMateri = document.getElementById('manual-materi').value.trim() || 'Umum';
-      const teks1 = document.getElementById('manual-teks').value.trim().replace(/\n/g, '<br>');
-      const fileImgSoal = document.getElementById('manual-img-soal').files[0];
-      const teksLanjutan = document.getElementById('manual-teks-lanjutan').value.trim().replace(/\n/g, '<br>');
+      const teks1 = document.getElementById('manual-teks').value.trim();
+      const teksLanjutan = document.getElementById('manual-teks-lanjutan').value.trim();
       const kunci = document.getElementById('manual-kunci').value;
 
-      let existingData = {};
-      if (editingSoalKey) {
+      const fileImgSoal = document.getElementById('manual-img-soal').files[0];
+      let imgSoalData = fileImgSoal ? await readFileAsDataURL(fileImgSoal) : '';
+
+      if (!imgSoalData && editingSoalKey) {
         const found = appData.soal.find(item => item.key === editingSoalKey);
-        if (found) existingData = found;
+        if (found && found.imgSoal) imgSoalData = found.imgSoal;
       }
 
-      let imgSoalBase64 = existingData.imgSoal || '';
-      if(fileImgSoal) imgSoalBase64 = await readFileAsDataURL(fileImgSoal);
+      let opsiText = {};
+      let opsiImgData = {};
 
-      const opsiData = {}, opsiImgData = {};
-      for(let k of ['A', 'B', 'C', 'D']) {
-        const optTxt = document.getElementById(`manual-opt-text-${k}`).value.trim().replace(/\n/g, '<br>');
-        const optImgFile = document.getElementById(`manual-opt-img-${k}`).files[0];
-        let optImgBase64 = (existingData.opsiImg && existingData.opsiImg[k]) ? existingData.opsiImg[k] : '';
-        if(optImgFile) optImgBase64 = await readFileAsDataURL(optImgFile);
-        opsiData[k] = optTxt;
-        opsiImgData[k] = optImgBase64;
+      for (let k of ['A', 'B', 'C', 'D']) {
+        opsiText[k] = document.getElementById(`manual-opt-text-${k}`).value.trim();
+        const fileOpt = document.getElementById(`manual-opt-img-${k}`).files[0];
+        if (fileOpt) {
+          opsiImgData[k] = await readFileAsDataURL(fileOpt);
+        } else if (editingSoalKey) {
+          const found = appData.soal.find(item => item.key === editingSoalKey);
+          if (found && found.opsiImg && found.opsiImg[k]) {
+            opsiImgData[k] = found.opsiImg[k];
+          } else {
+            opsiImgData[k] = '';
+          }
+        } else {
+          opsiImgData[k] = '';
+        }
       }
 
       const payload = {
-        no: noVal, mapel: currentGuruMapel, kelas: targetKelas, materi: targetMateri,
-        teks: teks1, imgSoal: imgSoalBase64, teksLanjutan: teksLanjutan, opsi: opsiData, opsiImg: opsiImgData, kunci: kunci
+        no: noVal,
+        mapel: currentGuruMapel,
+        kelas: targetKelas,
+        materi: targetMateri,
+        teks: teks1,
+        imgSoal: imgSoalData,
+        teksLanjutan: teksLanjutan,
+        opsi: opsiText,
+        opsiImg: opsiImgData,
+        kunci: kunci
       };
 
       const pathGuru = getGuruPath();
 
       if (editingSoalKey) {
-        db.ref(`${pathGuru}/soal/${editingSoalKey}`).update(payload);
-        showToast(`Soal No. ${noVal} diperbarui!`);
-        editingSoalKey = null;
+        await db.ref(`${pathGuru}/soal/${editingSoalKey}`).update(payload);
+        showToast(`Soal No. ${noVal} Berhasil Diperbarui!`);
       } else {
-        db.ref(`${pathGuru}/soal`).push(payload);
-        showToast(`Soal No. ${noVal} disimpan!`);
+        await db.ref(`${pathGuru}/soal`).push(payload);
+        showToast(`Soal No. ${noVal} Berhasil Ditambahkan!`);
       }
 
+      resetFormManual();
+      tutupPreviewManual();
+    }
+
+    function resetFormManual() {
+      editingSoalKey = null;
       document.getElementById('manual-no').value = '';
+      document.getElementById('manual-materi').value = '';
       document.getElementById('manual-teks').value = '';
       document.getElementById('manual-teks-lanjutan').value = '';
+      document.getElementById('manual-kunci').value = 'A';
+
       ['A', 'B', 'C', 'D'].forEach(k => {
         document.getElementById(`manual-opt-text-${k}`).value = '';
       });
+
       resetGambarFormManual();
       updateManualButtonState();
-      tutupPreviewManual();
     }
 
     function renderSoalList() {
       const container = document.getElementById('list-soal');
-      const countEl = document.getElementById('total-soal');
-      const filterKelas = document.getElementById('filter-kelas-soal').value;
-
+      if (!container) return;
+      
+      const filterKelas = document.getElementById('filter-kelas-soal') ? document.getElementById('filter-kelas-soal').value : 'SEMUA';
+      
       let filteredSoal = appData.soal;
       if (filterKelas !== 'SEMUA') {
         filteredSoal = appData.soal.filter(s => {
-          const k = String(s.kelas || 'SEMUA').toUpperCase();
-          return k === 'SEMUA' || k === filterKelas;
+          if (!s.kelas || s.kelas === 'SEMUA') return true;
+          return s.kelas.toString().toLowerCase() === filterKelas.toLowerCase();
         });
       }
 
-      countEl.innerText = filteredSoal.length;
-      container.innerHTML = '';
+      document.getElementById('total-soal').innerText = filteredSoal.length;
 
       if (filteredSoal.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 italic">Belum ada bank soal dalam ruang kerja Anda.</p>';
+        container.innerHTML = `<div class="p-8 text-center text-slate-400 bg-slate-50 border border-dashed rounded-xl">Belum ada data soal pada kategori/kelas ini.</div>`;
         return;
       }
 
-      filteredSoal.forEach(s => {
+      container.innerHTML = '';
+      filteredSoal.forEach((s) => {
+        let opsiStr = '';
+        ['A','B','C','D'].forEach(k => {
+          let isKunci = (s.kunci === k);
+          let txt = (s.opsi && s.opsi[k]) ? s.opsi[k] : '-';
+          let hasImg = (s.opsiImg && s.opsiImg[k]);
+          opsiStr += `<div class="${isKunci ? 'text-emerald-700 font-bold' : 'text-slate-600'}">${k}. ${stripHtmlToText(txt)} ${hasImg ? '🖼' : ''}</div>`;
+        });
+
         container.innerHTML += `
-          <div class="p-2.5 bg-white rounded-lg border flex justify-between items-center text-xs">
-            <div>
-              <span class="font-bold text-blue-700 mr-2">No. ${s.no}</span>
-              <span class="bg-purple-100 text-purple-800 font-bold px-1.5 py-0.5 rounded text-[10px] mr-2">Kelas: ${s.kelas || 'SEMUA'}</span>
-              <span class="text-slate-700 truncate max-w-md inline-block align-middle">${s.teks ? stripHtmlToText(s.teks) : '(Gambar/Media)'}</span>
-              <span class="ml-2 bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded text-[10px]">Kunci: ${s.kunci}</span>
+          <div class="p-4 border rounded-xl bg-white shadow-sm flex flex-col md:flex-row justify-between gap-4 items-start">
+            <div class="space-y-1.5 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="bg-blue-600 text-white font-bold text-xs px-2.5 py-0.5 rounded">No. ${s.no}</span>
+                <span class="bg-slate-100 text-slate-700 font-bold text-[10px] px-2 py-0.5 rounded border">Kelas: ${s.kelas || 'SEMUA'}</span>
+                <span class="bg-emerald-100 text-emerald-800 font-bold text-[10px] px-2 py-0.5 rounded border border-emerald-200">Materi: ${s.materi || 'Umum'}</span>
+                ${s.imgSoal ? '<span class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded">Ada Gambar Soal</span>' : ''}
+              </div>
+              <p class="font-medium text-slate-800 text-sm leading-relaxed">${stripHtmlToText(s.teks)}</p>
+              ${s.teksLanjutan ? `<p class="text-xs text-slate-600 italic font-semibold">${stripHtmlToText(s.teksLanjutan)}</p>` : ''}
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs pt-1 border-t border-slate-100 mt-2">${opsiStr}</div>
             </div>
-            <div class="flex items-center gap-2">
-              <button onclick="editSoal('${s.key}')" class="text-blue-600 font-bold hover:underline bg-blue-50 px-2 py-0.5 rounded border">✏️ Edit</button>
-              <button onclick="hapusSoal('${s.key}')" class="text-red-600 font-bold hover:underline bg-red-50 px-2 py-0.5 rounded border">🗑 Hapus</button>
+            <div class="flex md:flex-col gap-2 shrink-0">
+              <button onclick="editSoal('${s.key}')" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow transition">Edit</button>
+              <button onclick="hapusSoal('${s.key}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow transition">Hapus</button>
             </div>
           </div>
         `;
       });
     }
 
-    function hapusSoalSesuaiKelas() {
-      const filterKelas = document.getElementById('filter-kelas-soal').value;
-      if (filterKelas === 'SEMUA') return alert("Pilih kelas spesifik terlebih dahulu!");
-
-      const targetSoal = appData.soal.filter(s => s.kelas === filterKelas);
-      if (targetSoal.length === 0) return alert(`Tidak ada soal untuk Kelas ${filterKelas}`);
-
-      if (confirm(`Hapus ${targetSoal.length} soal khusus Kelas ${filterKelas}?`)) {
-        const pathGuru = getGuruPath();
-        targetSoal.forEach(s => db.ref(`${pathGuru}/soal/${s.key}`).remove());
-        showToast(`Soal Kelas ${filterKelas} berhasil dihapus!`);
-      }
+    function hapusSoal(key) {
+      if(!confirm("Yakin ingin menghapus soal ini dari cloud?")) return;
+      const pathGuru = getGuruPath();
+      db.ref(`${pathGuru}/soal/${key}`).remove();
+      showToast("Soal berhasil dihapus!");
     }
 
-    function hapusSoal(key) {
-      if(confirm("Apakah Anda yakin ingin menghapus soal ini?")) {
-        const pathGuru = getGuruPath();
-        db.ref(`${pathGuru}/soal/${key}`).remove();
-        showToast("Soal berhasil dihapus!");
-      }
+    function hapusSoalSesuaiKelas() {
+      const selectedKelas = document.getElementById('filter-kelas-soal').value;
+      if (selectedKelas === 'SEMUA') return alert("Silakan pilih kelas spesifik (7, 8, atau 9) pada dropdown untuk menghapus soal berdasarkan kelas!");
+      if (!confirm(`Yakin ingin menghapus SELURUH SOAL khusus Kelas ${selectedKelas}?`)) return;
+
+      const pathGuru = getGuruPath();
+      let count = 0;
+      appData.soal.forEach(s => {
+        if (s.kelas && s.kelas.toString().toLowerCase() === selectedKelas.toLowerCase()) {
+          db.ref(`${pathGuru}/soal/${s.key}`).remove();
+          count++;
+        }
+      });
+      showToast(`Berhasil menghapus ${count} soal untuk Kelas ${selectedKelas}!`);
     }
 
     function kosongkanSoal() {
-      if(confirm("⚠️ PERINGATAN: Hapus semua soal di ruang kerja Anda?")) {
-        const pathGuru = getGuruPath();
-        db.ref(`${pathGuru}/soal`).remove();
-        showToast("Semua soal milik Anda dikosongkan.");
-      }
+      if(!confirm("PERINGATAN: Yakin menghapus SELURUH bank soal Anda? Data tidak dapat dikembalikan!")) return;
+      const pathGuru = getGuruPath();
+      db.ref(`${pathGuru}/soal`).remove();
+      showToast("Seluruh bank soal Anda telah dibersihkan!");
     }
 
     function renderMonitoringTable() {
       const tbody = document.getElementById('table-monitoring');
-      if (!tbody) return;
+      if(!tbody) return;
 
-      const filterElement = document.getElementById('filter-kelas-monitoring');
-      const filterKelas = filterElement ? filterElement.value : 'SEMUA';
-      tbody.innerHTML = '';
+      const filterKelas = document.getElementById('filter-kelas-monitoring') ? document.getElementById('filter-kelas-monitoring').value : 'SEMUA';
+      const kkmVal = parseInt(appData.config.kkm) || 75;
 
-      let filtered = appData.siswa || [];
-      
+      let list = appData.siswa;
       if (filterKelas !== 'SEMUA') {
-        filtered = filtered.filter(s => {
-          const kSiswa = String(s.kelas || '').toUpperCase().trim();
-          const kFilter = String(filterKelas).toUpperCase().trim();
-          return kSiswa === kFilter || kSiswa.includes(kFilter) || kFilter.includes(kSiswa);
-        });
+        list = appData.siswa.filter(s => (s.kelas || '').toUpperCase() === filterKelas.toUpperCase());
       }
 
-      if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="p-4 text-center text-xs text-slate-400 italic">Belum ada data siswa yang diimport untuk mata pelajaran ini (Atau ubah filter kelas ke "Semua Kelas").</td></tr>';
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">Belum ada siswa terdaftar pada kelas ini.</td></tr>`;
         return;
       }
 
-      const currentKkm = parseInt(appData.config.kkm) || 75;
+      tbody.innerHTML = '';
+      list.forEach((s, idx) => {
+        let statusBadge = '<span class="bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full font-bold">Belum Ujian</span>';
+        if (s.status === 'Sedang Ujian') {
+          statusBadge = '<span class="bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-1 rounded-full font-bold animate-pulse">Sedang Ujian</span>';
+        } else if (s.status === 'Selesai') {
+          statusBadge = '<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-1 rounded-full font-bold">Selesai</span>';
+        }
 
-      filtered.forEach((s, idx) => {
-        let statusBadge = '';
-        let waktuText = '-';
-        let keteranganBadge = '-';
+        let ketBadge = '-';
+        if (s.status === 'Selesai') {
+          let tuntas = (s.nilai >= kkmVal);
+          ketBadge = tuntas 
+            ? '<span class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">TUNTAS</span>'
+            : '<span class="text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded border border-red-200">REMIDIAL</span>';
+        }
 
-        const status = s.status || 'Belum Ujian';
-        const nilai = s.nilai !== undefined ? s.nilai : 0;
-
-        if (status === 'Selesai') {
-          statusBadge = `<span class="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-[10px] font-bold border border-red-300 inline-block">Selesai</span>`;
-          waktuText = `<span class="text-xs text-slate-500 font-semibold">Selesai (${s.waktuSelesai || '-'})</span>`;
-          keteranganBadge = nilai < currentKkm ? 
-            `<span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[10px] inline-block">Remedi</span>` :
-            `<span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded text-[10px] inline-block">Tuntas</span>`;
-        } else if (status === 'Sedang Mengerjakan' || s.mengerjakan === true) {
-          statusBadge = `<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-300 inline-block">Berlangsung</span>`;
-          const endTime = s.waktuSelesaiTimestamp;
-          if (endTime) {
-            const diff = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
-            const m = Math.floor(diff / 60), sSec = diff % 60;
-            waktuText = `<span class="font-mono font-bold text-amber-600 live-timer-monitoring" data-endtime="${endTime}">${m < 10 ? '0'+m : m}:${sSec < 10 ? '0'+sSec : sSec}</span>`;
-          } else {
-            waktuText = `<span class="font-mono font-bold text-amber-600">${appData.config.waktu || 60}:00</span>`;
-          }
-        } else {
-          statusBadge = `<span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[10px] border inline-block">Belum Ujian</span>`;
-          waktuText = `<span class="text-xs text-slate-400">${appData.config.waktu || 60} Menit</span>`;
+        let liveTimer = '-';
+        if (s.status === 'Sedang Ujian' && s.waktuSelesaiTimestamp) {
+          liveTimer = `<span class="live-timer-monitoring font-mono font-bold text-amber-600" data-endtime="${s.waktuSelesaiTimestamp}">--:--</span>`;
         }
 
         tbody.innerHTML += `
-          <tr class="border-b text-xs hover:bg-slate-50">
-            <td class="p-2.5 text-center font-bold text-slate-500">${idx + 1}</td>
-            <td class="p-2.5 font-semibold text-slate-800">${s.nama}</td>
-            <td class="p-2.5"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">${s.kelas}</span></td>
+          <tr class="border-b hover:bg-slate-50 transition">
+            <td class="p-2.5 text-center font-bold">${idx + 1}</td>
+            <td class="p-2.5 font-bold text-slate-800">${s.nama}</td>
+            <td class="p-2.5 font-semibold text-slate-600">${s.kelas}</td>
             <td class="p-2.5 text-center">${statusBadge}</td>
-            <td class="p-2.5 font-semibold">${waktuText}</td>
-            <td class="p-2.5 text-center font-bold text-slate-800">${status === 'Selesai' ? nilai : '-'}</td>
-            <td class="p-2.5 text-center font-bold text-slate-600">${currentKkm}</td>
-            <td class="p-2.5 text-center">${keteranganBadge}</td>
-            <td class="p-2.5 text-center">
-              <div class="flex items-center justify-center gap-1.5">
-                <button onclick="resetAksesSiswa('${s.key}')" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-semibold px-2 py-1 rounded transition shadow-sm">Reset Akses</button>
-                <button onclick="hapusDataSiswa('${s.key}')" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-semibold px-2 py-1 rounded transition shadow-sm">Hapus</button>
-              </div>
+            <td class="p-2.5 font-mono text-center">${liveTimer}</td>
+            <td class="p-2.5 text-center font-black text-blue-700 text-sm">${s.nilai || 0}</td>
+            <td class="p-2.5 text-center font-semibold text-slate-600">${kkmVal}</td>
+            <td class="p-2.5 text-center">${ketBadge}</td>
+            <td class="p-2.5 text-center space-x-1">
+              <button onclick="bukaAnalisisSiswa('${s.key}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow transition">Analisis</button>
+              <button onclick="resetSiswa('${s.key}')" class="bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow transition">Reset</button>
+              <button onclick="hapusSiswa('${s.key}')" class="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow transition">Hapus</button>
             </td>
           </tr>
         `;
       });
     }
 
-    function resetAksesSiswa(key) {
-      if (confirm(`Reset pengerjaan siswa ini khusus mata pelajaran ${currentGuruMapel}?`)) {
-        const pathGuru = getGuruPath();
-        db.ref(`${pathGuru}/siswa/${key}`).update({
-          status: 'Belum Ujian',
-          nilai: 0,
-          jawaban: null,
-          ragu: null,
-          mengerjakan: false,
-          waktuSelesaiTimestamp: null,
-          waktuSelesai: null
-        }).then(() => showToast("Akses pengerjaan siswa berhasil direset!"));
-      }
-    }
-
-    function hapusDataSiswa(key) {
-      if (confirm("Hapus data siswa ini dari daftar kelas Anda?")) {
-        const pathGuru = getGuruPath();
-        db.ref(`${pathGuru}/siswa/${key}`).remove().then(() => showToast("Data siswa berhasil dihapus."));
-      }
-    }
-
-    function hapusSiswaSesuaiKelas() {
-      const filterKelas = document.getElementById('filter-kelas-monitoring').value;
-      if (filterKelas === 'SEMUA') return alert("Pilih kelas spesifik pada dropdown 'Kelas Ujian' terlebih dahulu!");
-
-      const targetSiswa = appData.siswa.filter(s => {
-        const kSiswa = String(s.kelas || '').toUpperCase().trim();
-        const kFilter = String(filterKelas).toUpperCase().trim();
-        return kSiswa === kFilter || kSiswa.includes(kFilter) || kFilter.includes(kSiswa);
-      });
-
-      if (targetSiswa.length === 0) return alert(`Tidak ada data siswa untuk Kelas ${filterKelas}`);
-
-      if (confirm(`⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus ${targetSiswa.length} data siswa khusus Kelas ${filterKelas}?`)) {
-        const pathGuru = getGuruPath();
-        targetSiswa.forEach(s => db.ref(`${pathGuru}/siswa/${s.key}`).remove());
-        showToast(`Data siswa Kelas ${filterKelas} berhasil dihapus!`);
-      }
-    }
-
-    function kosongkanSemuaSiswa() {
-      if (appData.siswa.length === 0) return alert("Belum ada data siswa untuk dihapus!");
-
-      if (confirm(`⚠️ PERINGATAN KETAT: Apakah Anda yakin ingin MENGHAPUS SEMUA (${appData.siswa.length}) data siswa untuk mata pelajaran ${currentGuruMapel}?`)) {
-        const pathGuru = getGuruPath();
-        db.ref(`${pathGuru}/siswa`).remove();
-        showToast(`Semua data siswa untuk ${currentGuruMapel} telah dikosongkan!`);
-      }
+    function hapusSiswa(key) {
+      if(!confirm("Yakin menghapus siswa ini?")) return;
+      const pathGuru = getGuruPath();
+      db.ref(`${pathGuru}/siswa/${key}`).remove();
+      showToast("Data siswa berhasil dihapus!");
     }
 
     function hapusSiswaDuplikat() {
-      if (confirm("Hapus data siswa duplikat berdasarkan Nama dan Kelas?")) {
-        const pathGuru = getGuruPath();
-        const seen = new Set();
-        let deleted = 0;
-        appData.siswa.forEach(s => {
-          const identifier = `${s.nama.toLowerCase().trim()}_${s.kelas.toLowerCase().trim()}`;
-          if (seen.has(identifier)) {
-            db.ref(`${pathGuru}/siswa/${s.key}`).remove();
-            deleted++;
-          } else { seen.add(identifier); }
-        });
-        showToast(`Dihapus ${deleted} data siswa duplikat.`);
-      }
+      const pathGuru = getGuruPath();
+      const seen = new Set();
+      let removedCount = 0;
+
+      appData.siswa.forEach(s => {
+        const uniqueKey = `${(s.nama || '').trim().toLowerCase()}_${(s.kelas || '').trim().toLowerCase()}`;
+        if (seen.has(uniqueKey)) {
+          db.ref(`${pathGuru}/siswa/${s.key}`).remove();
+          removedCount++;
+        } else {
+          seen.add(uniqueKey);
+        }
+      });
+
+      showToast(`Berhasil membersihkan ${removedCount} data siswa duplikat!`);
+    }
+
+    function resetSiswa(key) {
+      if(!confirm("Reset pengerjaan ujian siswa ini agar dapat login kembali?")) return;
+      const pathGuru = getGuruPath();
+      db.ref(`${pathGuru}/siswa/${key}`).update({
+        status: 'Belum Ujian',
+        nilai: 0,
+        jawaban: {},
+        ragu: {},
+        waktuSelesaiTimestamp: null
+      });
+      showToast("Pengerjaan ujian siswa berhasil di-reset!");
+    }
+
+    function hapusSiswaSesuaiKelas() {
+      const selectedKelas = document.getElementById('filter-kelas-monitoring').value;
+      if (selectedKelas === 'SEMUA') return alert("Silakan pilih kelas spesifik pada dropdown 'Kelas Ujian'!");
+      if (!confirm(`Yakin ingin menghapus seluruh data siswa di Kelas ${selectedKelas}?`)) return;
+
+      const pathGuru = getGuruPath();
+      let count = 0;
+      appData.siswa.forEach(s => {
+        if ((s.kelas || '').toUpperCase() === selectedKelas.toUpperCase()) {
+          db.ref(`${pathGuru}/siswa/${s.key}`).remove();
+          count++;
+        }
+      });
+      showToast(`Berhasil menghapus ${count} siswa dari Kelas ${selectedKelas}!`);
+    }
+
+    function kosongkanSemuaSiswa() {
+      if(!confirm("PERINGATAN: Yakin ingin menghapus SELURUH data siswa dari database Anda?")) return;
+      const pathGuru = getGuruPath();
+      db.ref(`${pathGuru}/siswa`).remove();
+      showToast("Seluruh data siswa berhasil dibersihkan!");
     }
 
     function downloadHasilExcel() {
-      const filterKelas = document.getElementById('filter-kelas-monitoring').value;
-      const currentKkm = parseInt(appData.config.kkm) || 75;
+      const filterKelas = document.getElementById('filter-kelas-monitoring') ? document.getElementById('filter-kelas-monitoring').value : 'SEMUA';
+      const kkmVal = parseInt(appData.config.kkm) || 75;
 
-      let filtered = appData.siswa;
+      let list = appData.siswa;
       if (filterKelas !== 'SEMUA') {
-        filtered = appData.siswa.filter(s => {
-          const kSiswa = String(s.kelas || '').toUpperCase().trim();
-          const kFilter = String(filterKelas).toUpperCase().trim();
-          return kSiswa === kFilter || kSiswa.includes(kFilter);
-        });
+        list = appData.siswa.filter(s => (s.kelas || '').toUpperCase() === filterKelas.toUpperCase());
       }
 
-      if (filtered.length === 0) return alert("Tidak ada data untuk dieksport!");
+      if(list.length === 0) return alert("Tidak ada data siswa untuk di-export!");
 
-      const exportData = filtered.map((s, idx) => {
-        const nil = s.nilai !== undefined ? s.nilai : 0;
-        const stat = s.status || 'Belum Ujian';
-        const ket = nil >= currentKkm ? 'Tuntas' : (stat === 'Selesai' ? 'Remedi' : 'Belum');
+      const dataExcel = list.map((s, idx) => ({
+        "No": idx + 1,
+        "Nama Siswa": s.nama,
+        "Kelas": s.kelas,
+        "Mata Pelajaran": currentGuruMapel,
+        "Status Ujian": s.status || 'Belum Ujian',
+        "Nilai Akhir": s.nilai || 0,
+        "KKM": kkmVal,
+        "Keterangan Ketuntasan": (s.nilai || 0) >= kkmVal ? 'TUNTAS' : 'REMIDIAL'
+      }));
 
-        return {
-          No: idx + 1, 'Nama Siswa': s.nama, Kelas: s.kelas,
-          'Mata Pelajaran': currentGuruMapel, Status: stat, Nilai: nil, KKM: currentKkm, Keterangan: ket
-        };
-      });
-
-      const ws = XLSX.utils.json_to_sheet(exportData);
+      const ws = XLSX.utils.json_to_sheet(dataExcel);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Hasil Ujian");
       XLSX.writeFile(wb, `Hasil_Ujian_${currentGuruMapel}_Kelas_${filterKelas}.xlsx`);
     }
 
     function arsipkanDanBersihkanSesi() {
-      const filterKelas = document.getElementById('filter-kelas-monitoring').value;
-      let targetSiswa = appData.siswa;
-      if (filterKelas !== 'SEMUA') {
-        targetSiswa = appData.siswa.filter(s => {
-          const kSiswa = String(s.kelas || '').toUpperCase().trim();
-          const kFilter = String(filterKelas).toUpperCase().trim();
-          return kSiswa === kFilter || kSiswa.includes(kFilter);
-        });
-      }
+      if(!confirm("Arsipkan seluruh hasil ujian siswa saat ini ke Riwayat dan bersihkan sesi untuk ujian berikutnya?")) return;
 
-      if (targetSiswa.length === 0) return alert("Tidak ada data siswa!");
-
-      if (!confirm(`Arsipkan hasil ujian ${currentGuruMapel} dan bersihkan sesi kelas ini?`)) return;
-
-      const timestamp = new Date().toLocaleString('id-ID');
-      let count = 0;
       const pathGuru = getGuruPath();
+      const kkmVal = parseInt(appData.config.kkm) || 75;
+      const nowStr = new Date().toLocaleString('id-ID');
 
-      targetSiswa.forEach(s => {
-        const statusAksen = s.status || '';
-        const nilaiAksen = s.nilai !== undefined ? s.nilai : 0;
-
-        if (statusAksen.toLowerCase() === 'selesai' || nilaiAksen > 0) {
+      appData.siswa.forEach(s => {
+        if (s.status === 'Selesai') {
           db.ref(`${pathGuru}/riwayat_ujian`).push({
-            siswaKey: s.key,
-            nama: s.nama || '-',
-            kelas: s.kelas || '-',
+            nama: s.nama,
+            kelas: s.kelas,
             mapel: currentGuruMapel,
-            nilai: nilaiAksen,
-            jenis: appData.config.jenis || 'UH',
-            waktuArsip: timestamp
+            nilai: s.nilai || 0,
+            kkm: kkmVal,
+            tanggalArsip: nowStr
           });
-          count++;
         }
-
+        
         db.ref(`${pathGuru}/siswa/${s.key}`).update({
           status: 'Belum Ujian',
           nilai: 0,
-          jawaban: null,
-          ragu: null,
-          mengerjakan: false,
-          waktuSelesaiTimestamp: null,
-          waktuSelesai: null
+          jawaban: {},
+          ragu: {},
+          waktuSelesaiTimestamp: null
         });
       });
 
-      showToast(`Berhasil mengarsipkan ${count} data ujian untuk ${currentGuruMapel}!`);
+      showToast("Sesi berhasil diarsipkan dan status siswa di-reset ke Belum Ujian!");
     }
 
     function renderRiwayatTable() {
       const tbody = document.getElementById('table-riwayat');
       if (!tbody) return;
 
-      const filterKelas = document.getElementById('filter-riwayat-kelas').value;
-      tbody.innerHTML = '';
+      const filterKelas = document.getElementById('filter-riwayat-kelas') ? document.getElementById('filter-riwayat-kelas').value : 'SEMUA';
 
-      let riwayatList = Array.isArray(appData.riwayat) ? appData.riwayat : [];
+      let list = appData.riwayat;
       if (filterKelas !== 'SEMUA') {
-        riwayatList = riwayatList.filter(r => {
-          const kSiswa = String(r.kelas || '').toUpperCase().trim();
-          const kFilter = String(filterKelas).toUpperCase().trim();
-          return kSiswa === kFilter || kSiswa.includes(kFilter);
-        });
+        list = appData.riwayat.filter(r => (r.kelas || '').toUpperCase() === filterKelas.toUpperCase());
       }
 
-      if (riwayatList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-xs text-slate-400 italic">Belum ada riwayat ujian terarsip di akun Anda.</td></tr>';
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">Belum ada riwayat ujian terarsip.</td></tr>`;
         return;
       }
 
-      riwayatList.forEach((r, idx) => {
+      tbody.innerHTML = '';
+      list.forEach((r, idx) => {
         tbody.innerHTML += `
           <tr class="border-b hover:bg-slate-50 text-xs">
             <td class="p-3 text-center font-bold">${idx + 1}</td>
-            <td class="p-3 font-bold text-slate-800">${r.nama || '-'}</td>
-            <td class="p-3 font-semibold text-blue-700">${r.kelas || '-'}</td>
-            <td class="p-3 font-semibold text-emerald-700">${r.mapel || '-'}</td>
-            <td class="p-3 font-bold text-slate-900">${r.nilai !== undefined ? r.nilai : 0}</td>
-            <td class="p-3 text-slate-500">${r.waktuArsip || '-'}</td>
+            <td class="p-3 font-bold text-slate-800">${r.nama}</td>
+            <td class="p-3 font-semibold">${r.kelas}</td>
+            <td class="p-3 font-semibold text-blue-700">${r.mapel || currentGuruMapel}</td>
+            <td class="p-3 text-center font-black text-blue-700">${r.nilai}</td>
+            <td class="p-3 text-slate-500">${r.tanggalArsip || '-'}</td>
           </tr>
         `;
       });
     }
 
     function clearRiwayatTerpilih() {
-      const filterKelas = document.getElementById('filter-riwayat-kelas').value;
+      const selectedKelas = document.getElementById('filter-riwayat-kelas').value;
+      if (selectedKelas === 'SEMUA') return alert("Pilih kelas spesifik untuk menghapus riwayat!");
+      if (!confirm(`Hapus SELURUH riwayat ujian terarsip khusus Kelas ${selectedKelas}?`)) return;
+
       const pathGuru = getGuruPath();
-
-      if (filterKelas === 'SEMUA') {
-        if (confirm("Hapus semua riwayat ujian Anda?")) {
-          db.ref(`${pathGuru}/riwayat_ujian`).remove().then(() => showToast("Riwayat ujian berhasil dihapus!"));
+      appData.riwayat.forEach(r => {
+        if ((r.kelas || '').toUpperCase() === selectedKelas.toUpperCase()) {
+          db.ref(`${pathGuru}/riwayat_ujian/${r.key}`).remove();
         }
-        return;
+      });
+      showToast(`Riwayat Kelas ${selectedKelas} berhasil dihapus!`);
+    }
+
+    // MODAL ANALISIS SISWA & PENJELASAN
+    function bukaAnalisisSiswa(siswaKey) {
+      const s = appData.siswa.find(item => item.key === siswaKey);
+      if(!s) return alert("Data siswa tidak ditemukan!");
+
+      const kkmVal = parseInt(appData.config.kkm) || 75;
+      const nilai = s.nilai || 0;
+      const isTuntas = (nilai >= kkmVal);
+
+      let targetKelasSoal = 'SEMUA';
+      if (s.kelas) {
+        if (s.kelas.startsWith('7')) targetKelasSoal = '7';
+        else if (s.kelas.startsWith('8')) targetKelasSoal = '8';
+        else if (s.kelas.startsWith('9')) targetKelasSoal = '9';
       }
 
-      if (confirm(`Hapus riwayat ujian khusus Kelas ${filterKelas}?`)) {
-        if (Array.isArray(appData.riwayat)) {
-          appData.riwayat.forEach(item => {
-            if (item.kelas === filterKelas) {
-              db.ref(`${pathGuru}/riwayat_ujian/${item.key}`).remove();
-            }
-          });
-          showToast(`Riwayat Kelas ${filterKelas} berhasil dihapus!`);
+      let daftarSoal = appData.soal.filter(item => {
+        if (!item.kelas || item.kelas === 'SEMUA') return true;
+        return item.kelas.toString().toLowerCase() === targetKelasSoal.toLowerCase();
+      });
+
+      if (daftarSoal.length === 0) daftarSoal = appData.soal;
+
+      let totalSoal = daftarSoal.length;
+      let jawaban = s.jawaban || {};
+      let jumlahBenar = 0;
+      let materiGagal = new Set();
+      let materiBerhasil = new Set();
+
+      let rowsHtml = '';
+      daftarSoal.forEach((soal, idx) => {
+        let jwbSiswa = jawaban[idx] || '-';
+        let isBenar = (jwbSiswa.toUpperCase() === (soal.kunci || '').toUpperCase());
+        
+        if (isBenar) {
+          jumlahBenar++;
+          if (soal.materi) materiBerhasil.add(soal.materi);
+        } else {
+          if (soal.materi) materiGagal.add(soal.materi);
         }
+
+        let statusText = isBenar 
+          ? '<span class="text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">BENAR</span>'
+          : '<span class="text-red-700 font-bold bg-red-100 px-2 py-0.5 rounded border border-red-300">SALAH</span>';
+
+        rowsHtml += `
+          <tr class="border-b hover:bg-slate-50 text-xs">
+            <td class="p-2.5 text-center font-bold">${idx + 1}</td>
+            <td class="p-2.5 font-bold text-slate-700">${soal.materi || 'Umum'}</td>
+            <td class="p-2.5 max-w-xs truncate">${stripHtmlToText(soal.teks)}</td>
+            <td class="p-2.5 text-center font-bold ${isBenar ? 'text-emerald-600' : 'text-red-600'}">${jwbSiswa}</td>
+            <td class="p-2.5 text-center font-bold text-blue-700">${soal.kunci || 'A'}</td>
+            <td class="p-2.5 text-center">${statusText}</td>
+          </tr>
+        `;
+      });
+
+      let deskripsiText = "";
+      if (isTuntas) {
+        deskripsiText = `Selamat! Siswa atas nama <b>${s.nama}</b> telah menguasai materi ujian dengan sangat baik. `;
+        if (materiBerhasil.size > 0) {
+          deskripsiText += `Penguasaan materi paling menonjol terdapat pada topik: <b>${Array.from(materiBerhasil).join(', ')}</b>. `;
+        }
+        deskripsiText += `Siswa direkomendasikan untuk melanjutkan ke materi pengayaan berikutnya.`;
+      } else {
+        deskripsiText = `Siswa atas nama <b>${s.nama}</b> belum mencapai batas Ketuntasan Minimal (KKM ${kkmVal}). `;
+        if (materiGagal.size > 0) {
+          deskripsiText += `Perlu dilakukan pendampingan dan remedial khusus pada topik materi berikut: <b class="text-red-600">${Array.from(materiGagal).join(', ')}</b>. `;
+        }
+        deskripsiText += `Disarankan untuk membaca ulang materi pembelajaran dan melakukan latihan soal mandiri.`;
       }
+
+      document.getElementById('analisis-subtitle').innerText = `Nama Siswa: ${s.nama} | Kelas: ${s.kelas}`;
+      document.getElementById('analisis-mapel').innerText = currentGuruMapel;
+      document.getElementById('analisis-nilai').innerText = `${nilai} / ${kkmVal}`;
+      document.getElementById('analisis-status').innerHTML = isTuntas 
+        ? '<span class="bg-emerald-100 text-emerald-800 font-black px-3 py-1 rounded-full border border-emerald-300">TUNTAS</span>'
+        : '<span class="bg-red-100 text-red-800 font-black px-3 py-1 rounded-full border border-red-300">REMIDIAL</span>';
+      
+      document.getElementById('analisis-dijawab').innerText = `${Object.keys(jawaban).length} dari ${totalSoal} Soal`;
+      document.getElementById('analisis-deskripsi-teks').innerHTML = deskripsiText;
+      document.getElementById('tbody-analisis-detail').innerHTML = rowsHtml;
+
+      currentAnalisisSiswaData = {
+        nama: s.nama,
+        kelas: s.kelas,
+        mapel: currentGuruMapel,
+        nilai: nilai,
+        kkm: kkmVal,
+        statusStr: isTuntas ? 'TUNTAS' : 'REMIDIAL',
+        dijawabStr: `${Object.keys(jawaban).length} dari ${totalSoal} Soal`,
+        deskripsi: deskripsiText.replace(/<[^>]*>/g, ''),
+        daftarSoal: daftarSoal,
+        jawabanSiswa: jawaban
+      };
+
+      document.getElementById('modal-analisis').classList.remove('hidden');
+    }
+
+    function tutupModalAnalisis() {
+      document.getElementById('modal-analisis').classList.add('hidden');
+    }
+
+    function downloadAnalisisPDF() {
+      if (!currentAnalisisSiswaData) return alert("Data analisis tidak tersedia!");
+      
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const data = currentAnalisisSiswaData;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.text("LAPORAN ANALISIS PENGUASAAN MATERI SISWA", 105, 15, { align: "center" });
+
+      doc.setLineWidth(0.5);
+      doc.line(14, 18, 196, 18);
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      
+      const colonX = 55;
+      
+      doc.setFont("helvetica", "bold");
+      doc.text("Nama Siswa", 14, 25);
+      doc.text(":", colonX, 25);
+      doc.setFont("helvetica", "normal");
+      doc.text(data.nama, colonX + 3, 25);
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Kelas", 14, 30);
+      doc.text(":", colonX, 30);
+      doc.setFont("helvetica", "normal");
+      doc.text(data.kelas, colonX + 3, 30);
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Mata Pelajaran", 14, 35);
+      doc.text(":", colonX, 35);
+      doc.setFont("helvetica", "normal");
+      doc.text(data.mapel, colonX + 3, 35);
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Nilai Akhir / KKM", 14, 40);
+      doc.text(":", colonX, 40);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${data.nilai} / ${data.kkm} (${data.statusStr})`, colonX + 3, 40);
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Deskripsi Evaluasi", 14, 48);
+      doc.setFont("helvetica", "normal");
+      const splitDesc = doc.splitTextToSize(data.deskripsi, 180);
+      doc.text(splitDesc, 14, 53);
+
+      let startY = 53 + (splitDesc.length * 5) + 5;
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Perincian Jawaban Soal & Kunci Jawaban:", 14, startY);
+
+      const tableData = data.daftarSoal.map((soal, idx) => {
+        let jwbSiswa = data.jawabanSiswa[idx] || '-';
+        let isBenar = (jwbSiswa.toUpperCase() === (soal.kunci || '').toUpperCase());
+        return [
+          idx + 1,
+          soal.materi || 'Umum',
+          stripHtmlToText(soal.teks),
+          jwbSiswa,
+          soal.kunci || 'A',
+          isBenar ? 'BENAR' : 'SALAH'
+        ];
+      });
+
+      doc.autoTable({
+        startY: startY + 3,
+        head: [['No', 'Materi/Topik', 'Teks Soal', 'Jawaban Siswa', 'Kunci Jawaban', 'Status']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
+        styles: { fontSize: 8, cellPadding: 2 },
+        columnStyles: {
+          0: { cellWidth: 10, halign: 'center' },
+          1: { cellWidth: 35 },
+          2: { cellWidth: 80 },
+          3: { cellWidth: 20, halign: 'center' },
+          4: { cellWidth: 20, halign: 'center' },
+          5: { cellWidth: 17, halign: 'center' }
+        }
+      });
+
+      doc.save(`Analisis_Siswa_${data.nama.replace(/\s+/g, '_')}_${data.mapel}.pdf`);
+    }
+
+    // FUNGSI SIMULASI PENGERJAAN UJIAN SISWA
+    function persiapkanUjianSiswa(siswaKey, pathGuru) {
+      stateUjianSiswa.currentSiswaKey = siswaKey;
+      stateUjianSiswa.guruPathSiswa = pathGuru;
+      
+      const s = appData.siswa.find(item => item.key === siswaKey);
+      if(!s) return alert("Data siswa tidak valid!");
+
+      stateUjianSiswa.jawaban = s.jawaban || {};
+      stateUjianSiswa.ragu = s.ragu || {};
+
+      let targetKelas = 'SEMUA';
+      if (s.kelas) {
+        if (s.kelas.startsWith('7')) targetKelas = '7';
+        else if (s.kelas.startsWith('8')) targetKelas = '8';
+        else if (s.kelas.startsWith('9')) targetKelas = '9';
+      }
+
+      stateUjianSiswa.soalAktif = appData.soal.filter(item => {
+        if (!item.kelas || item.kelas === 'SEMUA') return true;
+        return item.kelas.toString().toLowerCase() === targetKelas.toLowerCase();
+      });
+
+      if(stateUjianSiswa.soalAktif.length === 0) {
+        stateUjianSiswa.soalAktif = appData.soal;
+      }
+
+      if(stateUjianSiswa.soalAktif.length === 0) {
+        return alert("Bank soal belum tersedia untuk ujian ini!");
+      }
+
+      stateUjianSiswa.currentSoalIdx = 0;
+      stateUjianSiswa.isExamActive = true;
+
+      document.getElementById('view-siswa-nama').innerText = s.nama;
+      document.getElementById('view-siswa-info').innerText = `${appData.config.jenis} | ${currentGuruMapel} | Kelas: ${s.kelas}`;
+
+      document.getElementById('page-guru').classList.add('hidden');
+      document.getElementById('page-siswa').classList.remove('hidden');
+
+      launchFullscreen(document.documentElement);
+      renderSoalSiswa();
+      renderGridNavSiswa();
     }
 
     function renderSoalSiswa() {
-      const idx = stateUjianSiswa.currentSoalIdx;
-      const total = stateUjianSiswa.soalAktif.length;
-      const s = stateUjianSiswa.soalAktif[idx];
+      const soal = stateUjianSiswa.soalAktif[stateUjianSiswa.currentSoalIdx];
+      if(!soal) return;
 
-      document.getElementById('soal-nomor-display').innerText = idx + 1;
-      document.getElementById('display-soal-num-prefix').innerText = `${idx + 1}.`;
+      document.getElementById('soal-nomor-display').innerText = stateUjianSiswa.currentSoalIdx + 1;
+      document.getElementById('display-soal-num-prefix').innerText = `${stateUjianSiswa.currentSoalIdx + 1}.`;
 
-      let leftContent = s.teks || '';
-      if(s.imgSoal) {
-        leftContent += `<br><img src="${s.imgSoal}" class="max-w-full h-auto rounded-lg border my-2" />`;
+      let leftContent = `<div>${soal.teks || ''}</div>`;
+      if (soal.imgSoal) {
+        leftContent += `<img src="${soal.imgSoal}" class="max-w-full h-auto rounded-lg my-2 max-h-80 border" />`;
       }
-      document.getElementById('display-teks-soal').innerHTML = leftContent || '<p class="text-slate-400 italic">Tidak ada wacana.</p>';
-      document.getElementById('display-teks-lanjutan-siswa').innerHTML = s.teksLanjutan || s.teks || '';
+      document.getElementById('display-teks-soal').innerHTML = leftContent;
+      document.getElementById('display-teks-lanjutan-siswa').innerHTML = soal.teksLanjutan || 'Pilihlah salah satu jawaban yang paling tepat:';
 
       const optContainer = document.getElementById('options-container');
       optContainer.innerHTML = '';
 
-      ['A', 'B', 'C', 'D'].forEach(k => {
-        const isChosen = stateUjianSiswa.jawaban[idx] === k;
-        const optTxt = s.opsi ? s.opsi[k] : '';
-        const optImg = (s.opsiImg && s.opsiImg[k]) ? s.opsiImg[k] : '';
+      const currentJwb = stateUjianSiswa.jawaban[stateUjianSiswa.currentSoalIdx];
 
-        if(optTxt || optImg) {
-          optContainer.innerHTML += `
-            <div onclick="selectJawaban('${k}')" class="p-3 rounded-xl border-2 cursor-pointer transition flex items-start gap-3 ${isChosen ? 'border-emerald-600 bg-emerald-50' : 'border-slate-200 bg-white hover:border-blue-400'}">
-              <span class="font-bold text-sm ${isChosen ? 'text-emerald-700' : 'text-slate-600'}">${k}.</span>
-              <div class="flex-1 text-slate-800 text-sm">
-                ${optTxt ? `<div>${optTxt}</div>` : ''}
-                ${optImg ? `<img src="${optImg}" class="max-w-xs h-auto rounded border my-1" />` : ''}
-              </div>
+      ['A', 'B', 'C', 'D'].forEach(k => {
+        const isSelected = (currentJwb === k);
+        let optText = (soal.opsi && soal.opsi[k]) ? soal.opsi[k] : '';
+        let optImg = (soal.opsiImg && soal.opsiImg[k]) ? soal.opsiImg[k] : '';
+
+        let mediaHtml = optImg ? `<img src="${optImg}" class="max-h-36 rounded border my-1" />` : '';
+
+        optContainer.innerHTML += `
+          <div onclick="pilihJawaban('${k}')" class="p-3 border-2 rounded-xl bg-white hover:bg-blue-50 cursor-pointer flex items-start gap-3 transition ${isSelected ? 'border-blue-600 bg-blue-50' : 'border-slate-200'}">
+            <span class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700'}">${k}</span>
+            <div class="flex-1 text-sm font-semibold text-slate-800">
+              ${mediaHtml}
+              <div>${optText}</div>
             </div>
-          `;
-        }
+          </div>
+        `;
       });
 
-      document.getElementById('chk-ragu').checked = !!stateUjianSiswa.ragu[idx];
-
-      document.getElementById('btn-prev').disabled = (idx === 0);
-      if(idx === total - 1) {
-        document.getElementById('btn-next').classList.add('hidden');
-        document.getElementById('btn-submit').classList.remove('hidden');
-      } else {
-        document.getElementById('btn-next').classList.remove('hidden');
-        document.getElementById('btn-submit').classList.add('hidden');
+      const chkRagu = document.getElementById('chk-ragu');
+      if (chkRagu) {
+        chkRagu.checked = !!stateUjianSiswa.ragu[stateUjianSiswa.currentSoalIdx];
       }
 
-      renderNavGridSiswa();
+      const total = stateUjianSiswa.soalAktif.length;
+      document.getElementById('btn-prev').classList.toggle('hidden', stateUjianSiswa.currentSoalIdx === 0);
+      document.getElementById('btn-next').classList.toggle('hidden', stateUjianSiswa.currentSoalIdx === total - 1);
+      document.getElementById('btn-submit').classList.toggle('hidden', stateUjianSiswa.currentSoalIdx !== total - 1);
     }
 
-    function selectJawaban(k) {
-      const idx = stateUjianSiswa.currentSoalIdx;
-      stateUjianSiswa.jawaban[idx] = k;
+    function renderGridNavSiswa() {
+      const grid = document.getElementById('grid-nav-soal');
+      if(!grid) return;
+      grid.innerHTML = '';
 
-      const pathGuru = stateUjianSiswa.guruPathSiswa;
-      const keySiswa = stateUjianSiswa.currentSiswaKey;
-      db.ref(`${pathGuru}/siswa/${keySiswa}/jawaban`).set(stateUjianSiswa.jawaban);
+      stateUjianSiswa.soalAktif.forEach((_, idx) => {
+        let cls = 'btn-nav-soal';
+        if (idx === stateUjianSiswa.currentSoalIdx) {
+          cls += ' aktif';
+        } else if (stateUjianSiswa.ragu[idx]) {
+          cls += ' ragu';
+        } else if (stateUjianSiswa.jawaban[idx]) {
+          cls += ' dijawab';
+        }
 
+        grid.innerHTML += `<button onclick="jumpKeSoal(${idx})" class="${cls}">${idx + 1}</button>`;
+      });
+    }
+
+    function pilihJawaban(k) {
+      stateUjianSiswa.jawaban[stateUjianSiswa.currentSoalIdx] = k;
       renderSoalSiswa();
+      renderGridNavSiswa();
     }
 
     function toggleRagu() {
-      const idx = stateUjianSiswa.currentSoalIdx;
-      stateUjianSiswa.ragu[idx] = document.getElementById('chk-ragu').checked;
-
-      const pathGuru = stateUjianSiswa.guruPathSiswa;
-      const keySiswa = stateUjianSiswa.currentSiswaKey;
-      db.ref(`${pathGuru}/siswa/${keySiswa}/ragu`).set(stateUjianSiswa.ragu);
-
-      renderNavGridSiswa();
+      const chk = document.getElementById('chk-ragu');
+      stateUjianSiswa.ragu[stateUjianSiswa.currentSoalIdx] = chk.checked;
+      renderGridNavSiswa();
     }
 
-    function navSoal(step) {
-      const nextIdx = stateUjianSiswa.currentSoalIdx + step;
-      if(nextIdx >= 0 && nextIdx < stateUjianSiswa.soalAktif.length) {
+    function navSoal(dir) {
+      const nextIdx = stateUjianSiswa.currentSoalIdx + dir;
+      if (nextIdx >= 0 && nextIdx < stateUjianSiswa.soalAktif.length) {
         stateUjianSiswa.currentSoalIdx = nextIdx;
         renderSoalSiswa();
+        renderGridNavSiswa();
       }
     }
 
-    function renderNavGridSiswa() {
-      const grid = document.getElementById('grid-nav-soal');
-      grid.innerHTML = '';
-
-      stateUjianSiswa.soalAktif.forEach((s, idx) => {
-        const isCurrent = idx === stateUjianSiswa.currentSoalIdx;
-        const isAnswered = !!stateUjianSiswa.jawaban[idx];
-        const isRagu = !!stateUjianSiswa.ragu[idx];
-
-        let cls = 'btn-nav-soal';
-        if(isCurrent) cls += ' aktif';
-        else if(isRagu) cls += ' ragu';
-        else if(isAnswered) cls += ' dijawab';
-
-        grid.innerHTML += `<button onclick="jumpToSoal(${idx})" class="${cls}">${idx + 1}</button>`;
-      });
-    }
-
-    function jumpToSoal(idx) {
+    function jumpKeSoal(idx) {
       stateUjianSiswa.currentSoalIdx = idx;
       renderSoalSiswa();
+      renderGridNavSiswa();
     }
 
     function konfirmasiSelesai() {
-      if(confirm("Apakah Anda yakin ingin menyelesaikan ujian ini?")) {
-        selesaiUjian();
-      }
-    }
+      if(!confirm("Yakin ingin menyelesaikan ujian ini? Seluruh jawaban Anda akan dikirim.")) return;
 
-    function selesaiUjian() {
-      if (stateUjianSiswa.timerInterval) clearInterval(stateUjianSiswa.timerInterval);
-
-      let benar = 0;
-      const total = stateUjianSiswa.soalAktif.length;
-
-      stateUjianSiswa.soalAktif.forEach((s, idx) => {
-        if(stateUjianSiswa.jawaban[idx] === s.kunci) {
-          benar++;
+      let jumlahBenar = 0;
+      stateUjianSiswa.soalAktif.forEach((soal, idx) => {
+        let jwb = stateUjianSiswa.jawaban[idx];
+        if (jwb && jwb.toUpperCase() === (soal.kunci || '').toUpperCase()) {
+          jumlahBenar++;
         }
       });
 
-      const nilaiAkhir = total > 0 ? Math.round((benar / total) * 100) : 0;
-      const pathGuru = stateUjianSiswa.guruPathSiswa;
-      const keySiswa = stateUjianSiswa.currentSiswaKey;
+      const totalSoal = stateUjianSiswa.soalAktif.length;
+      const nilaiAkhir = Math.round((jumlahBenar / totalSoal) * 100);
 
-      const nowStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-
-      db.ref(`${pathGuru}/siswa/${keySiswa}`).update({
+      db.ref(`${stateUjianSiswa.guruPathSiswa}/siswa/${stateUjianSiswa.currentSiswaKey}`).update({
         status: 'Selesai',
-        mengerjakan: false,
         nilai: nilaiAkhir,
-        waktuSelesai: nowStr
+        jawaban: stateUjianSiswa.jawaban,
+        ragu: stateUjianSiswa.ragu
       });
 
       stateUjianSiswa.isExamActive = false;
       exitFullscreenSafely();
 
-      alert(`Ujian Selesai! Nilai Anda: ${nilaiAkhir}`);
       document.getElementById('page-siswa').classList.add('hidden');
-      document.getElementById('page-login').classList.remove('hidden');
+      document.getElementById('page-guru').classList.remove('hidden');
+
+      showToast(`Ujian Selesai! Nilai Anda: ${nilaiAkhir}`);
     }
 
     function mintaKonfirmasiKeluar() {
@@ -2228,10 +2518,9 @@
       document.getElementById('modal-confirm-logout').classList.add('hidden');
       if(ya) {
         stateUjianSiswa.isExamActive = false;
-        if (stateUjianSiswa.timerInterval) clearInterval(stateUjianSiswa.timerInterval);
         exitFullscreenSafely();
         document.getElementById('page-siswa').classList.add('hidden');
-        document.getElementById('page-login').classList.remove('hidden');
+        document.getElementById('page-guru').classList.remove('hidden');
       }
     }
   </script>
