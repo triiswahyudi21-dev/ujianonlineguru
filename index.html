@@ -163,7 +163,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
-  <div id="toast" class="hidden fixed top-4 right-4 z-50 bg-red-600 text-white px-4 py-2.5 rounded-lg shadow-xl text-sm font-semibold transition-all"></div>
+  <div id="toast" class="hidden fixed top-4 right-4 z-50 bg-emerald-600 text-white px-4 py-2.5 rounded-lg shadow-xl text-sm font-semibold transition-all"></div>
 
   <div id="modal-confirm-logout" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full mx-4 border border-slate-200 text-center">
@@ -347,9 +347,14 @@
 
         <div id="section-import-siswa" class="tab-section hidden bg-white p-5 rounded-xl shadow border border-slate-200">
           <h3 class="font-bold text-slate-700 border-b pb-2 mb-2">Import Data Siswa Khusus Mapel Saya</h3>
-          <p class="text-xs text-slate-500 mb-2">Format: <b>Nama Siswa [Tab/Koma/Spasi] Kelas</b></p>
+          <p class="text-xs text-slate-500 mb-2">Format: <b>Nama Siswa [Tab/Koma/Spasi/titik koma] Kelas</b></p>
           <textarea id="import-siswa-raw" rows="8" placeholder="Ahmad&#9;7A&#10;Budi, 7A&#10;Cici   7B" class="w-full p-2 border rounded-lg text-sm font-mono mb-3"></textarea>
-          <button onclick="prosesImportSiswa()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-sm font-semibold shadow transition">Simpan Data Siswa ke Ruang Saya</button>
+          <button onclick="prosesImportSiswa()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-sm font-semibold shadow transition cursor-pointer">Simpan Data Siswa ke Ruang Saya</button>
+
+          <div class="mt-4 pt-4 border-t">
+            <h4 class="text-xs font-bold text-slate-700 mb-2">Daftar Siswa Tersimpan (<span id="total-siswa-count">0</span>):</h4>
+            <div id="list-siswa-preview" class="max-h-48 overflow-y-auto space-y-1 text-xs border p-2 rounded bg-slate-50"></div>
+          </div>
         </div>
 
         <div id="section-soal-massal" class="tab-section hidden bg-white p-5 rounded-xl shadow border border-slate-200">
@@ -619,38 +624,152 @@
     }
 
     function setupGuruRealtimeListeners() {
-      if (!db || !currentGuruKey || !currentGuruMapel) return;
+      if (!currentGuruKey || !currentGuruMapel) return;
 
       const pathGuru = getGuruPath();
 
-      try {
-        db.ref(`${pathGuru}/config`).on('value', snap => {
-          if(snap.exists()) {
-            appData.config = snap.val();
-          }
-          if (document.getElementById('cfg-jenis-ujian')) document.getElementById('cfg-jenis-ujian').value = appData.config.jenis || 'UH';
-          if (document.getElementById('cfg-mapel')) document.getElementById('cfg-mapel').value = currentGuruMapel;
-          if (document.getElementById('cfg-semester')) document.getElementById('cfg-semester').value = appData.config.semester || 'Ganjil';
-          if (document.getElementById('cfg-tp')) document.getElementById('cfg-tp').value = appData.config.tp || '2025/2026';
-          if (document.getElementById('cfg-waktu')) document.getElementById('cfg-waktu').value = appData.config.waktu || 60;
-          if (document.getElementById('cfg-kkm')) document.getElementById('cfg-kkm').value = appData.config.kkm || 75;
-          if (document.getElementById('cfg-token')) document.getElementById('cfg-token').value = appData.config.token || 'EXAM88';
-        });
+      if (db) {
+        try {
+          db.ref(`${pathGuru}/config`).on('value', snap => {
+            if(snap.exists()) {
+              appData.config = snap.val();
+            }
+            if (document.getElementById('cfg-jenis-ujian')) document.getElementById('cfg-jenis-ujian').value = appData.config.jenis || 'UH';
+            if (document.getElementById('cfg-mapel')) document.getElementById('cfg-mapel').value = currentGuruMapel;
+            if (document.getElementById('cfg-semester')) document.getElementById('cfg-semester').value = appData.config.semester || 'Ganjil';
+            if (document.getElementById('cfg-tp')) document.getElementById('cfg-tp').value = appData.config.tp || '2025/2026';
+            if (document.getElementById('cfg-waktu')) document.getElementById('cfg-waktu').value = appData.config.waktu || 60;
+            if (document.getElementById('cfg-kkm')) document.getElementById('cfg-kkm').value = appData.config.kkm || 75;
+            if (document.getElementById('cfg-token')) document.getElementById('cfg-token').value = appData.config.token || 'EXAM88';
+          });
 
-        db.ref(`${pathGuru}/soal`).on('value', snap => {
-          const val = snap.val();
-          appData.soal = [];
-          if (val) {
-            Object.keys(val).forEach(k => {
-              appData.soal.push({ key: k, ...val[k] });
-            });
-            appData.soal.sort((a,b) => (parseInt(a.no)||0) - (parseInt(b.no)||0));
-          }
-          renderSoalList();
-        });
-      } catch(e) {
-        console.log("Firebase sync fallback active");
+          db.ref(`${pathGuru}/soal`).on('value', snap => {
+            const val = snap.val();
+            appData.soal = [];
+            if (val) {
+              Object.keys(val).forEach(k => {
+                appData.soal.push({ key: k, ...val[k] });
+              });
+              appData.soal.sort((a,b) => (parseInt(a.no)||0) - (parseInt(b.no)||0));
+            }
+            renderSoalList();
+          });
+
+          db.ref(`${pathGuru}/siswa`).on('value', snap => {
+            const val = snap.val();
+            appData.siswa = [];
+            if (val) {
+              Object.keys(val).forEach(k => {
+                appData.siswa.push({ key: k, ...val[k] });
+              });
+            }
+            renderSiswaPreview();
+          });
+        } catch(e) {
+          console.log("Firebase sync fallback active");
+        }
+      } else {
+        renderSiswaPreview();
       }
+    }
+
+    // FUNGSI UTAMA IMPORT SISWA (DIPERBAIKI LENGKAP)
+    function prosesImportSiswa() {
+      const rawInput = document.getElementById('import-siswa-raw');
+      if (!rawInput) return;
+
+      const teks = rawInput.value.trim();
+      if (!teks) {
+        alert("Silakan masukkan/tempel data siswa terlebih dahulu!");
+        return;
+      }
+
+      const baris = teks.split('\n');
+      const hasilSiswa = [];
+
+      baris.forEach((b, idx) => {
+        const item = b.trim();
+        if (item) {
+          let nama = "";
+          let kelas = "7A";
+
+          if (item.includes('\t')) {
+            const parts = item.split('\t');
+            nama = parts[0].trim();
+            kelas = parts[1] ? parts[1].trim() : "7A";
+          } else if (item.includes(',')) {
+            const parts = item.split(',');
+            nama = parts[0].trim();
+            kelas = parts[1] ? parts[1].trim() : "7A";
+          } else if (item.includes(';')) {
+            const parts = item.split(';');
+            nama = parts[0].trim();
+            kelas = parts[1] ? parts[1].trim() : "7A";
+          } else {
+            const parts = item.split(/\s+/);
+            if (parts.length > 1) {
+              kelas = parts.pop().trim();
+              nama = parts.join(' ').trim();
+            } else {
+              nama = item;
+            }
+          }
+
+          if (nama) {
+            hasilSiswa.push({
+              id: 's_' + Date.now() + '_' + idx,
+              nama: nama,
+              kelas: kelas.toUpperCase()
+            });
+          }
+        }
+      });
+
+      if (hasilSiswa.length === 0) {
+        alert("Format data siswa tidak valid!");
+        return;
+      }
+
+      appData.siswa = hasilSiswa;
+
+      if (db && currentGuruKey && currentGuruMapel) {
+        db.ref(`${getGuruPath()}/siswa`).set(hasilSiswa).then(() => {
+          showToast(`Berhasil menyimpan ${hasilSiswa.length} data siswa!`);
+          renderSiswaPreview();
+        }).catch(err => {
+          console.warn("Gagal simpan ke firebase, simpan lokal:", err);
+          showToast(`Simpan lokal: ${hasilSiswa.length} data siswa!`);
+          renderSiswaPreview();
+        });
+      } else {
+        sessionStorage.setItem(`siswa_${getGuruPath()}`, JSON.stringify(hasilSiswa));
+        showToast(`Berhasil menyimpan ${hasilSiswa.length} data siswa!`);
+        renderSiswaPreview();
+      }
+    }
+
+    function renderSiswaPreview() {
+      const previewEl = document.getElementById('list-siswa-preview');
+      const countEl = document.getElementById('total-siswa-count');
+      if (!previewEl) return;
+
+      const list = appData.siswa || [];
+      if (countEl) countEl.innerText = list.length;
+
+      previewEl.innerHTML = '';
+      if (list.length === 0) {
+        previewEl.innerHTML = '<span class="text-slate-400 italic">Belum ada data siswa terimport.</span>';
+        return;
+      }
+
+      list.forEach((s, idx) => {
+        previewEl.innerHTML += `
+          <div class="flex justify-between items-center py-1 border-b border-slate-200 last:border-0">
+            <span class="font-medium text-slate-700">${idx + 1}. ${s.nama}</span>
+            <span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">${s.kelas}</span>
+          </div>
+        `;
+      });
     }
 
     function switchGuruTab(targetTabId) {
