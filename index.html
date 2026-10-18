@@ -285,43 +285,36 @@
         </div>
 
         <nav class="space-y-1.5 text-xs font-medium">
-          <!-- 1. Pengaturan Ujian -->
           <button onclick="switchSection('sec-pengaturan')" class="nav-menu-btn active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             <span class="text-left">Pengaturan Ujian</span>
           </button>
 
-          <!-- 2. Impor Data Siswa -->
           <button onclick="switchSection('sec-impor-siswa')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
             <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
             <span class="text-left">Impor Data Siswa</span>
           </button>
 
-          <!-- 3. Input Soal Manual & Impor Soal -->
           <button onclick="switchSection('sec-input-soal')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
             <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
             <span class="text-left">Input & Impor Soal</span>
           </button>
 
-          <!-- 4. Bank Soal -->
           <button onclick="switchSection('sec-bank-soal')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
             <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             <span class="text-left">Bank Soal</span>
           </button>
 
-          <!-- 5. Pemantauan Ujian -->
           <button onclick="switchSection('sec-pemantauan')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
             <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             <span class="text-left">Pemantauan Ujian</span>
           </button>
 
-          <!-- 6. Laporan Analisis Hasil Ujian -->
           <button onclick="switchSection('sec-laporan-analisis')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
             <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             <span class="text-left">Laporan Analisis Hasil Ujian</span>
           </button>
 
-          <!-- 7. Riwayat Hasil Ujian -->
           <button onclick="switchSection('sec-riwayat')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
             <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             <span class="text-left">Riwayat Hasil Ujian</span>
@@ -505,6 +498,12 @@
               <div class="p-3 bg-blue-950/20 border border-blue-500/20 rounded-xl space-y-2">
                 <label class="block text-xs font-bold text-blue-400">🖼 Gambar Stimulus / Pendukung (Sisi Kiri)</label>
                 <input type="file" id="manual-img-soal" accept="image/*" class="text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+                <!-- PREVIEW GAMBAR SOAL EKSISTING SAAT EDIT -->
+                <div id="preview-container-img-soal" class="hidden mt-2 p-2 bg-slate-900 rounded-xl border border-slate-800">
+                  <span class="text-[10px] font-bold text-amber-400 block mb-1">Gambar Terpasang Sekarang:</span>
+                  <img id="img-preview-soal" src="" class="max-h-40 rounded border border-slate-700 object-contain mx-auto" />
+                </div>
+
                 <div>
                   <label class="block text-xs font-semibold text-slate-300 mt-2 mb-1">Teks Pertanyaan Soal (Sisi Kanan)</label>
                   <input type="text" id="manual-teks-lanjutan" placeholder="Pertanyaan utama soal..." class="w-full p-2.5 bg-slate-900 border border-slate-700 text-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
@@ -520,6 +519,9 @@
                       <span class="font-bold text-xs text-blue-400">OPSI A</span>
                       <input type="file" id="manual-opt-img-A" accept="image/*" class="text-[10px] text-slate-400 w-44">
                     </div>
+                    <div id="preview-container-img-A" class="hidden mt-1 p-1 bg-slate-950 rounded border border-slate-800">
+                      <img id="img-preview-A" src="" class="max-h-24 rounded object-contain mx-auto" />
+                    </div>
                     <input type="text" id="manual-opt-text-A" placeholder="Teks opsi A..." class="w-full p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-lg text-xs text-left focus:ring-1 focus:ring-blue-500 outline-none">
                   </div>
 
@@ -527,6 +529,9 @@
                     <div class="flex items-center justify-between">
                       <span class="font-bold text-xs text-blue-400">OPSI B</span>
                       <input type="file" id="manual-opt-img-B" accept="image/*" class="text-[10px] text-slate-400 w-44">
+                    </div>
+                    <div id="preview-container-img-B" class="hidden mt-1 p-1 bg-slate-950 rounded border border-slate-800">
+                      <img id="img-preview-B" src="" class="max-h-24 rounded object-contain mx-auto" />
                     </div>
                     <input type="text" id="manual-opt-text-B" placeholder="Teks opsi B..." class="w-full p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-lg text-xs text-left focus:ring-1 focus:ring-blue-500 outline-none">
                   </div>
@@ -536,6 +541,9 @@
                       <span class="font-bold text-xs text-blue-400">OPSI C</span>
                       <input type="file" id="manual-opt-img-C" accept="image/*" class="text-[10px] text-slate-400 w-44">
                     </div>
+                    <div id="preview-container-img-C" class="hidden mt-1 p-1 bg-slate-950 rounded border border-slate-800">
+                      <img id="img-preview-C" src="" class="max-h-24 rounded object-contain mx-auto" />
+                    </div>
                     <input type="text" id="manual-opt-text-C" placeholder="Teks opsi C..." class="w-full p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-lg text-xs text-left focus:ring-1 focus:ring-blue-500 outline-none">
                   </div>
 
@@ -543,6 +551,9 @@
                     <div class="flex items-center justify-between">
                       <span class="font-bold text-xs text-blue-400">OPSI D</span>
                       <input type="file" id="manual-opt-img-D" accept="image/*" class="text-[10px] text-slate-400 w-44">
+                    </div>
+                    <div id="preview-container-img-D" class="hidden mt-1 p-1 bg-slate-950 rounded border border-slate-800">
+                      <img id="img-preview-D" src="" class="max-h-24 rounded object-contain mx-auto" />
                     </div>
                     <input type="text" id="manual-opt-text-D" placeholder="Teks opsi D..." class="w-full p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-lg text-xs text-left focus:ring-1 focus:ring-blue-500 outline-none">
                   </div>
@@ -561,8 +572,11 @@
                 </div>
                 
                 <div class="flex w-full md:w-auto gap-2">
-                  <button type="button" onclick="previewSoalManual()" class="flex-1 md:flex-initial bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow transition">
+                  <button type="button" onclick="previewSoalManual()" class="flex-1 md:flex-initial bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow transition">
                     👁 Preview Soal
+                  </button>
+                  <button id="btn-cancel-manual" type="button" onclick="batalEditSoalManual()" class="hidden flex-1 md:flex-initial bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 font-bold px-4 py-2.5 rounded-xl text-sm transition">
+                    ❌ Batal Edit
                   </button>
                   <button id="btn-simpan-manual" type="button" onclick="simpanSoalManual()" class="flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow transition">
                     💾 Simpan Soal
@@ -1052,7 +1066,6 @@
   </div>
 
   <script>
-    // FUNGSI NAVIGASI TAB/SECTION DASHBOARD GURU
     const allDashboardSections = [
       'sec-pengaturan',
       'sec-impor-siswa',
@@ -1859,13 +1872,17 @@
 
     function updateManualButtonState() {
       const btn = document.getElementById('btn-simpan-manual');
+      const btnCancel = document.getElementById('btn-cancel-manual');
       if(!btn) return;
 
       if (editingSoalKey) {
+        btn.innerText = `🔄 Update Soal`;
         btn.className = "flex-1 md:flex-initial bg-amber-600 hover:bg-amber-500 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow transition";
+        if (btnCancel) btnCancel.classList.remove('hidden');
         return;
       }
 
+      if (btnCancel) btnCancel.classList.add('hidden');
       btn.className = "flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow transition";
       const total = appData.soal.length;
       btn.innerText = total === 0 ? "💾 Simpan Soal Pertama" : `💾 Simpan Soal Ke-${total + 1}`;
@@ -1883,19 +1900,57 @@
       document.getElementById('manual-teks-lanjutan').value = stripHtmlToText(s.teksLanjutan);
       document.getElementById('manual-kunci').value = s.kunci || 'A';
 
-      ['A', 'B', 'C', 'D'].forEach(k => {
-        document.getElementById(`manual-opt-text-${k}`).value = (s.opsi && s.opsi[k]) ? stripHtmlToText(s.opsi[k]) : '';
-      });
-
-      const btn = document.getElementById('btn-simpan-manual');
-      if(btn) {
-        btn.innerText = `🔄 Update Soal No. ${s.no}`;
-        btn.className = "flex-1 md:flex-initial bg-amber-600 hover:bg-amber-500 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow transition";
+      // SET Gambar Stimulus/Soal jika ada
+      const boxImgSoal = document.getElementById('preview-container-img-soal');
+      const imgSoalPreview = document.getElementById('img-preview-soal');
+      if (s.imgSoal) {
+        imgSoalPreview.src = s.imgSoal;
+        boxImgSoal.classList.remove('hidden');
+      } else {
+        boxImgSoal.classList.add('hidden');
+        imgSoalPreview.src = '';
       }
 
+      // SET Teks & Gambar Opsi
+      ['A', 'B', 'C', 'D'].forEach(k => {
+        document.getElementById(`manual-opt-text-${k}`).value = (s.opsi && s.opsi[k]) ? stripHtmlToText(s.opsi[k]) : '';
+        const boxOptImg = document.getElementById(`preview-container-img-${k}`);
+        const imgOptPreview = document.getElementById(`img-preview-${k}`);
+        if (s.opsiImg && s.opsiImg[k]) {
+          imgOptPreview.src = s.opsiImg[k];
+          boxOptImg.classList.remove('hidden');
+        } else {
+          boxOptImg.classList.add('hidden');
+          imgOptPreview.src = '';
+        }
+      });
+
+      updateManualButtonState();
       switchSection('sec-input-soal');
       document.getElementById('manual-no').scrollIntoView({ behavior: 'smooth' });
       showToast(`Mode Edit: Soal No. ${s.no}`);
+    }
+
+    function batalEditSoalManual() {
+      editingSoalKey = null;
+      document.getElementById('manual-no').value = '';
+      document.getElementById('manual-teks').value = '';
+      document.getElementById('manual-img-soal').value = '';
+      document.getElementById('manual-teks-lanjutan').value = '';
+      
+      document.getElementById('preview-container-img-soal').classList.add('hidden');
+      document.getElementById('img-preview-soal').src = '';
+
+      ['A', 'B', 'C', 'D'].forEach(k => {
+        document.getElementById(`manual-opt-text-${k}`).value = '';
+        document.getElementById(`manual-opt-img-${k}`).value = '';
+        document.getElementById(`preview-container-img-${k}`).classList.add('hidden');
+        document.getElementById(`img-preview-${k}`).src = '';
+      });
+
+      updateManualButtonState();
+      tutupPreviewManual();
+      showToast("Batal mengedit soal.");
     }
 
     function previewSoalManual() {
@@ -1933,6 +1988,7 @@
       document.getElementById('manual-preview-box').classList.add('hidden');
     }
 
+    /* FUNGSI SIMPAN SOAL TERINTEGRASI - MEMPERTAHANKAN GAMBAR TERPASANG */
     async function simpanSoalManual() {
       const noVal = parseInt(document.getElementById('manual-no').value) || (appData.soal.length + 1);
       const targetKelas = document.getElementById('manual-kelas').value;
@@ -1942,51 +1998,59 @@
       const teksLanjutan = document.getElementById('manual-teks-lanjutan').value.trim().replace(/\n/g, '<br>');
       const kunci = document.getElementById('manual-kunci').value;
 
+      // 1. Ambil data eksisting jika sedang dalam mode edit
       let existingData = {};
       if (editingSoalKey) {
         const found = appData.soal.find(item => item.key === editingSoalKey);
         if (found) existingData = found;
       }
 
+      // 2. Pertahankan gambar soal lama jika tidak ada file baru yang diunggah
       let imgSoalBase64 = existingData.imgSoal || '';
-      if(fileImgSoal) imgSoalBase64 = await readFileAsDataURL(fileImgSoal);
+      if (fileImgSoal) {
+        imgSoalBase64 = await readFileAsDataURL(fileImgSoal);
+      }
 
+      // 3. Pertahankan gambar opsi lama jika tidak ada file opsi baru yang diunggah
       const opsiData = {}, opsiImgData = {};
-      for(let k of ['A', 'B', 'C', 'D']) {
+      for (let k of ['A', 'B', 'C', 'D']) {
         const optTxt = document.getElementById(`manual-opt-text-${k}`).value.trim().replace(/\n/g, '<br>');
         const optImgFile = document.getElementById(`manual-opt-img-${k}`).files[0];
+        
         let optImgBase64 = (existingData.opsiImg && existingData.opsiImg[k]) ? existingData.opsiImg[k] : '';
-        if(optImgFile) optImgBase64 = await readFileAsDataURL(optImgFile);
+        if (optImgFile) {
+          optImgBase64 = await readFileAsDataURL(optImgFile);
+        }
+        
         opsiData[k] = optTxt;
         opsiImgData[k] = optImgBase64;
       }
 
       const payload = {
-        no: noVal, mapel: currentGuruMapel, kelas: targetKelas, materi: targetMateri,
-        teks: teks1, imgSoal: imgSoalBase64, teksLanjutan: teksLanjutan, opsi: opsiData, opsiImg: opsiImgData, kunci: kunci
+        no: noVal, 
+        mapel: currentGuruMapel, 
+        kelas: targetKelas, 
+        materi: targetMateri,
+        teks: teks1, 
+        imgSoal: imgSoalBase64, 
+        teksLanjutan: teksLanjutan, 
+        opsi: opsiData, 
+        opsiImg: opsiImgData, 
+        kunci: kunci
       };
 
       const pathGuru = getGuruPath();
 
       if (editingSoalKey) {
         db.ref(`${pathGuru}/soal/${editingSoalKey}`).update(payload);
-        showToast(`Soal No. ${noVal} diperbarui!`);
+        showToast(`Soal No. ${noVal} berhasil diperbarui!`);
         editingSoalKey = null;
       } else {
         db.ref(`${pathGuru}/soal`).push(payload);
         showToast(`Soal No. ${noVal} disimpan!`);
       }
 
-      document.getElementById('manual-no').value = '';
-      document.getElementById('manual-teks').value = '';
-      document.getElementById('manual-img-soal').value = '';
-      document.getElementById('manual-teks-lanjutan').value = '';
-      ['A', 'B', 'C', 'D'].forEach(k => {
-        document.getElementById(`manual-opt-text-${k}`).value = '';
-        document.getElementById(`manual-opt-img-${k}`).value = '';
-      });
-      updateManualButtonState();
-      tutupPreviewManual();
+      batalEditSoalManual();
     }
 
     function renderSoalList() {
