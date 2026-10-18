@@ -253,8 +253,16 @@
             </select>
           </div>
           <div>
-            <label class="text-xs font-semibold">Tahun Pelajaran</label>
-            <input type="text" id="cfg-tp" onchange="simpanPengaturan()" placeholder="2025/2026" value="2025/2026" class="w-full p-2 border rounded-lg text-sm font-semibold">
+            <label class="text-xs font-semibold">Tahun Pelajaran (Tapel)</label>
+            <div class="flex gap-1">
+              <select id="cfg-tp" onchange="simpanPengaturan()" class="w-full p-2 border rounded-lg text-sm font-semibold text-slate-800 bg-white">
+                <option value="2025/2026">2025/2026</option>
+                <option value="2026/2027">2026/2027</option>
+              </select>
+              <button onclick="tambahTapelBaru()" title="Tambah Tahun Pelajaran Baru" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 rounded-lg text-xs shadow transition flex items-center justify-center shrink-0">
+                + Tapel
+              </button>
+            </div>
           </div>
           <div>
             <label class="text-xs font-semibold">Isian KKM (Ketuntasan)</label>
@@ -1115,6 +1123,33 @@
       }
     }
 
+    function tambahTapelBaru() {
+      const tapelBaru = prompt("Masukkan Tahun Pelajaran Baru (Contoh: 2027/2028):");
+      if (tapelBaru && tapelBaru.trim()) {
+        const selectTp = document.getElementById('cfg-tp');
+        const valClean = tapelBaru.trim();
+
+        let exists = false;
+        for (let i = 0; i < selectTp.options.length; i++) {
+          if (selectTp.options[i].value === valClean) {
+            exists = true;
+            break;
+          }
+        }
+
+        if (!exists) {
+          const newOpt = document.createElement('option');
+          newOpt.value = valClean;
+          newOpt.text = valClean;
+          selectTp.appendChild(newOpt);
+        }
+
+        selectTp.value = valClean;
+        simpanPengaturan();
+        showToast(`Tahun Pelajaran ${valClean} berhasil ditambahkan & dipilih!`);
+      }
+    }
+
     function setupGuruRealtimeListeners() {
       if (!currentGuruKey || !currentGuruMapel) return;
 
@@ -1133,7 +1168,26 @@
         if (document.getElementById('cfg-jenis-ujian')) document.getElementById('cfg-jenis-ujian').value = appData.config.jenis || 'UH';
         if (document.getElementById('cfg-mapel')) document.getElementById('cfg-mapel').value = currentGuruMapel;
         if (document.getElementById('cfg-semester')) document.getElementById('cfg-semester').value = appData.config.semester || 'Ganjil';
-        if (document.getElementById('cfg-tp')) document.getElementById('cfg-tp').value = appData.config.tp || '2025/2026';
+        
+        const selectTp = document.getElementById('cfg-tp');
+        if (selectTp) {
+          const currentTpVal = appData.config.tp || '2025/2026';
+          let exists = false;
+          for (let i = 0; i < selectTp.options.length; i++) {
+            if (selectTp.options[i].value === currentTpVal) {
+              exists = true;
+              break;
+            }
+          }
+          if (!exists) {
+            const opt = document.createElement('option');
+            opt.value = currentTpVal;
+            opt.text = currentTpVal;
+            selectTp.appendChild(opt);
+          }
+          selectTp.value = currentTpVal;
+        }
+
         if (document.getElementById('cfg-waktu')) document.getElementById('cfg-waktu').value = appData.config.waktu || 60;
         if (document.getElementById('cfg-kkm')) document.getElementById('cfg-kkm').value = appData.config.kkm || 75;
         if (document.getElementById('cfg-token')) document.getElementById('cfg-token').value = appData.config.token || 'EXAM88';
@@ -1378,12 +1432,13 @@
       const selectedKelas = document.getElementById('cfg-kelas').value;
       const selectedMateri = document.getElementById('cfg-materi') ? document.getElementById('cfg-materi').value : 'SEMUA';
       const tokenVal = document.getElementById('cfg-token').value || 'EXAM88';
+      const tpVal = document.getElementById('cfg-tp') ? document.getElementById('cfg-tp').value : '2025/2026';
 
       const cfg = {
         jenis: document.getElementById('cfg-jenis-ujian').value,
         mapel: currentGuruMapel,
         semester: document.getElementById('cfg-semester').value,
-        tp: document.getElementById('cfg-tp').value,
+        tp: tpVal,
         waktu: parseInt(document.getElementById('cfg-waktu').value) || 60,
         kelasAktif: selectedKelas,
         kelas: selectedKelas,
@@ -1822,7 +1877,6 @@
       });
     }
 
-    // FITUR UTAMA: HAPUS SOAL TERFILTER (SESUAI KELAS DAN/ATAU MATERI TERPILIH)
     function hapusSoalSesuaiFilter() {
       const filterKelas = document.getElementById('filter-kelas-soal').value;
       const filterMateri = document.getElementById('filter-materi-soal') ? document.getElementById('filter-materi-soal').value : 'SEMUA';
