@@ -13,6 +13,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
   <style>
+    html {
+      scroll-behavior: smooth;
+    }
     body { 
       user-select: none; 
       -webkit-user-select: none; 
@@ -26,6 +29,14 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Style Tombol Sidebar Aktif */
+    .nav-menu-btn.active {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-weight: 700;
     }
 
     .rich-editor {
@@ -149,11 +160,11 @@
       body * {
         visibility: hidden !important;
       }
-      #section-analisis-pdf, #section-analisis-pdf * {
+      #sec-laporan-analisis, #sec-laporan-analisis * {
         visibility: visible !important;
         color: black !important;
       }
-      #section-analisis-pdf {
+      #sec-laporan-analisis {
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
@@ -240,10 +251,14 @@
     </div>
   </div>
 
-  <!-- HALAMAN DASHBOARD GURU -->
-  <div id="page-guru" class="hidden min-h-screen pb-12">
+  <!-- HALAMAN DASHBOARD GURU PERBAIKAN DENGAN SIDEBAR -->
+  <div id="page-guru" class="hidden min-h-screen flex flex-col">
+    <!-- Navbar Header Stik Kaki -->
     <nav class="anbk-header text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-40 backdrop-blur-md">
       <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-xl bg-slate-800 text-slate-300">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
         <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center font-black text-slate-950 shadow-md">
           U
         </div>
@@ -261,642 +276,698 @@
       </div>
     </nav>
 
-    <div class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
-      
-      <!-- Pengaturan Sesi Ujian -->
-      <div class="dark-card p-5 rounded-2xl shadow-xl">
-        <h3 class="font-bold text-slate-200 border-b border-slate-800 pb-2 mb-4 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span>Pengaturan Sesi Ujian Saya</span>
-        </h3>
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
-          <div>
-            <label class="text-xs font-semibold text-slate-400">Jenis Ujian</label>
-            <select id="cfg-jenis-ujian" onchange="simpanPengaturan()" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-bold text-blue-400 focus:ring-2 focus:ring-blue-500 outline-none mt-1">
-              <option value="UH">UH (Ulangan Harian)</option>
-              <option value="PTS">PTS (Penilaian Tengah Semester)</option>
-              <option value="SAS">SAS (Sumatif Akhir Semester)</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-400">Mata Pelajaran (Terkunci)</label>
-            <input type="text" id="cfg-mapel" disabled class="w-full p-2 border border-slate-800 rounded-xl text-sm font-bold bg-slate-950 text-slate-400 cursor-not-allowed mt-1">
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-400">Semester</label>
-            <select id="cfg-semester" onchange="simpanPengaturan()" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none mt-1">
-              <option value="Ganjil">Ganjil</option>
-              <option value="Genap">Genap</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-400">Tahun Pelajaran (Tapel)</label>
-            <div class="flex gap-1 mt-1">
-              <select id="cfg-tp" onchange="simpanPengaturan()" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
-                <option value="2025/2026">2025/2026</option>
-                <option value="2026/2027">2026/2027</option>
-              </select>
-              <button onclick="tambahTapelBaru()" title="Tambah Tahun Pelajaran Baru" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 rounded-xl text-xs shadow transition flex items-center justify-center shrink-0">
-                + Tapel
-              </button>
-            </div>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-400">Isian KKM (Ketuntasan)</label>
-            <input type="number" id="cfg-kkm" onchange="simpanPengaturan()" value="75" min="0" max="100" placeholder="75" class="w-full p-2 border border-emerald-500/30 rounded-xl text-sm font-bold text-emerald-400 bg-emerald-950/30 focus:ring-2 focus:ring-emerald-500 outline-none mt-1">
-          </div>
+    <!-- CONTAINER UTAMA DENGAN SIDEBAR NAVIGASI SWITCHER -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- SIDEBAR NAVIGASI MENU GURU -->
+      <aside id="sidebar-guru" class="w-64 bg-slate-900 border-r border-slate-800 min-h-[calc(100vh-73px)] p-4 shrink-0 text-slate-300 hidden md:block sticky top-[73px] self-start overflow-y-auto max-h-[calc(100vh-73px)]">
+        <div class="mb-4 px-2">
+          <h2 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Navigasi Utama</h2>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div>
-            <label class="text-xs font-semibold text-slate-400">Tingkat Kelas (Aktif Ujian)</label>
-            <select id="cfg-kelas" onchange="onSesiKelasChange()" class="w-full p-2 border border-emerald-500/30 rounded-xl text-sm font-bold text-emerald-400 bg-emerald-950/20 focus:ring-2 focus:ring-emerald-500 outline-none mt-1">
-              <option value="SEMUA">-- Semua Kelas --</option>
-              <option value="7A">Kelas 7A</option>
-              <option value="7B">Kelas 7B</option>
-              <option value="7C">Kelas 7C</option>
-              <option value="7D">Kelas 7D</option>
-              <option value="8A">Kelas 8A</option>
-              <option value="8B">Kelas 8B</option>
-              <option value="8C">Kelas 8C</option>
-              <option value="8D">Kelas 8D</option>
-              <option value="9A">Kelas 9A</option>
-              <option value="9B">Kelas 9B</option>
-              <option value="9C">Kelas 9C</option>
-              <option value="9D">Kelas 9D</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-400">📖 Materi / Topik Ujian Aktif</label>
-            <select id="cfg-materi" onchange="simpanPengaturan()" class="w-full p-2 border border-amber-500/30 rounded-xl text-sm font-bold text-amber-400 bg-amber-950/20 focus:ring-2 focus:ring-amber-500 outline-none mt-1">
-              <option value="SEMUA">-- Semua Materi --</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-400">Waktu (Menit)</label>
-            <input type="number" id="cfg-waktu" onchange="simpanPengaturan()" value="60" min="5" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none mt-1">
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-400">Token Ujian Spesifik Saya</label>
-            <div class="flex gap-1 mt-1">
-              <input type="text" id="cfg-token" readonly class="w-full p-2 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono font-bold text-center text-amber-400">
-              <button onclick="generateToken()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 rounded-xl text-xs font-semibold shadow transition">Buat</button>
-            </div>
-          </div>
-        </div>
-      </div>
+        <nav class="space-y-1.5 text-xs font-medium">
+          <!-- 1. Pengaturan Ujian -->
+          <button onclick="switchSection('sec-pengaturan')" class="nav-menu-btn active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span class="text-left">Pengaturan Ujian</span>
+          </button>
 
-      <!-- Import Data Siswa & Import Soal Massal -->
-      <div class="grid md:grid-cols-2 gap-6">
-        <div class="dark-card p-5 rounded-2xl shadow-xl">
-          <h3 class="font-bold text-slate-200 border-b border-slate-800 pb-2 mb-2">Import Data Siswa Khusus Mapel Saya</h3>
-          <p class="text-xs text-slate-400 mb-2">Format: <b>Nama Siswa [Tab/Koma/Spasi] Kelas</b></p>
-          <textarea id="import-siswa-raw" rows="6" placeholder="Ahmad&#9;7A&#10;Budi, 7A&#10;Cici   7B" class="w-full p-2.5 bg-slate-950 border border-slate-800 text-slate-200 rounded-xl text-sm font-mono mb-3 focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
-          <button onclick="prosesImportSiswa()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-emerald-900/30 transition">Simpan Data Siswa ke Ruang Saya</button>
-        </div>
+          <!-- 2. Impor Data Siswa -->
+          <button onclick="switchSection('sec-impor-siswa')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
+            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+            <span class="text-left">Impor Data Siswa</span>
+          </button>
 
-        <div class="dark-card p-5 rounded-2xl shadow-xl">
-          <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
-            <h3 class="font-bold text-slate-200">Import Soal Massal (.docx / PDF)</h3>
-            <button onclick="downloadTemplateSoal()" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1 rounded-xl text-xs font-semibold shadow flex items-center gap-1.5 transition border border-emerald-500/30">
-              <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-              <span>Template Word</span>
-            </button>
-          </div>
+          <!-- 3. Input Soal Manual & Impor Soal -->
+          <button onclick="switchSection('sec-input-soal')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
+            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            <span class="text-left">Input & Impor Soal</span>
+          </button>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+          <!-- 4. Bank Soal -->
+          <button onclick="switchSection('sec-bank-soal')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
+            <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <span class="text-left">Bank Soal</span>
+          </button>
+
+          <!-- 5. Pemantauan Ujian -->
+          <button onclick="switchSection('sec-pemantauan')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
+            <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            <span class="text-left">Pemantauan Ujian</span>
+          </button>
+
+          <!-- 6. Laporan Analisis Hasil Ujian -->
+          <button onclick="switchSection('sec-laporan-analisis')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
+            <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span class="text-left">Laporan Analisis Hasil Ujian</span>
+          </button>
+
+          <!-- 7. Riwayat Hasil Ujian -->
+          <button onclick="switchSection('sec-riwayat')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="text-left">Riwayat Hasil Ujian</span>
+          </button>
+        </nav>
+      </aside>
+
+      <!-- KONTEN UTAMA RUANG KERJA GURU -->
+      <main class="flex-1 p-4 md:p-6 space-y-6 overflow-y-auto">
+        
+        <!-- 1. Pengaturan Sesi Ujian (Tampil Default) -->
+        <div id="sec-pengaturan" class="dark-card p-5 rounded-2xl shadow-xl">
+          <h3 class="font-bold text-slate-200 border-b border-slate-800 pb-2 mb-4 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Pengaturan Sesi Ujian Saya</span>
+          </h3>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
             <div>
-              <label class="block text-xs font-bold text-slate-400 mb-1">📌 Target Kelas Soal</label>
-              <select id="import-soal-kelas" class="w-full p-2 bg-slate-900 border border-blue-500/30 text-blue-400 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
-                <option value="SEMUA">Semua Kelas</option>
-                <option value="7">Kelas 7</option>
-                <option value="8">Kelas 8</option>
-                <option value="9">Kelas 9</option>
+              <label class="text-xs font-semibold text-slate-400">Jenis Ujian</label>
+              <select id="cfg-jenis-ujian" onchange="simpanPengaturan()" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-bold text-blue-400 focus:ring-2 focus:ring-blue-500 outline-none mt-1">
+                <option value="Ulangan Harian">Ulangan Harian</option>
+                <option value="Penilaian Tengah Semester">Penilaian Tengah Semester</option>
+                <option value="Ujian Akhir Semester">Ujian Akhir Semester</option>
               </select>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-400 mb-1">📖 Nama Materi / Topik</label>
-              <input type="text" id="import-soal-materi" placeholder="Contoh: Bab 1 Pendahuluan" class="w-full p-2 bg-slate-900 border border-slate-700 text-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 outline-none">
-            </div>
-          </div>
-
-          <div class="mb-3 bg-emerald-950/20 p-3 rounded-xl border border-emerald-500/20">
-            <label class="block text-xs font-bold text-emerald-400 mb-1">📂 Upload Dokumen Soal (.docx Word / .txt / .html)</label>
-            <input type="file" id="import-word-file" accept=".docx,.txt,.html,.htm" onchange="handleWordUpload(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer">
-          </div>
-
-          <div class="mb-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-            <label class="block text-xs font-bold text-slate-300 mb-1">📄 Upload PDF (Preservasi Gambar Utuh)</label>
-            <input type="file" id="import-pdf-file" accept="application/pdf" onchange="handlePdfUpload(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
-          </div>
-
-          <div id="pdf-preview-container" class="hidden mb-3 border border-blue-500/30 rounded-xl overflow-hidden h-52 bg-slate-950">
-            <iframe id="pdf-viewer" class="w-full h-full border-none"></iframe>
-          </div>
-
-          <p class="text-xs text-slate-400 mb-2">Pratinjau Hasil Upload:</p>
-          <div id="mass-paste-box" class="rich-editor h-28" contenteditable="true" data-placeholder="Isi dokumen akan tampil di sini secara otomatis..."></div>
-          <button id="btn-parse-soal" onclick="parseMassPasteSoal()" class="w-full mt-3 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-blue-900/30 transition">Ekstrak Soal & Buat Tabel Kunci</button>
-        </div>
-      </div>
-
-      <!-- Form Manual Input / Edit Soal -->
-      <div class="dark-card p-5 rounded-2xl shadow-xl">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
-          <h3 class="font-bold text-slate-200" id="form-manual-title">Form Input / Edit Soal Saya</h3>
-          <span class="text-xs text-slate-400 font-medium">Khusus Mapel Terdaftar</span>
-        </div>
-
-        <div class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label class="block text-xs font-semibold text-slate-400 mb-1">Nomor Soal</label>
-              <input type="number" id="manual-no" placeholder="Otomatik" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-bold text-blue-400 focus:ring-2 focus:ring-blue-500 outline-none">
+              <label class="text-xs font-semibold text-slate-400">Mata Pelajaran (Terkunci)</label>
+              <input type="text" id="cfg-mapel" disabled class="w-full p-2 border border-slate-800 rounded-xl text-sm font-bold bg-slate-950 text-slate-400 cursor-not-allowed mt-1">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-400 mb-1">Target Kelas</label>
-              <select id="manual-kelas" class="w-full p-2 bg-slate-900 border border-blue-500/30 text-blue-400 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
-                <option value="SEMUA">Semua Kelas</option>
-                <option value="7">Kelas 7</option>
-                <option value="8">Kelas 8</option>
-                <option value="9">Kelas 9</option>
+              <label class="text-xs font-semibold text-slate-400">Semester</label>
+              <select id="cfg-semester" onchange="simpanPengaturan()" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none mt-1">
+                <option value="Ganjil">Ganjil</option>
+                <option value="Genap">Genap</option>
               </select>
             </div>
-            <div class="md:col-span-2">
-              <label class="block text-xs font-semibold text-slate-400 mb-1">Nama Materi / Topik</label>
-              <input type="text" id="manual-materi" placeholder="Contoh: Bab 1" class="w-full p-2 bg-slate-900 border border-slate-700 text-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 outline-none">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Teks Wacana / Teks Panjang (Sisi Kiri)</label>
-            <textarea id="manual-teks" rows="3" placeholder="Tuliskan wacana, bacaan, atau cerita..." class="w-full p-2.5 bg-slate-950 border border-slate-800 text-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
-          </div>
-
-          <div class="p-3 bg-blue-950/20 border border-blue-500/20 rounded-xl space-y-2">
-            <label class="block text-xs font-bold text-blue-400">🖼 Gambar Stimulus / Pendukung (Sisi Kiri)</label>
-            <input type="file" id="manual-img-soal" accept="image/*" class="text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mt-2 mb-1">Teks Pertanyaan Soal (Sisi Kanan)</label>
-              <input type="text" id="manual-teks-lanjutan" placeholder="Pertanyaan utama soal..." class="w-full p-2.5 bg-slate-900 border border-slate-700 text-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
+              <label class="text-xs font-semibold text-slate-400">Tahun Pelajaran (Tapel)</label>
+              <div class="flex gap-1 mt-1">
+                <select id="cfg-tp" onchange="simpanPengaturan()" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                  <option value="2025/2026">2025/2026</option>
+                  <option value="2026/2027">2026/2027</option>
+                </select>
+                <button onclick="tambahTapelBaru()" title="Tambah Tahun Pelajaran Baru" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 rounded-xl text-xs shadow transition flex items-center justify-center shrink-0">
+                  + Tapel
+                </button>
+              </div>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-400">Isian KKM (Ketuntasan)</label>
+              <input type="number" id="cfg-kkm" onchange="simpanPengaturan()" value="75" min="0" max="100" placeholder="75" class="w-full p-2 border border-emerald-500/30 rounded-xl text-sm font-bold text-emerald-400 bg-emerald-950/30 focus:ring-2 focus:ring-emerald-500 outline-none mt-1">
             </div>
           </div>
 
-          <div class="border-t border-slate-800 pt-3">
-            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Pilihan Opsi Soal (A, B, C, D)</h4>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="p-2.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-xs text-blue-400">OPSI A</span>
-                  <input type="file" id="manual-opt-img-A" accept="image/*" class="text-[10px] text-slate-400 w-44">
-                </div>
-                <input type="text" id="manual-opt-text-A" placeholder="Teks opsi A..." class="w-full p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-lg text-xs text-left focus:ring-1 focus:ring-blue-500 outline-none">
-              </div>
-
-              <div class="p-2.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-xs text-blue-400">OPSI B</span>
-                  <input type="file" id="manual-opt-img-B" accept="image/*" class="text-[10px] text-slate-400 w-44">
-                </div>
-                <input type="text" id="manual-opt-text-B" placeholder="Teks opsi B..." class="w-full p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-lg text-xs text-left focus:ring-1 focus:ring-blue-500 outline-none">
-              </div>
-
-              <div class="p-2.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-xs text-blue-400">OPSI C</span>
-                  <input type="file" id="manual-opt-img-C" accept="image/*" class="text-[10px] text-slate-400 w-44">
-                </div>
-                <input type="text" id="manual-opt-text-C" placeholder="Teks opsi C..." class="w-full p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-lg text-xs text-left focus:ring-1 focus:ring-blue-500 outline-none">
-              </div>
-
-              <div class="p-2.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-xs text-blue-400">OPSI D</span>
-                  <input type="file" id="manual-opt-img-D" accept="image/*" class="text-[10px] text-slate-400 w-44">
-                </div>
-                <input type="text" id="manual-opt-text-D" placeholder="Teks opsi D..." class="w-full p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-lg text-xs text-left focus:ring-1 focus:ring-blue-500 outline-none">
-              </div>
-            </div>
-          </div>
-
-          <div class="flex flex-col md:flex-row justify-between items-center gap-3 pt-2 border-t border-slate-800">
-            <div class="w-full md:w-48">
-              <label class="block text-xs font-semibold text-slate-400 mb-1">Kunci Jawaban</label>
-              <select id="manual-kunci" class="w-full p-2 bg-emerald-950/30 border border-emerald-500/30 rounded-xl text-sm font-bold text-emerald-400 focus:ring-2 focus:ring-emerald-500 outline-none">
-                <option value="A">Kunci A</option>
-                <option value="B">Kunci B</option>
-                <option value="C">Kunci C</option>
-                <option value="D">Kunci D</option>
-              </select>
-            </div>
-            
-            <div class="flex w-full md:w-auto gap-2">
-              <button type="button" onclick="previewSoalManual()" class="flex-1 md:flex-initial bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow transition">
-                👁 Preview Soal
-              </button>
-              <button id="btn-simpan-manual" type="button" onclick="simpanSoalManual()" class="flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow transition">
-                💾 Simpan Soal
-              </button>
-            </div>
-          </div>
-
-          <div id="manual-preview-box" class="hidden p-4 border border-blue-500/30 bg-blue-950/20 rounded-2xl space-y-3 mt-4">
-            <div class="flex justify-between items-center border-b border-blue-500/20 pb-2">
-              <h4 class="font-bold text-blue-400 text-sm flex items-center gap-2">
-                <span>👁 Preview Tampilan Dual Kolom Siswa</span>
-                <span id="preview-no-badge" class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-md">No. 1</span>
-              </h4>
-              <button onclick="tutupPreviewManual()" class="text-xs font-bold text-rose-400 hover:underline">Tutup Preview</button>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-xs">
-                <span class="font-bold text-slate-500 block mb-1 uppercase tracking-wider text-[10px]">Kolom Kiri (Stimulus/Wacana/Gambar):</span>
-                <div id="preview-display-soal" class="soal-content preview-img"></div>
-              </div>
-              <div class="space-y-3 text-xs">
-                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 font-semibold text-slate-200 flex gap-2">
-                  <span>1.</span>
-                  <div id="preview-display-pertanyaan"></div>
-                </div>
-                <div id="preview-display-opts" class="space-y-2 text-left"></div>
-              </div>
-            </div>
-
-            <div class="text-xs text-emerald-400 font-bold bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/30">
-              Kunci Jawaban Terpilih: <span id="preview-display-kunci">A</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="section-tabel-kunci" class="hidden dark-card p-5 rounded-2xl shadow-xl border border-blue-500/30">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
-          <div>
-            <h3 class="font-bold text-blue-400">Tabel Kunci Jawaban Soal Massal</h3>
-            <p class="text-xs text-slate-400">Jumlah nomor terdeteksi: <span id="parsed-count" class="font-bold text-blue-400">0</span> nomor.</p>
-          </div>
-          <button onclick="simpanSemuaSoalMassal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-xl font-bold text-sm shadow transition">Simpan Semua ke Cloud Guru</button>
-        </div>
-
-        <div class="overflow-x-auto max-h-80 overflow-y-auto">
-          <table class="w-full text-sm text-left border-collapse">
-            <thead class="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-300">
-              <tr>
-                <th class="p-2.5 border border-slate-800 text-center w-16">No</th>
-                <th class="p-2.5 border border-slate-800">Preview Teks Soal</th>
-                <th class="p-2.5 border border-slate-800 text-center w-48">Pilih Kunci Jawaban</th>
-                <th class="p-2.5 border border-slate-800 text-center w-20">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="tbody-tabel-kunci"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Bank Soal Saya -->
-      <div class="dark-card p-5 rounded-2xl shadow-xl">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 mb-4 gap-3">
-          <div>
-            <h3 class="font-bold text-slate-200">Daftar Bank Soal Saya (<span id="total-soal" class="text-blue-400">0</span> Soal)</h3>
-            <p class="text-xs text-slate-400">Menampilkan bank soal khusus akun & mapel Anda yang terisolasi.</p>
-          </div>
-          
-          <div class="flex flex-wrap items-center gap-2">
-            <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
-              <label for="filter-kelas-soal" class="text-xs font-semibold text-slate-400 px-1">Tampilkan Soal:</label>
-              <select id="filter-kelas-soal" onchange="renderSoalList()" class="text-xs font-bold bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <label class="text-xs font-semibold text-slate-400">Tingkat Kelas (Aktif Ujian)</label>
+              <select id="cfg-kelas" onchange="onSesiKelasChange()" class="w-full p-2 border border-emerald-500/30 rounded-xl text-sm font-bold text-emerald-400 bg-emerald-950/20 focus:ring-2 focus:ring-emerald-500 outline-none mt-1">
                 <option value="SEMUA">-- Semua Kelas --</option>
-                <option value="7">Kelas 7</option>
-                <option value="8">Kelas 8</option>
-                <option value="9">Kelas 9</option>
+                <option value="7A">Kelas 7A</option>
+                <option value="7B">Kelas 7B</option>
+                <option value="7C">Kelas 7C</option>
+                <option value="7D">Kelas 7D</option>
+                <option value="8A">Kelas 8A</option>
+                <option value="8B">Kelas 8B</option>
+                <option value="8C">Kelas 8C</option>
+                <option value="8D">Kelas 8D</option>
+                <option value="9A">Kelas 9A</option>
+                <option value="9B">Kelas 9B</option>
+                <option value="9C">Kelas 9C</option>
+                <option value="9D">Kelas 9D</option>
               </select>
             </div>
-
-            <div class="flex items-center gap-1.5 bg-amber-950/20 p-1.5 rounded-xl border border-amber-500/20">
-              <label for="filter-materi-soal" class="text-xs font-semibold text-amber-400 px-1">Filter Materi:</label>
-              <select id="filter-materi-soal" onchange="renderSoalList()" class="text-xs font-bold bg-slate-950 border border-amber-500/30 rounded-lg px-2 py-1 text-amber-300 focus:ring-2 focus:ring-amber-500 outline-none">
+            <div>
+              <label class="text-xs font-semibold text-slate-400">📖 Materi / Topik Ujian Aktif</label>
+              <select id="cfg-materi" onchange="simpanPengaturan()" class="w-full p-2 border border-amber-500/30 rounded-xl text-sm font-bold text-amber-400 bg-amber-950/20 focus:ring-2 focus:ring-amber-500 outline-none mt-1">
                 <option value="SEMUA">-- Semua Materi --</option>
               </select>
             </div>
-
-            <button onclick="hapusSoalSesuaiFilter()" class="bg-amber-600/20 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/30 text-xs font-bold px-3 py-1.5 rounded-xl shadow transition">
-              🗑 Hapus Soal Terfilter
-            </button>
-
-            <button onclick="kosongkanSoal()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold px-3 py-1.5 rounded-xl shadow transition">
-              🔥 Hapus Semua Soal Saya
-            </button>
+            <div>
+              <label class="text-xs font-semibold text-slate-400">Waktu (Menit)</label>
+              <input type="number" id="cfg-waktu" onchange="simpanPengaturan()" value="60" min="5" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none mt-1">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-400">Token Ujian Spesifik Saya</label>
+              <div class="flex gap-1 mt-1">
+                <input type="text" id="cfg-token" readonly class="w-full p-2 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono font-bold text-center text-amber-400">
+                <button onclick="generateToken()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 rounded-xl text-xs font-semibold shadow transition">Buat</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div id="list-soal" class="space-y-3 max-h-96 overflow-y-auto"></div>
-      </div>
+        <!-- 2. Import Data Siswa (Hidden) -->
+        <div id="sec-impor-siswa" class="hidden dark-card p-5 rounded-2xl shadow-xl max-w-2xl">
+          <h3 class="font-bold text-slate-200 border-b border-slate-800 pb-2 mb-2">Import Data Siswa Khusus Mapel Saya</h3>
+          <p class="text-xs text-slate-400 mb-2">Format: <b>Nama Siswa [Tab/Koma/Spasi] Kelas</b></p>
+          <textarea id="import-siswa-raw" rows="8" placeholder="" class="w-full p-2.5 bg-slate-950 border border-slate-800 text-slate-200 rounded-xl text-sm font-mono mb-3 focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+          <button onclick="prosesImportSiswa()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-emerald-900/30 transition">Simpan Data Siswa ke Ruang Saya</button>
+        </div>
 
-      <!-- Pemantauan Ujian Realtime -->
-      <div class="dark-card p-5 rounded-2xl shadow-xl">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 mb-4 gap-3">
-          <div>
-            <h3 class="font-bold text-slate-200">Pemantauan Ujian & Hasil Nilai Realtime Saya</h3>
-            <p class="text-xs text-slate-400">Nilai hasil pengerjaan, status ketuntasan KKM, & sisa waktu pengerjaan khusus mapel Anda.</p>
+        <!-- 3. Input Soal Manual & Impor Soal (Hidden) -->
+        <div id="sec-input-soal" class="hidden space-y-6">
+          <div class="dark-card p-5 rounded-2xl shadow-xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
+              <h3 class="font-bold text-slate-200">Import Soal Massal (.docx / PDF)</h3>
+              <button onclick="downloadTemplateSoal()" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1 rounded-xl text-xs font-semibold shadow flex items-center gap-1.5 transition border border-emerald-500/30">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                <span>Template Word</span>
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1">📌 Target Kelas Soal</label>
+                <select id="import-soal-kelas" class="w-full p-2 bg-slate-900 border border-blue-500/30 text-blue-400 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="SEMUA">Semua Kelas</option>
+                  <option value="7">Kelas 7</option>
+                  <option value="8">Kelas 8</option>
+                  <option value="9">Kelas 9</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1">📖 Nama Materi / Topik</label>
+                <input type="text" id="import-soal-materi" placeholder="" class="w-full p-2 bg-slate-900 border border-slate-700 text-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 outline-none">
+              </div>
+            </div>
+
+            <div class="mb-3 bg-emerald-950/20 p-3 rounded-xl border border-emerald-500/20">
+              <label class="block text-xs font-bold text-emerald-400 mb-1">📂 Upload Dokumen Soal (.docx Word / .txt / .html)</label>
+              <input type="file" id="import-word-file" accept=".docx,.txt,.html,.htm" onchange="handleWordUpload(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer">
+            </div>
+
+            <div class="mb-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <label class="block text-xs font-bold text-slate-300 mb-1">📄 Upload PDF (Preservasi Gambar Utuh)</label>
+              <input type="file" id="import-pdf-file" accept="application/pdf" onchange="handlePdfUpload(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+            </div>
+
+            <div id="pdf-preview-container" class="hidden mb-3 border border-blue-500/30 rounded-xl overflow-hidden h-52 bg-slate-950">
+              <iframe id="pdf-viewer" class="w-full h-full border-none"></iframe>
+            </div>
+
+            <p class="text-xs text-slate-400 mb-2">Pratinjau Hasil Upload:</p>
+            <div id="mass-paste-box" class="rich-editor h-28" contenteditable="true" data-placeholder="Isi dokumen akan tampil di sini secara otomatis..."></div>
+            <button id="btn-parse-soal" onclick="parseMassPasteSoal()" class="w-full mt-3 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-blue-900/30 transition">Ekstrak Soal & Buat Tabel Kunci</button>
           </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <button onclick="refreshDataGuru()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold px-3 py-2 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
-              <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-              <span>Refresh Data</span>
-            </button>
-            <button onclick="arsipkanDanBersihkanSesi()" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 font-bold px-3 py-2 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
-              <span>🧹 Arsipkan & Bersihkan Sesi Saya</span>
-            </button>
-            <button onclick="hapusSiswaDuplikat()" class="bg-amber-600/20 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/30 font-bold px-3 py-2 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
-              <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-              <span>Hapus Duplikat Siswa</span>
-            </button>
+
+          <!-- Form Manual Input / Edit Soal -->
+          <div class="dark-card p-5 rounded-2xl shadow-xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
+              <h3 class="font-bold text-slate-200" id="form-manual-title">Form Input / Edit Soal Saya</h3>
+              <span class="text-xs text-slate-400 font-medium">Khusus Mapel Terdaftar</span>
+            </div>
+
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 mb-1">Nomor Soal</label>
+                  <input type="number" id="manual-no" placeholder="Otomatis" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-bold text-blue-400 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 mb-1">Target Kelas</label>
+                  <select id="manual-kelas" class="w-full p-2 bg-slate-900 border border-blue-500/30 text-blue-400 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="SEMUA">Semua Kelas</option>
+                    <option value="7">Kelas 7</option>
+                    <option value="8">Kelas 8</option>
+                    <option value="9">Kelas 9</option>
+                  </select>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-semibold text-slate-400 mb-1">Nama Materi / Topik</label>
+                  <input type="text" id="manual-materi" placeholder="" class="w-full p-2 bg-slate-900 border border-slate-700 text-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Teks Wacana / Teks Panjang (Sisi Kiri)</label>
+                <textarea id="manual-teks" rows="3" placeholder="Tuliskan wacana, bacaan, atau cerita..." class="w-full p-2.5 bg-slate-950 border border-slate-800 text-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+              </div>
+
+              <div class="p-3 bg-blue-950/20 border border-blue-500/20 rounded-xl space-y-2">
+                <label class="block text-xs font-bold text-blue-400">🖼 Gambar Stimulus / Pendukung (Sisi Kiri)</label>
+                <input type="file" id="manual-img-soal" accept="image/*" class="text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mt-2 mb-1">Teks Pertanyaan Soal (Sisi Kanan)</label>
+                  <input type="text" id="manual-teks-lanjutan" placeholder="Pertanyaan utama soal..." class="w-full p-2.5 bg-slate-900 border border-slate-700 text-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+              </div>
+
+              <div class="border-t border-slate-800 pt-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Pilihan Opsi Soal (A, B, C, D)</h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div class="p-2.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1.5">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-xs text-blue-400">OPSI A</span>
+                      <input type="file" id="manual-opt-img-A" accept="image/*" class="text-[10px] text-slate-400 w-44">
+                    </div>
+                    <input type="text" id="manual-opt-text-A" placeholder="Teks opsi A..." class="w-full p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-lg text-xs text-left focus:ring-1 focus:ring-blue-500 outline-none">
+                  </div>
+
+                  <div class="p-2.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1.5">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-xs text-blue-400">OPSI B</span>
+                      <input type="file" id="manual-opt-img-B" accept="image/*" class="text-[10px] text-slate-400 w-44">
+                    </div>
+                    <input type="text" id="manual-opt-text-B" placeholder="Teks opsi B..." class="w-full p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-lg text-xs text-left focus:ring-1 focus:ring-blue-500 outline-none">
+                  </div>
+
+                  <div class="p-2.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1.5">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-xs text-blue-400">OPSI C</span>
+                      <input type="file" id="manual-opt-img-C" accept="image/*" class="text-[10px] text-slate-400 w-44">
+                    </div>
+                    <input type="text" id="manual-opt-text-C" placeholder="Teks opsi C..." class="w-full p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-lg text-xs text-left focus:ring-1 focus:ring-blue-500 outline-none">
+                  </div>
+
+                  <div class="p-2.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1.5">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-xs text-blue-400">OPSI D</span>
+                      <input type="file" id="manual-opt-img-D" accept="image/*" class="text-[10px] text-slate-400 w-44">
+                    </div>
+                    <input type="text" id="manual-opt-text-D" placeholder="Teks opsi D..." class="w-full p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-lg text-xs text-left focus:ring-1 focus:ring-blue-500 outline-none">
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex flex-col md:flex-row justify-between items-center gap-3 pt-2 border-t border-slate-800">
+                <div class="w-full md:w-48">
+                  <label class="block text-xs font-semibold text-slate-400 mb-1">Kunci Jawaban</label>
+                  <select id="manual-kunci" class="w-full p-2 bg-emerald-950/30 border border-emerald-500/30 rounded-xl text-sm font-bold text-emerald-400 focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <option value="A">Kunci A</option>
+                    <option value="B">Kunci B</option>
+                    <option value="C">Kunci C</option>
+                    <option value="D">Kunci D</option>
+                  </select>
+                </div>
+                
+                <div class="flex w-full md:w-auto gap-2">
+                  <button type="button" onclick="previewSoalManual()" class="flex-1 md:flex-initial bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow transition">
+                    👁 Preview Soal
+                  </button>
+                  <button id="btn-simpan-manual" type="button" onclick="simpanSoalManual()" class="flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow transition">
+                    💾 Simpan Soal
+                  </button>
+                </div>
+              </div>
+
+              <div id="manual-preview-box" class="hidden p-4 border border-blue-500/30 bg-blue-950/20 rounded-2xl space-y-3 mt-4">
+                <div class="flex justify-between items-center border-b border-blue-500/20 pb-2">
+                  <h4 class="font-bold text-blue-400 text-sm flex items-center gap-2">
+                    <span>👁 Preview Tampilan Dual Kolom Siswa</span>
+                    <span id="preview-no-badge" class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-md">No. 1</span>
+                  </h4>
+                  <button onclick="tutupPreviewManual()" class="text-xs font-bold text-rose-400 hover:underline">Tutup Preview</button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-xs">
+                    <span class="font-bold text-slate-500 block mb-1 uppercase tracking-wider text-[10px]">Kolom Kiri (Stimulus/Wacana/Gambar):</span>
+                    <div id="preview-display-soal" class="soal-content preview-img"></div>
+                  </div>
+                  <div class="space-y-3 text-xs">
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 font-semibold text-slate-200 flex gap-2">
+                      <span>1.</span>
+                      <div id="preview-display-pertanyaan"></div>
+                    </div>
+                    <div id="preview-display-opts" class="space-y-2 text-left"></div>
+                  </div>
+                </div>
+
+                <div class="text-xs text-emerald-400 font-bold bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/30">
+                  Kunci Jawaban Terpilih: <span id="preview-display-kunci">A</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="section-tabel-kunci" class="hidden dark-card p-5 rounded-2xl shadow-xl border border-blue-500/30">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
+              <div>
+                <h3 class="font-bold text-blue-400">Tabel Kunci Jawaban Soal Massal</h3>
+                <p class="text-xs text-slate-400">Jumlah nomor terdeteksi: <span id="parsed-count" class="font-bold text-blue-400">0</span> nomor.</p>
+              </div>
+              <button onclick="simpanSemuaSoalMassal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-xl font-bold text-sm shadow transition">Simpan Semua ke Cloud Guru</button>
+            </div>
+
+            <div class="overflow-x-auto max-h-80 overflow-y-auto">
+              <table class="w-full text-sm text-left border-collapse">
+                <thead class="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-300">
+                  <tr>
+                    <th class="p-2.5 border border-slate-800 text-center w-16">No</th>
+                    <th class="p-2.5 border border-slate-800">Preview Teks Soal</th>
+                    <th class="p-2.5 border border-slate-800 text-center w-48">Pilih Kunci Jawaban</th>
+                    <th class="p-2.5 border border-slate-800 text-center w-20">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-tabel-kunci"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Bank Soal Saya (Hidden) -->
+        <div id="sec-bank-soal" class="hidden dark-card p-5 rounded-2xl shadow-xl">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 mb-4 gap-3">
+            <div>
+              <h3 class="font-bold text-slate-200">Daftar Bank Soal Saya (<span id="total-soal" class="text-blue-400">0</span> Soal)</h3>
+              <p class="text-xs text-slate-400">Menampilkan bank soal khusus akun & mapel Anda yang terisolasi.</p>
+            </div>
             
-            <button onclick="hapusSiswaSesuaiKelas()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 font-bold px-3 py-2 rounded-xl text-xs shadow transition">
-              🗑 Hapus Siswa Kelas Terpilih
-            </button>
-            <button onclick="kosongkanSemuaSiswa()" class="bg-rose-800 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-xl text-xs shadow transition">
-              🔥 Hapus Semua Siswa
-            </button>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+                <label for="filter-kelas-soal" class="text-xs font-semibold text-slate-400 px-1">Tampilkan Soal:</label>
+                <select id="filter-kelas-soal" onchange="renderSoalList()" class="text-xs font-bold bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="SEMUA">-- Semua Kelas --</option>
+                  <option value="7">Kelas 7</option>
+                  <option value="8">Kelas 8</option>
+                  <option value="9">Kelas 9</option>
+                </select>
+              </div>
 
-            <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
-              <label for="filter-kelas-monitoring" class="text-xs font-semibold text-slate-400 px-1">Kelas Ujian:</label>
-              <select id="filter-kelas-monitoring" onchange="renderMonitoringTable()" class="text-xs font-bold bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                <option value="SEMUA">-- Semua Kelas --</option>
-                <option value="7A">Kelas 7A</option>
-                <option value="7B">Kelas 7B</option>
-                <option value="7C">Kelas 7C</option>
-                <option value="7D">Kelas 7D</option>
-                <option value="8A">Kelas 8A</option>
-                <option value="8B">Kelas 8B</option>
-                <option value="8C">Kelas 8C</option>
-                <option value="8D">Kelas 8D</option>
-                <option value="9A">Kelas 9A</option>
-                <option value="9B">Kelas 9B</option>
-                <option value="9C">Kelas 9C</option>
-                <option value="9D">Kelas 9D</option>
-              </select>
+              <div class="flex items-center gap-1.5 bg-amber-950/20 p-1.5 rounded-xl border border-amber-500/20">
+                <label for="filter-materi-soal" class="text-xs font-semibold text-amber-400 px-1">Filter Materi:</label>
+                <select id="filter-materi-soal" onchange="renderSoalList()" class="text-xs font-bold bg-slate-950 border border-amber-500/30 rounded-lg px-2 py-1 text-amber-300 focus:ring-2 focus:ring-amber-500 outline-none">
+                  <option value="SEMUA">-- Semua Materi --</option>
+                </select>
+              </div>
+
+              <button onclick="hapusSoalSesuaiFilter()" class="bg-amber-600/20 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/30 text-xs font-bold px-3 py-1.5 rounded-xl shadow transition">
+                🗑 Hapus Soal Terfilter
+              </button>
+
+              <button onclick="kosongkanSoal()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold px-3 py-1.5 rounded-xl shadow transition">
+                🔥 Hapus Semua Soal Saya
+              </button>
             </div>
-            <button onclick="downloadHasilExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow flex items-center gap-2 transition">
-              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-              <span>Download Excel Kelas Ini</span>
-            </button>
           </div>
+
+          <div id="list-soal" class="space-y-3 max-h-96 overflow-y-auto"></div>
         </div>
 
-        <div class="overflow-x-auto">
-          <table id="table-monitoring-dom" class="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-900 text-slate-400 border-b border-slate-800">
-                <th class="p-2.5 text-center w-10">No</th>
-                <th class="p-2.5">Nama Siswa</th>
-                <th class="p-2.5">Kelas</th>
-                <th class="p-2.5 text-center">Status</th>
-                <th class="p-2.5">Sisa Waktu (Realtime)</th>
-                <th class="p-2.5 text-center">Nilai</th>
-                <th class="p-2.5 text-center">KKM</th>
-                <th class="p-2.5 text-center">Keterangan</th>
-                <th class="p-2.5 text-center">Aksi Guru</th>
-              </tr>
-            </thead>
-            <tbody id="table-monitoring"></tbody>
-          </table>
-        </div>
-      </div>
+        <!-- 5. Pemantauan Ujian Realtime (Hidden) -->
+        <div id="sec-pemantauan" class="hidden dark-card p-5 rounded-2xl shadow-xl">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 mb-4 gap-3">
+            <div>
+              <h3 class="font-bold text-slate-200">Pemantauan Ujian & Hasil Nilai Realtime Saya</h3>
+              <p class="text-xs text-slate-400">Nilai hasil pengerjaan, status ketuntasan KKM, & sisa waktu pengerjaan khusus mapel Anda.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="refreshDataGuru()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold px-3 py-2 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                <span>Refresh Data</span>
+              </button>
+              <button onclick="arsipkanDanBersihkanSesi()" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 font-bold px-3 py-2 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
+                <span>🧹 Arsipkan & Bersihkan Sesi Saya</span>
+              </button>
+              <button onclick="hapusSiswaDuplikat()" class="bg-amber-600/20 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/30 font-bold px-3 py-2 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                <span>Hapus Duplikat Siswa</span>
+              </button>
+              
+              <button onclick="hapusSiswaSesuaiKelas()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 font-bold px-3 py-2 rounded-xl text-xs shadow transition">
+                🗑 Hapus Siswa Kelas Terpilih
+              </button>
+              <button onclick="kosongkanSemuaSiswa()" class="bg-rose-800 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-xl text-xs shadow transition">
+                🔥 Hapus Semua Siswa
+              </button>
 
-      <!-- HASIL ANALISIS ULANGAN & CETAK LAPORAN -->
-      <div id="section-analisis-pdf" class="dark-card p-6 md:p-8 rounded-2xl shadow-xl border border-slate-800 space-y-6">
-        
-        <div class="border-b-2 border-slate-700 pb-4 text-center space-y-1">
-          <h2 class="text-xl font-black uppercase text-slate-100 tracking-wider">LAPORAN ANALISIS HASIL ULANGAN KETUNTASAN KLASIKAL</h2>
-          <p class="text-xs font-bold text-slate-400 uppercase">PROGRAM REMEDIAL, PENGAYAAN DAN RENCANA TINDAK LANJUT (RTL)</p>
-        </div>
-
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div class="grid grid-cols-[140px_10px_1fr] text-xs font-semibold text-slate-300 gap-y-1.5 w-full md:w-auto">
-            <span>Mata Pelajaran</span><span>:</span><span id="pdf-meta-mapel" class="font-bold text-blue-400 truncate">-</span>
-            <span>Jenis Ujian</span><span>:</span><span id="pdf-meta-jenis" class="truncate">-</span>
-            <span>Materi Ujian</span><span>:</span><span id="pdf-meta-materi" class="font-bold text-amber-400 truncate">SEMUA</span>
-            <span>Tahun Pelajaran / Sem</span><span>:</span><span id="pdf-meta-tp" class="truncate">-</span>
-            <span>Batas KKM</span><span>:</span><span id="pdf-meta-kkm" class="font-bold text-emerald-400 truncate">-</span>
-            <span>Filter Kelas Ujian</span><span>:</span><span id="pdf-meta-kelas" class="font-bold text-slate-100 truncate">SEMUA</span>
+              <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+                <label for="filter-kelas-monitoring" class="text-xs font-semibold text-slate-400 px-1">Kelas Ujian:</label>
+                <select id="filter-kelas-monitoring" onchange="renderMonitoringTable()" class="text-xs font-bold bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="SEMUA">-- Semua Kelas --</option>
+                  <option value="7A">Kelas 7A</option>
+                  <option value="7B">Kelas 7B</option>
+                  <option value="7C">Kelas 7C</option>
+                  <option value="7D">Kelas 7D</option>
+                  <option value="8A">Kelas 8A</option>
+                  <option value="8B">Kelas 8B</option>
+                  <option value="8C">Kelas 8C</option>
+                  <option value="8D">Kelas 8D</option>
+                  <option value="9A">Kelas 9A</option>
+                  <option value="9B">Kelas 9B</option>
+                  <option value="9C">Kelas 9C</option>
+                  <option value="9D">Kelas 9D</option>
+                </select>
+              </div>
+              <button onclick="downloadHasilExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow flex items-center gap-2 transition">
+                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                <span>Download Excel Kelas Ini</span>
+              </button>
+            </div>
           </div>
 
-          <div class="no-print">
-            <button onclick="cetakLaporanBrowser()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md flex items-center gap-2 transition">
-              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-4 11H9v-5h6v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H7v4h10V3z"/></svg>
-              <span>Cetak / Simpan PDF (Browser)</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div class="bg-blue-950/30 border border-blue-500/20 p-3 rounded-xl text-center">
-            <p class="text-[11px] font-bold text-blue-400 uppercase">Total Peserta</p>
-            <h4 id="stat-total-siswa" class="text-xl font-black text-blue-200 mt-0.5">0</h4>
-          </div>
-          <div class="bg-emerald-950/30 border border-emerald-500/20 p-3 rounded-xl text-center">
-            <p class="text-[11px] font-bold text-emerald-400 uppercase">Tuntas Klasikal (≥ KKM)</p>
-            <h4 id="stat-tuntas-siswa" class="text-xl font-black text-emerald-200 mt-0.5">0 <span id="stat-persen-tuntas" class="text-xs font-semibold text-emerald-400">(0%)</span></h4>
-          </div>
-          <div class="bg-amber-950/30 border border-amber-500/20 p-3 rounded-xl text-center">
-            <p class="text-[11px] font-bold text-amber-400 uppercase">Perlu Remedial (&lt; KKM)</p>
-            <h4 id="stat-remedi-siswa" class="text-xl font-black text-amber-200 mt-0.5">0 <span id="stat-persen-remedi" class="text-xs font-semibold text-amber-400">(0%)</span></h4>
-          </div>
-          <div class="bg-indigo-950/30 border border-indigo-500/20 p-3 rounded-xl text-center">
-            <p class="text-[11px] font-bold text-indigo-400 uppercase">Rata-Rata Nilai</p>
-            <h4 id="stat-rata-nilai" class="text-xl font-black text-indigo-200 mt-0.5">0.0</h4>
-          </div>
-        </div>
-
-        <div class="space-y-2">
-          <h4 class="font-bold text-slate-200 text-xs uppercase tracking-wide border-l-4 border-blue-500 pl-2">I. Rekapitulasi Ketuntasan Klasikal Per Kelas</h4>
           <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left border-collapse border border-slate-800">
+            <table id="table-monitoring-dom" class="w-full text-xs text-left border-collapse">
               <thead>
-                <tr class="bg-slate-900 text-slate-300 border-b border-slate-800 font-bold">
-                  <th class="p-2 border border-slate-800 text-center w-12">Kelas</th>
-                  <th class="p-2 border border-slate-800 text-center">Jumlah Siswa</th>
-                  <th class="p-2 border border-slate-800 text-center">Siswa Tuntas</th>
-                  <th class="p-2 border border-slate-800 text-center">Siswa Remedi</th>
-                  <th class="p-2 border border-slate-800 text-center">% Ketuntasan</th>
-                  <th class="p-2 border border-slate-800 text-center">Status Klasikal</th>
-                  <th class="p-2 border border-slate-800">Rekomendasi Tindakan</th>
+                <tr class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                  <th class="p-2.5 text-center w-10">No</th>
+                  <th class="p-2.5">Nama Siswa</th>
+                  <th class="p-2.5">Kelas</th>
+                  <th class="p-2.5 text-center">Status</th>
+                  <th class="p-2.5">Sisa Waktu (Realtime)</th>
+                  <th class="p-2.5 text-center">Nilai</th>
+                  <th class="p-2.5 text-center">KKM</th>
+                  <th class="p-2.5 text-center">Keterangan</th>
+                  <th class="p-2.5 text-center">Aksi Guru</th>
                 </tr>
               </thead>
-              <tbody id="tbody-analisis-kelas"></tbody>
+              <tbody id="table-monitoring"></tbody>
             </table>
           </div>
         </div>
 
-        <div class="space-y-3">
-          <h4 class="font-bold text-slate-200 text-xs uppercase tracking-wide border-l-4 border-emerald-500 pl-2">II. Rincian Data Valid Siswa Tuntas & Perlu Remedial</h4>
+        <!-- 6. HASIL ANALISIS ULANGAN & CETAK LAPORAN (Hidden) -->
+        <div id="sec-laporan-analisis" class="hidden dark-card p-6 md:p-8 rounded-2xl shadow-xl border border-slate-800 space-y-6">
           
-          <div class="grid md:grid-cols-2 gap-4">
-            <div class="border border-rose-500/30 rounded-xl overflow-hidden bg-rose-950/10">
-              <div class="bg-rose-950/40 px-3 py-2 border-b border-rose-500/30 flex justify-between items-center">
-                <span class="font-bold text-rose-300 text-xs">⚠️ Daftar Siswa Perlu Remedial (&lt; KKM)</span>
-                <span id="badge-count-remedi" class="bg-rose-600 text-white font-bold text-[10px] px-2 py-0.5 rounded-full">0 Siswa</span>
-              </div>
-              <div>
-                <table class="w-full text-xs text-left border-collapse">
-                  <thead>
-                    <tr class="bg-slate-900 text-slate-400 border-b border-slate-800 font-bold">
-                      <th class="p-1.5 border-r border-slate-800 text-center w-8">No</th>
-                      <th class="p-1.5 border-r border-slate-800">Nama Siswa</th>
-                      <th class="p-1.5 border-r border-slate-800 text-center w-14">Kelas</th>
-                      <th class="p-1.5 text-center w-12">Nilai</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbody-siswa-remedi"></tbody>
-                </table>
-              </div>
+          <div class="border-b-2 border-slate-700 pb-4 text-center space-y-1">
+            <h2 class="text-xl font-black uppercase text-slate-100 tracking-wider">LAPORAN ANALISIS HASIL UJIAN</h2>
+            <p class="text-xs font-bold text-slate-400 uppercase">PROGRAM REMEDIAL, PENGAYAAN DAN RENCANA TINDAK LANJUT (RTL)</p>
+          </div>
+
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="grid grid-cols-[140px_10px_1fr] text-xs font-semibold text-slate-300 gap-y-1.5 w-full md:w-auto">
+              <span>Mata Pelajaran</span><span>:</span><span id="pdf-meta-mapel" class="font-bold text-blue-400 truncate">-</span>
+              <span>Jenis Ujian</span><span>:</span><span id="pdf-meta-jenis" class="truncate">-</span>
+              <span>Materi Ujian</span><span>:</span><span id="pdf-meta-materi" class="font-bold text-amber-400 truncate">SEMUA</span>
+              <span>Tahun Pelajaran / Sem</span><span>:</span><span id="pdf-meta-tp" class="truncate">-</span>
+              <span>Batas KKM</span><span>:</span><span id="pdf-meta-kkm" class="font-bold text-emerald-400 truncate">-</span>
+              <span>Filter Kelas Ujian</span><span>:</span><span id="pdf-meta-kelas" class="font-bold text-slate-100 truncate">SEMUA</span>
             </div>
 
-            <div class="border border-emerald-500/30 rounded-xl overflow-hidden bg-emerald-950/10">
-              <div class="bg-emerald-950/40 px-3 py-2 border-b border-emerald-500/30 flex justify-between items-center">
-                <span class="font-bold text-emerald-300 text-xs">⭐ Daftar Siswa Tuntas / Pengayaan (≥ KKM)</span>
-                <span id="badge-count-tuntas" class="bg-emerald-600 text-white font-bold text-[10px] px-2 py-0.5 rounded-full">0 Siswa</span>
+            <div class="no-print">
+              <button onclick="cetakLaporanBrowser()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md flex items-center gap-2 transition">
+                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-4 11H9v-5h6v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H7v4h10V3z"/></svg>
+                <span>Cetak / Simpan PDF (Browser)</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="bg-blue-950/30 border border-blue-500/20 p-3 rounded-xl text-center">
+              <p class="text-[11px] font-bold text-blue-400 uppercase">Total Peserta</p>
+              <h4 id="stat-total-siswa" class="text-xl font-black text-blue-200 mt-0.5">0</h4>
+            </div>
+            <div class="bg-emerald-950/30 border border-emerald-500/20 p-3 rounded-xl text-center">
+              <p class="text-[11px] font-bold text-emerald-400 uppercase">Tuntas Klasikal (≥ KKM)</p>
+              <h4 id="stat-tuntas-siswa" class="text-xl font-black text-emerald-200 mt-0.5">0 <span id="stat-persen-tuntas" class="text-xs font-semibold text-emerald-400">(0%)</span></h4>
+            </div>
+            <div class="bg-amber-950/30 border border-amber-500/20 p-3 rounded-xl text-center">
+              <p class="text-[11px] font-bold text-amber-400 uppercase">Perlu Remedial (&lt; KKM)</p>
+              <h4 id="stat-remedi-siswa" class="text-xl font-black text-amber-200 mt-0.5">0 <span id="stat-persen-remedi" class="text-xs font-semibold text-amber-400">(0%)</span></h4>
+            </div>
+            <div class="bg-indigo-950/30 border border-indigo-500/20 p-3 rounded-xl text-center">
+              <p class="text-[11px] font-bold text-indigo-400 uppercase">Rata-Rata Nilai</p>
+              <h4 id="stat-rata-nilai" class="text-xl font-black text-indigo-200 mt-0.5">0.0</h4>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <h4 class="font-bold text-slate-200 text-xs uppercase tracking-wide border-l-4 border-blue-500 pl-2">I. Rekapitulasi Ketuntasan Klasikal Per Kelas</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse border border-slate-800">
+                <thead>
+                  <tr class="bg-slate-900 text-slate-300 border-b border-slate-800 font-bold">
+                    <th class="p-2 border border-slate-800 text-center w-12">Kelas</th>
+                    <th class="p-2 border border-slate-800 text-center">Jumlah Siswa</th>
+                    <th class="p-2 border border-slate-800 text-center">Siswa Tuntas</th>
+                    <th class="p-2 border border-slate-800 text-center">Siswa Remedi</th>
+                    <th class="p-2 border border-slate-800 text-center">% Ketuntasan</th>
+                    <th class="p-2 border border-slate-800 text-center">Status Klasikal</th>
+                    <th class="p-2 border border-slate-800">Rekomendasi Tindakan</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-analisis-kelas"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <h4 class="font-bold text-slate-200 text-xs uppercase tracking-wide border-l-4 border-emerald-500 pl-2">II. Rincian Data Valid Siswa Tuntas & Perlu Remedial</h4>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="border border-rose-500/30 rounded-xl overflow-hidden bg-rose-950/10">
+                <div class="bg-rose-950/40 px-3 py-2 border-b border-rose-500/30 flex justify-between items-center">
+                  <span class="font-bold text-rose-300 text-xs">⚠️ Daftar Siswa Perlu Remedial (&lt; KKM)</span>
+                  <span id="badge-count-remedi" class="bg-rose-600 text-white font-bold text-[10px] px-2 py-0.5 rounded-full">0 Siswa</span>
+                </div>
+                <div>
+                  <table class="w-full text-xs text-left border-collapse">
+                    <thead>
+                      <tr class="bg-slate-900 text-slate-400 border-b border-slate-800 font-bold">
+                        <th class="p-1.5 border-r border-slate-800 text-center w-8">No</th>
+                        <th class="p-1.5 border-r border-slate-800">Nama Siswa</th>
+                        <th class="p-1.5 border-r border-slate-800 text-center w-14">Kelas</th>
+                        <th class="p-1.5 text-center w-12">Nilai</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-siswa-remedi"></tbody>
+                  </table>
+                </div>
               </div>
-              <div>
-                <table class="w-full text-xs text-left border-collapse">
-                  <thead>
-                    <tr class="bg-slate-900 text-slate-400 border-b border-slate-800 font-bold">
-                      <th class="p-1.5 border-r border-slate-800 text-center w-8">No</th>
-                      <th class="p-1.5 border-r border-slate-800">Nama Siswa</th>
-                      <th class="p-1.5 border-r border-slate-800 text-center w-14">Kelas</th>
-                      <th class="p-1.5 text-center w-12">Nilai</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbody-siswa-tuntas"></tbody>
-                </table>
+
+              <div class="border border-emerald-500/30 rounded-xl overflow-hidden bg-emerald-950/10">
+                <div class="bg-emerald-950/40 px-3 py-2 border-b border-emerald-500/30 flex justify-between items-center">
+                  <span class="font-bold text-emerald-300 text-xs">⭐ Daftar Siswa Tuntas / Pengayaan (≥ KKM)</span>
+                  <span id="badge-count-tuntas" class="bg-emerald-600 text-white font-bold text-[10px] px-2 py-0.5 rounded-full">0 Siswa</span>
+                </div>
+                <div>
+                  <table class="w-full text-xs text-left border-collapse">
+                    <thead>
+                      <tr class="bg-slate-900 text-slate-400 border-b border-slate-800 font-bold">
+                        <th class="p-1.5 border-r border-slate-800 text-center w-8">No</th>
+                        <th class="p-1.5 border-r border-slate-800">Nama Siswa</th>
+                        <th class="p-1.5 border-r border-slate-800 text-center w-14">Kelas</th>
+                        <th class="p-1.5 text-center w-12">Nilai</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-siswa-tuntas"></tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="space-y-2">
-          <h4 class="font-bold text-slate-200 text-xs uppercase tracking-wide border-l-4 border-amber-500 pl-2">III. Program Pelaksanaan Remedial dan Pengayaan</h4>
-          <div class="grid md:grid-cols-2 gap-4 text-xs">
-            <div class="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1.5">
-              <h5 class="font-bold text-amber-400">A. Ketentuan Program Remedial:</h5>
-              <div class="grid grid-cols-[110px_10px_1fr] gap-y-1 text-slate-300">
-                <span>Metode Pembelajaran</span><span>:</span><span>Bimbingan Individu & Tutor Sebaya</span>
-                <span>Materi Fokus</span><span>:</span><span>Indikator Soal Kategori Rendah/Sulit</span>
-                <span>Bentuk Evaluasi</span><span>:</span><span>Tes Tulis Ulang Soal Remedial</span>
-                <span>Target Ketuntasan</span><span>:</span><span>100% Menggapai KKM Minimum</span>
+          <div class="space-y-2">
+            <h4 class="font-bold text-slate-200 text-xs uppercase tracking-wide border-l-4 border-amber-500 pl-2">III. Program Pelaksanaan Remedial dan Pengayaan</h4>
+            <div class="grid md:grid-cols-2 gap-4 text-xs">
+              <div class="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1.5">
+                <h5 class="font-bold text-amber-400">A. Ketentuan Program Remedial:</h5>
+                <div class="grid grid-cols-[110px_10px_1fr] gap-y-1 text-slate-300">
+                  <span>Metode Pembelajaran</span><span>:</span><span>Bimbingan Individu & Tutor Sebaya</span>
+                  <span>Materi Fokus</span><span>:</span><span>Indikator Soal Kategori Rendah/Sulit</span>
+                  <span>Bentuk Evaluasi</span><span>:</span><span>Tes Tulis Ulang Soal Remedial</span>
+                  <span>Target Ketuntasan</span><span>:</span><span>100% Menggapai KKM Minimum</span>
+                </div>
               </div>
-            </div>
 
-            <div class="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1.5">
-              <h5 class="font-bold text-emerald-400">B. Ketentuan Program Pengayaan:</h5>
-              <div class="grid grid-cols-[110px_10px_1fr] gap-y-1 text-slate-300">
-                <span>Metode Pembelajaran</span><span>:</span><span>Penugasan Mandiri / Studi Literatur</span>
-                <span>Materi Fokus</span><span>:</span><span>Penyelesaian Soal Tingkat Tinggi (HOTS)</span>
-                <span>Bentuk Evaluasi</span><span>:</span><span>Portofolio Hasil Kerja / Proyek</span>
-                <span>Target Capaian</span><span>:</span><span>Pengembangan Wawasan & Penalaran</span>
+              <div class="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1.5">
+                <h5 class="font-bold text-emerald-400">B. Ketentuan Program Pengayaan:</h5>
+                <div class="grid grid-cols-[110px_10px_1fr] gap-y-1 text-slate-300">
+                  <span>Metode Pembelajaran</span><span>:</span><span>Penugasan Mandiri / Studi Literatur</span>
+                  <span>Materi Fokus</span><span>:</span><span>Penyelesaian Soal Tingkat Tinggi (HOTS)</span>
+                  <span>Bentuk Evaluasi</span><span>:</span><span>Portofolio Hasil Kerja / Proyek</span>
+                  <span>Target Capaian</span><span>:</span><span>Pengembangan Wawasan & Penalaran</span>
+                </div>
               </div>
             </div>
           </div>
+
+          <div class="space-y-2">
+            <h4 class="font-bold text-slate-200 text-xs uppercase tracking-wide border-l-4 border-indigo-500 pl-2">IV. Matriks Rencana Tindak Lanjut (RTL) Guru</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse border border-slate-800">
+                <thead>
+                  <tr class="bg-slate-900 text-slate-300 border-b border-slate-800 font-bold">
+                    <th class="p-2 border border-slate-800 text-center w-8">No</th>
+                    <th class="p-2 border border-slate-800">Rencana Kegiatan</th>
+                    <th class="p-2 border border-slate-800">Sasaran / Target</th>
+                    <th class="p-2 border border-slate-800">Metode & Strategi</th>
+                    <th class="p-2 border border-slate-800 text-center w-32">Jadwal Pelaksanaan</th>
+                    <th class="p-2 border border-slate-800 text-center w-28">Penanggung Jawab</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-b border-slate-800/60">
+                    <td class="p-2 border border-slate-800/60 text-center font-bold">1</td>
+                    <td class="p-2 border border-slate-800/60 font-semibold">Pelaksanaan Pembelajaran & Tes Remedial</td>
+                    <td class="p-2 border border-slate-800/60">Siswa dengan nilai di bawah KKM</td>
+                    <td class="p-2 border border-slate-800/60">Bimbingan terfokus materi indikator esensial</td>
+                    <td class="p-2 border border-slate-800/60 text-center">Minggu Ke-1 Pasca Ujian</td>
+                    <td class="p-2 border border-slate-800/60 text-center">Guru Mata Pelajaran</td>
+                  </tr>
+                  <tr class="border-b border-slate-800/60">
+                    <td class="p-2 border border-slate-800/60 text-center font-bold">2</td>
+                    <td class="p-2 border border-slate-800/60 font-semibold">Pemberian Tugas Pengayaan HOTS</td>
+                    <td class="p-2 border border-slate-800/60">Siswa yang telah memenuhi standar KKM</td>
+                    <td class="p-2 border border-slate-800/60">Pemberian soal bernalar tinggi & penugasan proyek</td>
+                    <td class="p-2 border border-slate-800/60 text-center">Minggu Ke-1 Pasca Ujian</td>
+                    <td class="p-2 border border-slate-800/60 text-center">Guru Mata Pelajaran</td>
+                  </tr>
+                  <tr class="border-b border-slate-800/60">
+                    <td class="p-2 border border-slate-800/60 text-center font-bold">3</td>
+                    <td class="p-2 border border-slate-800/60 font-semibold">Evaluasi & Refleksi Kualitas Soal</td>
+                    <td class="p-2 border border-slate-800/60">Bank Soal & Modul Pembelajaran</td>
+                    <td class="p-2 border border-slate-800/60">Revisi butir soal yang memiliki tingkat kesukaran ekstrem</td>
+                    <td class="p-2 border border-slate-800/60 text-center">Minggu Ke-2 Pasca Ujian</td>
+                    <td class="p-2 border border-slate-800/60 text-center">Guru Mata Pelajaran</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
 
-        <div class="space-y-2">
-          <h4 class="font-bold text-slate-200 text-xs uppercase tracking-wide border-l-4 border-indigo-500 pl-2">IV. Matriks Rencana Tindak Lanjut (RTL) Guru</h4>
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left border-collapse border border-slate-800">
+        <!-- 7. Riwayat Ujian Terarsip Saya (Hidden) -->
+        <div id="sec-riwayat" class="hidden dark-card p-5 rounded-2xl shadow-xl">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 mb-4 gap-3">
+            <div>
+              <h3 class="font-bold text-slate-200">Riwayat Hasil Ujian Terarsip Saya</h3>
+              <p class="text-xs text-slate-400">Data hasil ujian dari sesi sebelumnya khusus mata pelajaran Anda.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+                <label for="filter-riwayat-kelas" class="text-xs font-semibold text-slate-400 px-1">Pilih Kelas:</label>
+                <select id="filter-riwayat-kelas" onchange="renderRiwayatTable()" class="text-xs font-bold bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-200 outline-none">
+                  <option value="SEMUA">-- Semua Kelas --</option>
+                  <option value="7A">Kelas 7A</option>
+                  <option value="7B">Kelas 7B</option>
+                  <option value="7C">Kelas 7C</option>
+                  <option value="7D">Kelas 7D</option>
+                  <option value="8A">Kelas 8A</option>
+                  <option value="8B">Kelas 8B</option>
+                  <option value="8C">Kelas 8C</option>
+                  <option value="8D">Kelas 8D</option>
+                  <option value="9A">Kelas 9A</option>
+                  <option value="9B">Kelas 9B</option>
+                  <option value="9C">Kelas 9C</option>
+                  <option value="9D">Kelas 9D</option>
+                </select>
+              </div>
+              <button onclick="clearRiwayatTerpilih()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 font-bold px-3 py-1.5 rounded-xl text-xs shadow transition">
+                🗑 Hapus Riwayat Kelas Terpilih
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto max-h-80 overflow-y-auto">
+            <table class="w-full text-sm text-left border-collapse">
               <thead>
-                <tr class="bg-slate-900 text-slate-300 border-b border-slate-800 font-bold">
-                  <th class="p-2 border border-slate-800 text-center w-8">No</th>
-                  <th class="p-2 border border-slate-800">Rencana Kegiatan</th>
-                  <th class="p-2 border border-slate-800">Sasaran / Target</th>
-                  <th class="p-2 border border-slate-800">Metode & Strategi</th>
-                  <th class="p-2 border border-slate-800 text-center w-32">Jadwal Pelaksanaan</th>
-                  <th class="p-2 border border-slate-800 text-center w-28">Penanggung Jawab</th>
+                <tr class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                  <th class="p-3 text-center w-12">No</th>
+                  <th class="p-3">Nama Siswa</th>
+                  <th class="p-3">Kelas</th>
+                  <th class="p-3">Mata Pelajaran</th>
+                  <th class="p-3">Nilai</th>
+                  <th class="p-3">Tanggal / Waktu Arsip</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr class="border-b border-slate-800/60">
-                  <td class="p-2 border border-slate-800/60 text-center font-bold">1</td>
-                  <td class="p-2 border border-slate-800/60 font-semibold">Pelaksanaan Pembelajaran & Tes Remedial</td>
-                  <td class="p-2 border border-slate-800/60">Siswa dengan nilai di bawah KKM</td>
-                  <td class="p-2 border border-slate-800/60">Bimbingan terfokus materi indikator esensial</td>
-                  <td class="p-2 border border-slate-800/60 text-center">Minggu Ke-1 Pasca Ujian</td>
-                  <td class="p-2 border border-slate-800/60 text-center">Guru Mata Pelajaran</td>
-                </tr>
-                <tr class="border-b border-slate-800/60">
-                  <td class="p-2 border border-slate-800/60 text-center font-bold">2</td>
-                  <td class="p-2 border border-slate-800/60 font-semibold">Pemberian Tugas Pengayaan HOTS</td>
-                  <td class="p-2 border border-slate-800/60">Siswa yang telah memenuhi standar KKM</td>
-                  <td class="p-2 border border-slate-800/60">Pemberian soal bernalar tinggi & penugasan proyek</td>
-                  <td class="p-2 border border-slate-800/60 text-center">Minggu Ke-1 Pasca Ujian</td>
-                  <td class="p-2 border border-slate-800/60 text-center">Guru Mata Pelajaran</td>
-                </tr>
-                <tr class="border-b border-slate-800/60">
-                  <td class="p-2 border border-slate-800/60 text-center font-bold">3</td>
-                  <td class="p-2 border border-slate-800/60 font-semibold">Evaluasi & Refleksi Kualitas Soal</td>
-                  <td class="p-2 border border-slate-800/60">Bank Soal & Modul Pembelajaran</td>
-                  <td class="p-2 border border-slate-800/60">Revisi butir soal yang memiliki tingkat kesukaran ekstrem</td>
-                  <td class="p-2 border border-slate-800/60 text-center">Minggu Ke-2 Pasca Ujian</td>
-                  <td class="p-2 border border-slate-800/60 text-center">Guru Mata Pelajaran</td>
-                </tr>
-              </tbody>
+              <tbody id="table-riwayat"></tbody>
             </table>
           </div>
         </div>
 
-      </div>
-
-      <!-- Riwayat Ujian Terarsip Saya -->
-      <div class="dark-card p-5 rounded-2xl shadow-xl">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 mb-4 gap-3">
-          <div>
-            <h3 class="font-bold text-slate-200">Riwayat Ujian Terarsip Saya</h3>
-            <p class="text-xs text-slate-400">Data hasil ujian dari sesi sebelumnya khusus mata pelajaran Anda.</p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
-              <label for="filter-riwayat-kelas" class="text-xs font-semibold text-slate-400 px-1">Pilih Kelas:</label>
-              <select id="filter-riwayat-kelas" onchange="renderRiwayatTable()" class="text-xs font-bold bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-200 outline-none">
-                <option value="SEMUA">-- Semua Kelas --</option>
-                <option value="7A">Kelas 7A</option>
-                <option value="7B">Kelas 7B</option>
-                <option value="7C">Kelas 7C</option>
-                <option value="7D">Kelas 7D</option>
-                <option value="8A">Kelas 8A</option>
-                <option value="8B">Kelas 8B</option>
-                <option value="8C">Kelas 8C</option>
-                <option value="8D">Kelas 8D</option>
-                <option value="9A">Kelas 9A</option>
-                <option value="9B">Kelas 9B</option>
-                <option value="9C">Kelas 9C</option>
-                <option value="9D">Kelas 9D</option>
-              </select>
-            </div>
-            <button onclick="clearRiwayatTerpilih()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 font-bold px-3 py-1.5 rounded-xl text-xs shadow transition">
-              🗑 Hapus Riwayat Kelas Terpilih
-            </button>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto max-h-80 overflow-y-auto">
-          <table class="w-full text-sm text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-900 text-slate-400 border-b border-slate-800">
-                <th class="p-3 text-center w-12">No</th>
-                <th class="p-3">Nama Siswa</th>
-                <th class="p-3">Kelas</th>
-                <th class="p-3">Mata Pelajaran</th>
-                <th class="p-3">Nilai</th>
-                <th class="p-3">Tanggal / Waktu Arsip</th>
-              </tr>
-            </thead>
-            <tbody id="table-riwayat"></tbody>
-          </table>
-        </div>
-      </div>
-
+      </main>
     </div>
   </div>
 
@@ -910,7 +981,7 @@
         </div>
         <div class="border-l border-slate-800 pl-4">
           <h2 id="view-siswa-nama" class="font-bold text-sm leading-tight text-slate-100">Nama Siswa</h2>
-          <p id="view-siswa-info" class="text-xs text-slate-400">UH | Mapel | Ganjil TP. 2025/2026</p>
+          <p id="view-siswa-info" class="text-xs text-slate-400">Ulangan Harian | Mapel | Ganjil TP. 2025/2026</p>
         </div>
       </div>
       <div class="flex items-center gap-4">
@@ -929,7 +1000,7 @@
             <span class="bg-blue-600 text-white font-black text-sm px-3.5 py-1.5 rounded-xl shadow-md shadow-blue-900/30">SOAL NO. <span id="soal-nomor-display">1</span></span>
             <span id="display-hots-lots" class="text-xs font-extrabold px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-900 text-slate-300"></span>
           </div>
-          <span id="display-jenis-ujian" class="text-xs font-extrabold text-blue-400 bg-blue-950/40 border border-blue-500/30 px-3 py-1 rounded-xl">UH</span>
+          <span id="display-jenis-ujian" class="text-xs font-extrabold text-blue-400 bg-blue-950/40 border border-blue-500/30 px-3 py-1 rounded-xl">Ulangan Harian</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow overflow-hidden my-2 min-h-0">
@@ -981,6 +1052,50 @@
   </div>
 
   <script>
+    // FUNGSI NAVIGASI TAB/SECTION DASHBOARD GURU
+    const allDashboardSections = [
+      'sec-pengaturan',
+      'sec-impor-siswa',
+      'sec-input-soal',
+      'sec-bank-soal',
+      'sec-pemantauan',
+      'sec-laporan-analisis',
+      'sec-riwayat'
+    ];
+
+    function switchSection(targetId) {
+      allDashboardSections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.classList.remove('hidden');
+      }
+
+      const buttons = document.querySelectorAll('.nav-menu-btn');
+      buttons.forEach(btn => {
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(targetId)) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      if (window.innerWidth < 768) {
+        const sidebar = document.getElementById('sidebar-guru');
+        if (sidebar) sidebar.classList.add('hidden');
+      }
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar-guru');
+      if(sidebar) {
+        sidebar.classList.toggle('hidden');
+      }
+    }
+
     const firebaseConfig = {
       apiKey: "AIzaSyBxQCgLQlLPkueDp0lpuLarGwWWLIpEwnM",
       authDomain: "ujianonline-937d4.firebaseapp.com",
@@ -1003,7 +1118,7 @@
       siswa: [],
       riwayat: [],
       config: {
-        jenis: 'UH',
+        jenis: 'Ulangan Harian',
         mapel: 'IPA',
         semester: 'Ganjil',
         tp: '2025/2026',
@@ -1115,6 +1230,8 @@
 
       if (window.monitoringInterval) clearInterval(window.monitoringInterval);
       window.monitoringInterval = setInterval(updateLiveTimersMonitoring, 1000);
+
+      switchSection('sec-pengaturan');
     };
 
     function updateLabelGuruAktif() {
@@ -1200,12 +1317,12 @@
           appData.config = snap.val();
         } else {
           appData.config = {
-            jenis: 'UH', mapel: currentGuruMapel, semester: 'Ganjil', tp: '2025/2026',
+            jenis: 'Ulangan Harian', mapel: currentGuruMapel, semester: 'Ganjil', tp: '2025/2026',
             waktu: 60, kelas: 'SEMUA', kelasAktif: 'SEMUA', materiAktif: 'SEMUA', kkm: 75, token: 'EXAM88'
           };
         }
         
-        if (document.getElementById('cfg-jenis-ujian')) document.getElementById('cfg-jenis-ujian').value = appData.config.jenis || 'UH';
+        if (document.getElementById('cfg-jenis-ujian')) document.getElementById('cfg-jenis-ujian').value = appData.config.jenis || 'Ulangan Harian';
         if (document.getElementById('cfg-mapel')) document.getElementById('cfg-mapel').value = currentGuruMapel;
         if (document.getElementById('cfg-semester')) document.getElementById('cfg-semester').value = appData.config.semester || 'Ganjil';
         
@@ -1326,6 +1443,7 @@
 
           setupGuruRealtimeListeners();
           simpanPengaturan();
+          switchSection('sec-pengaturan');
           showToast(`Selamat Datang, ${dataGuru.nama || dataGuru.username} (Mapel: ${currentGuruMapel})!`);
         }
       }).catch(err => {
@@ -1344,6 +1462,7 @@
 
         setupGuruRealtimeListeners();
         simpanPengaturan();
+        switchSection('sec-pengaturan');
         showToast(`Selamat Datang, ${dataGuru.nama} (Mapel: ${currentGuruMapel})!`);
       });
     }
@@ -1774,6 +1893,7 @@
         btn.className = "flex-1 md:flex-initial bg-amber-600 hover:bg-amber-500 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow transition";
       }
 
+      switchSection('sec-input-soal');
       document.getElementById('manual-no').scrollIntoView({ behavior: 'smooth' });
       showToast(`Mode Edit: Soal No. ${s.no}`);
     }
@@ -2056,7 +2176,7 @@
       const filterKelas = document.getElementById('filter-kelas-monitoring') ? document.getElementById('filter-kelas-monitoring').value : 'SEMUA';
       
       document.getElementById('pdf-meta-mapel').innerText = currentGuruMapel || '-';
-      document.getElementById('pdf-meta-jenis').innerText = appData.config.jenis || 'UH';
+      document.getElementById('pdf-meta-jenis').innerText = appData.config.jenis || 'Ulangan Harian';
       document.getElementById('pdf-meta-materi').innerText = appData.config.materiAktif || 'SEMUA';
       document.getElementById('pdf-meta-tp').innerText = `${appData.config.tp || '2025/2026'} (${appData.config.semester || 'Ganjil'})`;
       document.getElementById('pdf-meta-kkm').innerText = currentKkm;
@@ -2319,7 +2439,7 @@
             kelas: s.kelas || '-',
             mapel: currentGuruMapel,
             nilai: nilaiAksen,
-            jenis: appData.config.jenis || 'UH',
+            jenis: appData.config.jenis || 'Ulangan Harian',
             waktuArsip: timestamp
           });
           count++;
@@ -2422,7 +2542,7 @@
 
       const badgeJenis = document.getElementById('display-jenis-ujian');
       if (badgeJenis && s) {
-        const jenisText = appData.config.jenis || 'UH';
+        const jenisText = appData.config.jenis || 'Ulangan Harian';
         const materiText = s.materi ? ` | Materi: ${s.materi}` : '';
         badgeJenis.innerText = `${jenisText}${materiText}`;
       }
