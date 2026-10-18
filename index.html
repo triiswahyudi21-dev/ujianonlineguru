@@ -116,7 +116,6 @@
       border-color: #b45309;
     }
 
-    /* CSS KHUSUS CETAK PDF BROWSER NATIVE AGAR RAPI & TIDAK TERPOTONG */
     @media print {
       @page {
         size: A4 portrait;
@@ -263,7 +262,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div>
             <label class="text-xs font-semibold">Tingkat Kelas (Aktif Ujian)</label>
             <select id="cfg-kelas" onchange="onSesiKelasChange()" class="w-full p-2 border rounded-lg text-sm font-bold text-emerald-700 bg-emerald-50 border-emerald-300">
@@ -280,6 +279,12 @@
               <option value="9B">Kelas 9B</option>
               <option value="9C">Kelas 9C</option>
               <option value="9D">Kelas 9D</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold">📖 Materi / Topik Ujian Aktif</label>
+            <select id="cfg-materi" onchange="simpanPengaturan()" class="w-full p-2 border rounded-lg text-sm font-bold text-amber-800 bg-amber-50 border-amber-300">
+              <option value="SEMUA">-- Semua Materi --</option>
             </select>
           </div>
           <div>
@@ -524,8 +529,15 @@
               </select>
             </div>
 
-            <button onclick="hapusSoalSesuaiKelas()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded shadow transition">
-              🗑 Hapus Soal Kelas Terpilih
+            <div class="flex items-center gap-1.5 bg-amber-50 p-1 rounded-lg border border-amber-200">
+              <label for="filter-materi-soal" class="text-xs font-semibold text-amber-800 px-1">Filter Materi:</label>
+              <select id="filter-materi-soal" onchange="renderSoalList()" class="text-xs font-bold bg-white border rounded px-2 py-1 text-amber-900 border-amber-300 focus:ring-2 focus:ring-amber-500 outline-none">
+                <option value="SEMUA">-- Semua Materi --</option>
+              </select>
+            </div>
+
+            <button onclick="hapusSoalSesuaiFilter()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded shadow transition">
+              🗑 Hapus Soal Terfilter
             </button>
 
             <button onclick="kosongkanSoal()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded shadow transition">
@@ -621,6 +633,7 @@
           <div class="grid grid-cols-[140px_10px_1fr] text-xs font-semibold text-slate-700 gap-y-1.5 w-full md:w-auto">
             <span>Mata Pelajaran</span><span>:</span><span id="pdf-meta-mapel" class="font-bold text-blue-800 truncate">-</span>
             <span>Jenis Ujian</span><span>:</span><span id="pdf-meta-jenis" class="truncate">-</span>
+            <span>Materi Ujian</span><span>:</span><span id="pdf-meta-materi" class="font-bold text-amber-800 truncate">SEMUA</span>
             <span>Tahun Pelajaran / Sem</span><span>:</span><span id="pdf-meta-tp" class="truncate">-</span>
             <span>Batas KKM</span><span>:</span><span id="pdf-meta-kkm" class="font-bold text-emerald-700 truncate">-</span>
             <span>Filter Kelas Ujian</span><span>:</span><span id="pdf-meta-kelas" class="font-bold text-slate-900 truncate">SEMUA</span>
@@ -949,6 +962,7 @@
         waktu: 60,
         kelas: 'SEMUA',
         kelasAktif: 'SEMUA',
+        materiAktif: 'SEMUA',
         kkm: 75,
         token: 'EXAM88'
       }
@@ -1070,6 +1084,37 @@
       }
     }
 
+    function populateMateriDropdowns() {
+      const materiSet = new Set();
+      appData.soal.forEach(s => {
+        if (s.materi && s.materi.trim()) {
+          materiSet.add(s.materi.trim());
+        }
+      });
+
+      const cfgMateri = document.getElementById('cfg-materi');
+      const filterMateri = document.getElementById('filter-materi-soal');
+
+      const currentCfgVal = cfgMateri ? cfgMateri.value : 'SEMUA';
+      const currentFilterVal = filterMateri ? filterMateri.value : 'SEMUA';
+
+      if (cfgMateri) {
+        cfgMateri.innerHTML = '<option value="SEMUA">-- Semua Materi --</option>';
+        materiSet.forEach(m => {
+          cfgMateri.innerHTML += `<option value="${m}">${m}</option>`;
+        });
+        cfgMateri.value = (appData.config && appData.config.materiAktif) ? appData.config.materiAktif : currentCfgVal;
+      }
+
+      if (filterMateri) {
+        filterMateri.innerHTML = '<option value="SEMUA">-- Semua Materi --</option>';
+        materiSet.forEach(m => {
+          filterMateri.innerHTML += `<option value="${m}">${m}</option>`;
+        });
+        filterMateri.value = currentFilterVal;
+      }
+    }
+
     function setupGuruRealtimeListeners() {
       if (!currentGuruKey || !currentGuruMapel) return;
 
@@ -1081,7 +1126,7 @@
         } else {
           appData.config = {
             jenis: 'UH', mapel: currentGuruMapel, semester: 'Ganjil', tp: '2025/2026',
-            waktu: 60, kelas: 'SEMUA', kelasAktif: 'SEMUA', kkm: 75, token: 'EXAM88'
+            waktu: 60, kelas: 'SEMUA', kelasAktif: 'SEMUA', materiAktif: 'SEMUA', kkm: 75, token: 'EXAM88'
           };
         }
         
@@ -1095,6 +1140,8 @@
         
         const klsVal = appData.config.kelasAktif || appData.config.kelas || 'SEMUA';
         if (document.getElementById('cfg-kelas')) document.getElementById('cfg-kelas').value = klsVal;
+
+        if (document.getElementById('cfg-materi')) document.getElementById('cfg-materi').value = appData.config.materiAktif || 'SEMUA';
 
         renderMonitoringTable();
       });
@@ -1119,6 +1166,7 @@
           });
           appData.soal.sort((a,b) => (parseInt(a.no)||0) - (parseInt(b.no)||0));
         }
+        populateMateriDropdowns();
         renderSoalList();
         updateManualButtonState();
       });
@@ -1135,7 +1183,6 @@
       });
     }
 
-    /* FUNGSI LOGIN GURU YANG DIPERBAIKI AGAR SELALU BISA MASUK */
     function handleLoginGuru(e) {
       e.preventDefault();
       const u = document.getElementById('guru-user').value.trim();
@@ -1158,12 +1205,10 @@
           });
         }
 
-        // Jika tidak ditemukan di database Firebase 'guru', otomatis buat/daftarkan akun baru secara mandiri
         if (!loginBerhasil) {
           loginBerhasil = true;
           const newKey = sanitizeKey(u);
           dataGuru = { key: newKey, username: u, password: p, nama: u.toUpperCase() };
-          // Simpan kredensial baru ke node 'guru' agar terdaftar secara permanen
           db.ref(`guru/${newKey}`).set(dataGuru);
         }
 
@@ -1190,7 +1235,6 @@
           showToast(`Selamat Datang, ${dataGuru.nama || dataGuru.username} (Mapel: ${currentGuruMapel})!`);
         }
       }).catch(err => {
-        // Penanganan jika ada error jaringan/permission pada node 'guru'
         currentGuruKey = sanitizeKey(u);
         currentGuruMapel = selectedMapel;
         const dataGuru = { key: currentGuruKey, username: u, nama: u.toUpperCase() };
@@ -1332,6 +1376,7 @@
       if (!currentGuruKey || !currentGuruMapel) return;
 
       const selectedKelas = document.getElementById('cfg-kelas').value;
+      const selectedMateri = document.getElementById('cfg-materi') ? document.getElementById('cfg-materi').value : 'SEMUA';
       const tokenVal = document.getElementById('cfg-token').value || 'EXAM88';
 
       const cfg = {
@@ -1342,6 +1387,7 @@
         waktu: parseInt(document.getElementById('cfg-waktu').value) || 60,
         kelasAktif: selectedKelas,
         kelas: selectedKelas,
+        materiAktif: selectedMateri,
         kkm: parseInt(document.getElementById('cfg-kkm').value) || 75,
         token: tokenVal
       };
@@ -1564,8 +1610,9 @@
 
       document.getElementById('section-tabel-kunci').classList.add('hidden');
       document.getElementById('mass-paste-box').innerHTML = '';
+      document.getElementById('import-soal-materi').value = '';
       tempParsedSoal = [];
-      showToast(`Bank Soal Berhasil Disimpan di Ruang Kerja ${currentGuruMapel}!`);
+      showToast(`Bank Soal Berhasil Disimpan untuk Materi: ${targetMateri}!`);
     }
 
     function readFileAsDataURL(file) {
@@ -1731,12 +1778,20 @@
       const container = document.getElementById('list-soal');
       const countEl = document.getElementById('total-soal');
       const filterKelas = document.getElementById('filter-kelas-soal').value;
+      const filterMateri = document.getElementById('filter-materi-soal') ? document.getElementById('filter-materi-soal').value : 'SEMUA';
 
       let filteredSoal = appData.soal;
+
       if (filterKelas !== 'SEMUA') {
-        filteredSoal = appData.soal.filter(s => {
+        filteredSoal = filteredSoal.filter(s => {
           const k = String(s.kelas || 'SEMUA').toUpperCase();
           return k === 'SEMUA' || k === filterKelas;
+        });
+      }
+
+      if (filterMateri !== 'SEMUA') {
+        filteredSoal = filteredSoal.filter(s => {
+          return String(s.materi || 'Umum').toLowerCase().trim() === String(filterMateri).toLowerCase().trim();
         });
       }
 
@@ -1753,8 +1808,9 @@
           <div class="p-2.5 bg-white rounded-lg border flex justify-between items-center text-xs">
             <div>
               <span class="font-bold text-blue-700 mr-2">No. ${s.no}</span>
-              <span class="bg-purple-100 text-purple-800 font-bold px-1.5 py-0.5 rounded text-[10px] mr-2">Kelas: ${s.kelas || 'SEMUA'}</span>
-              <span class="text-slate-700 truncate max-w-md inline-block align-middle">${s.teks ? stripHtmlToText(s.teks) : '(Gambar/Media)'}</span>
+              <span class="bg-purple-100 text-purple-800 font-bold px-1.5 py-0.5 rounded text-[10px] mr-1">Kelas: ${s.kelas || 'SEMUA'}</span>
+              <span class="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded text-[10px] mr-2">Materi: ${s.materi || 'Umum'}</span>
+              <span class="text-slate-700 truncate max-w-xs inline-block align-middle">${s.teks ? stripHtmlToText(s.teks) : '(Gambar/Media)'}</span>
               <span class="ml-2 bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded text-[10px]">Kunci: ${s.kunci}</span>
             </div>
             <div class="flex items-center gap-2">
@@ -1766,17 +1822,44 @@
       });
     }
 
-    function hapusSoalSesuaiKelas() {
+    // FITUR UTAMA: HAPUS SOAL TERFILTER (SESUAI KELAS DAN/ATAU MATERI TERPILIH)
+    function hapusSoalSesuaiFilter() {
       const filterKelas = document.getElementById('filter-kelas-soal').value;
-      if (filterKelas === 'SEMUA') return alert("Pilih kelas spesifik terlebih dahulu!");
+      const filterMateri = document.getElementById('filter-materi-soal') ? document.getElementById('filter-materi-soal').value : 'SEMUA';
 
-      const targetSoal = appData.soal.filter(s => s.kelas === filterKelas);
-      if (targetSoal.length === 0) return alert(`Tidak ada soal untuk Kelas ${filterKelas}`);
+      if (filterKelas === 'SEMUA' && filterMateri === 'SEMUA') {
+        return alert("Harap pilih kriteria spesifik (Kelas atau Materi) pada filter terlebih dahulu!");
+      }
 
-      if (confirm(`Hapus ${targetSoal.length} soal khusus Kelas ${filterKelas}?`)) {
+      let targetSoal = appData.soal;
+
+      if (filterKelas !== 'SEMUA') {
+        targetSoal = targetSoal.filter(s => {
+          const k = String(s.kelas || 'SEMUA').toUpperCase();
+          return k === filterKelas;
+        });
+      }
+
+      if (filterMateri !== 'SEMUA') {
+        targetSoal = targetSoal.filter(s => {
+          return String(s.materi || 'Umum').toLowerCase().trim() === String(filterMateri).toLowerCase().trim();
+        });
+      }
+
+      if (targetSoal.length === 0) {
+        return alert("Tidak ditemukan soal dengan kriteria filter yang dipilih.");
+      }
+
+      let infoDetail = [];
+      if (filterKelas !== 'SEMUA') infoDetail.push(`Kelas ${filterKelas}`);
+      if (filterMateri !== 'SEMUA') infoDetail.push(`Materi "${filterMateri}"`);
+
+      const pesanKonfirmasi = `Apakah Anda yakin ingin MENGHAPUS ${targetSoal.length} soal untuk kriteria: ${infoDetail.join(' & ')}?\n\nSoal pada materi/kelas lain tidak akan terpengaruh.`;
+
+      if (confirm(pesanKonfirmasi)) {
         const pathGuru = getGuruPath();
         targetSoal.forEach(s => db.ref(`${pathGuru}/soal/${s.key}`).remove());
-        showToast(`Soal Kelas ${filterKelas} berhasil dihapus!`);
+        showToast(`Berhasil menghapus ${targetSoal.length} soal (${infoDetail.join(' & ')})!`);
       }
     }
 
@@ -1880,6 +1963,7 @@
       
       document.getElementById('pdf-meta-mapel').innerText = currentGuruMapel || '-';
       document.getElementById('pdf-meta-jenis').innerText = appData.config.jenis || 'UH';
+      document.getElementById('pdf-meta-materi').innerText = appData.config.materiAktif || 'SEMUA';
       document.getElementById('pdf-meta-tp').innerText = `${appData.config.tp || '2025/2026'} (${appData.config.semester || 'Ganjil'})`;
       document.getElementById('pdf-meta-kkm').innerText = currentKkm;
       document.getElementById('pdf-meta-kelas').innerText = filterKelas;
@@ -2219,6 +2303,21 @@
       }
     }
 
+    function filterSoalUntukSiswa(kelasSiswa) {
+      const materiAktif = appData.config.materiAktif || 'SEMUA';
+      let kAngka = kelasSiswa.replace(/[^0-9]/g, '');
+
+      return appData.soal.filter(s => {
+        const kSoal = String(s.kelas || 'SEMUA').toUpperCase();
+        const mSoal = String(s.materi || 'Umum').toLowerCase().trim();
+
+        const matchKelas = (kSoal === 'SEMUA' || kSoal === kelasSiswa || kSoal === kAngka);
+        const matchMateri = (materiAktif === 'SEMUA' || mSoal === materiAktif.toLowerCase().trim());
+
+        return matchKelas && matchMateri;
+      });
+    }
+
     function renderSoalSiswa() {
       const idx = stateUjianSiswa.currentSoalIdx;
       const total = stateUjianSiswa.soalAktif.length;
@@ -2226,6 +2325,13 @@
 
       document.getElementById('soal-nomor-display').innerText = idx + 1;
       document.getElementById('display-soal-num-prefix').innerText = `${idx + 1}.`;
+
+      const badgeJenis = document.getElementById('display-jenis-ujian');
+      if (badgeJenis && s) {
+        const jenisText = appData.config.jenis || 'UH';
+        const materiText = s.materi ? ` | Materi: ${s.materi}` : '';
+        badgeJenis.innerText = `${jenisText}${materiText}`;
+      }
 
       let leftContent = s.teks || '';
       if(s.imgSoal) {
