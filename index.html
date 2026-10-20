@@ -143,7 +143,6 @@
       border-color: #f59e0b;
     }
 
-    /* Custom Input Dark Focus */
     input, select, textarea {
       color-scheme: dark;
     }
@@ -251,20 +250,28 @@
     </div>
   </div>
 
-  <!-- HALAMAN DASHBOARD GURU PERBAIKAN DENGAN SIDEBAR -->
+  <!-- HALAMAN DASHBOARD GURU -->
   <div id="page-guru" class="hidden min-h-screen flex flex-col">
-    <!-- Navbar Header Stik Kaki -->
-    <nav class="anbk-header text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-40 backdrop-blur-md">
+    <!-- Navbar Header -->
+    <nav class="anbk-header text-white px-6 py-3.5 flex justify-between items-center shadow-lg sticky top-0 z-40 backdrop-blur-md">
       <div class="flex items-center gap-3">
         <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-xl bg-slate-800 text-slate-300">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center font-black text-slate-950 shadow-md">
-          U
+        
+        <!-- LOGO BRAND MODERN -->
+        <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-400 p-[1.5px] shadow-lg shadow-emerald-500/20">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+            </svg>
+          </div>
         </div>
+
         <div>
           <h2 class="text-lg md:text-xl font-extrabold tracking-wide uppercase text-slate-100">UJIAN ONLINE SEKOLAH</h2>
-          <p class="text-xs text-slate-400">Ruang Kerja Khusus: <span id="label-guru-aktif" class="font-bold text-emerald-400">Guru</span></p>
+          <p id="label-guru-aktif" class="text-xs text-slate-400 font-medium">Guru • Mapel</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
@@ -290,9 +297,9 @@
             <span class="text-left">Pengaturan Ujian</span>
           </button>
 
-          <button onclick="switchSection('sec-impor-siswa')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
-            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-            <span class="text-left">Impor Data Siswa</span>
+          <button onclick="switchSection('sec-data-siswa')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
+            <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            <span class="text-left">Data Siswa Per Kelas</span>
           </button>
 
           <button onclick="switchSection('sec-input-soal')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
@@ -308,6 +315,18 @@
           <button onclick="switchSection('sec-pemantauan')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
             <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             <span class="text-left">Pemantauan Ujian</span>
+          </button>
+
+          <!-- SIDEBAR: DAFTAR NILAI UJIAN -->
+          <button onclick="switchSection('sec-daftar-nilai')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span class="text-left">Daftar Nilai Ujian</span>
+          </button>
+
+          <!-- SIDEBAR: REKAPITULASI NILAI -->
+          <button onclick="switchSection('sec-rekapitulasi-nilai')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
+            <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span class="text-left">Rekapitulasi Nilai</span>
           </button>
 
           <button onclick="switchSection('sec-laporan-analisis')" class="nav-menu-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition text-slate-300">
@@ -408,12 +427,102 @@
           </div>
         </div>
 
-        <!-- 2. Import Data Siswa (Hidden) -->
-        <div id="sec-impor-siswa" class="hidden dark-card p-5 rounded-2xl shadow-xl max-w-2xl">
-          <h3 class="font-bold text-slate-200 border-b border-slate-800 pb-2 mb-2">Import Data Siswa Khusus Mapel Saya</h3>
-          <p class="text-xs text-slate-400 mb-2">Format: <b>Nama Siswa [Tab/Koma/Spasi] Kelas</b></p>
-          <textarea id="import-siswa-raw" rows="8" placeholder="" class="w-full p-2.5 bg-slate-950 border border-slate-800 text-slate-200 rounded-xl text-sm font-mono mb-3 focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
-          <button onclick="prosesImportSiswa()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-emerald-900/30 transition">Simpan Data Siswa ke Ruang Saya</button>
+        <!-- 2. DATA SISWA PER KELAS & IMPOR SISWA (Hidden Default) -->
+        <div id="sec-data-siswa" class="hidden dark-card p-5 rounded-2xl shadow-xl space-y-6">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 gap-3">
+            <div>
+              <h3 class="font-bold text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                <span>Kelola Data Siswa Per Kelas (Otomatis Urut A-Z)</span>
+              </h3>
+              <p class="text-xs text-slate-400 mt-0.5">Tambah manual atau impor massal data siswa. Sistem otomatis mengurutkan berdasarkan huruf A-Z.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="text-xs font-semibold text-slate-400">Filter Tampilan Kelas:</label>
+              <select id="filter-view-kelas-siswa" onchange="renderTabelDataSiswa()" class="p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-cyan-400 focus:ring-2 focus:ring-cyan-500 outline-none">
+                <option value="SEMUA">-- Semua Kelas --</option>
+                <option value="7A">Kelas 7A</option>
+                <option value="7B">Kelas 7B</option>
+                <option value="7C">Kelas 7C</option>
+                <option value="7D">Kelas 7D</option>
+                <option value="8A">Kelas 8A</option>
+                <option value="8B">Kelas 8B</option>
+                <option value="8C">Kelas 8C</option>
+                <option value="8D">Kelas 8D</option>
+                <option value="9A">Kelas 9A</option>
+                <option value="9B">Kelas 9B</option>
+                <option value="9C">Kelas 9C</option>
+                <option value="9D">Kelas 9D</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Pilihan Tab Metode Tambah Siswa -->
+          <div class="space-y-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+            <div class="flex gap-2 border-b border-slate-800 pb-2">
+              <button type="button" id="btn-tab-manual" onclick="switchSubTabSiswa('manual')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 text-white transition">
+                + Tambah Manual (1 Siswa)
+              </button>
+              <button type="button" id="btn-tab-impor" onclick="switchSubTabSiswa('impor')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition">
+                📋 Impor Massal (Banyak Siswa)
+              </button>
+            </div>
+
+            <!-- Form Input Manual Siswa Baru -->
+            <form id="subtab-manual-siswa" onsubmit="tambahSiswaManual(event)" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+              <div class="md:col-span-6">
+                <label class="block text-xs font-bold text-slate-400 mb-1">Nama Siswa Baru</label>
+                <input type="text" id="manual-nama-siswa" placeholder="Masukkan nama lengkap siswa..." class="w-full p-2.5 bg-slate-950 border border-slate-800 text-slate-100 rounded-xl text-xs focus:ring-2 focus:ring-cyan-500 outline-none">
+              </div>
+              <div class="md:col-span-4">
+                <label class="block text-xs font-bold text-slate-400 mb-1">Kelas Siswa</label>
+                <select id="manual-kelas-siswa" class="w-full p-2.5 bg-slate-950 border border-slate-800 text-slate-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-cyan-500 outline-none">
+                  <option value="7A">Kelas 7A</option>
+                  <option value="7B">Kelas 7B</option>
+                  <option value="7C">Kelas 7C</option>
+                  <option value="7D">Kelas 7D</option>
+                  <option value="8A">Kelas 8A</option>
+                  <option value="8B">Kelas 8B</option>
+                  <option value="8C">Kelas 8C</option>
+                  <option value="8D">Kelas 8D</option>
+                  <option value="9A">Kelas 9A</option>
+                  <option value="9B">Kelas 9B</option>
+                  <option value="9C">Kelas 9C</option>
+                  <option value="9D">Kelas 9D</option>
+                </select>
+              </div>
+              <div class="md:col-span-2">
+                <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg shadow-cyan-900/30 transition">
+                  Simpan Siswa
+                </button>
+              </div>
+            </form>
+
+            <!-- Form Input Impor Massal Siswa Baru -->
+            <div id="subtab-impor-siswa" class="hidden space-y-3">
+              <p class="text-xs text-slate-400">Format Impor: <b>Nama Siswa [Tab/Koma/Spasi] Kelas</b> (Satu siswa per baris)</p>
+              <textarea id="import-siswa-raw" rows="5" placeholder="Contoh:&#10;Ahmad Subagyo	7A&#10;Budi Santoso	7A&#10;Citra Dewi	7B" class="w-full p-2.5 bg-slate-950 border border-slate-800 text-slate-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+              <button type="button" onclick="prosesImportSiswa()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-emerald-900/30 transition">
+                Proses Impor Massal Data Siswa
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabel Daftar Siswa Terurut -->
+          <div class="overflow-x-auto max-h-96 overflow-y-auto">
+            <table class="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                  <th class="p-2.5 text-center w-12">No</th>
+                  <th class="p-2.5">Nama Siswa (Otomatis Urut A-Z)</th>
+                  <th class="p-2.5 text-center w-28">Kelas</th>
+                  <th class="p-2.5 text-center w-36">Status Sesi</th>
+                  <th class="p-2.5 text-center w-28">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-data-siswa-kelas"></tbody>
+            </table>
+          </div>
         </div>
 
         <!-- 3. Input Soal Manual & Impor Soal (Hidden) -->
@@ -678,12 +787,12 @@
           <div id="list-soal" class="space-y-3 max-h-96 overflow-y-auto"></div>
         </div>
 
-        <!-- 5. Pemantauan Ujian Realtime (Hidden) -->
-        <div id="sec-pemantauan" class="hidden dark-card p-5 rounded-2xl shadow-xl">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 mb-4 gap-3">
+        <!-- 5. Pemantauan Ujian Realtime & Ringkasan Status Siswa Per Kelas -->
+        <div id="sec-pemantauan" class="hidden dark-card p-5 rounded-2xl shadow-xl space-y-4">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 gap-3">
             <div>
               <h3 class="font-bold text-slate-200">Pemantauan Ujian & Hasil Nilai Realtime Saya</h3>
-              <p class="text-xs text-slate-400">Nilai hasil pengerjaan, status ketuntasan KKM, & sisa waktu pengerjaan khusus mapel Anda.</p>
+              <p class="text-xs text-slate-400">Pantau pengerjaan aktif maupun riwayat ujian siswa yang pernah dikerjakan berdasarkan kelas dan materi.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <button onclick="refreshDataGuru()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold px-3 py-2 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
@@ -693,20 +802,9 @@
               <button onclick="arsipkanDanBersihkanSesi()" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 font-bold px-3 py-2 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
                 <span>🧹 Arsipkan & Bersihkan Sesi Saya</span>
               </button>
-              <button onclick="hapusSiswaDuplikat()" class="bg-amber-600/20 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/30 font-bold px-3 py-2 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
-                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                <span>Hapus Duplikat Siswa</span>
-              </button>
               
-              <button onclick="hapusSiswaSesuaiKelas()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 font-bold px-3 py-2 rounded-xl text-xs shadow transition">
-                🗑 Hapus Siswa Kelas Terpilih
-              </button>
-              <button onclick="kosongkanSemuaSiswa()" class="bg-rose-800 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-xl text-xs shadow transition">
-                🔥 Hapus Semua Siswa
-              </button>
-
               <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
-                <label for="filter-kelas-monitoring" class="text-xs font-semibold text-slate-400 px-1">Kelas Ujian:</label>
+                <label for="filter-kelas-monitoring" class="text-xs font-semibold text-slate-400 px-1">Kelas:</label>
                 <select id="filter-kelas-monitoring" onchange="renderMonitoringTable()" class="text-xs font-bold bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
                   <option value="SEMUA">-- Semua Kelas --</option>
                   <option value="7A">Kelas 7A</option>
@@ -723,10 +821,39 @@
                   <option value="9D">Kelas 9D</option>
                 </select>
               </div>
+
+              <!-- FILTER MATERI PEMANTAUAN -->
+              <div class="flex items-center gap-1.5 bg-amber-950/20 p-1.5 rounded-xl border border-amber-500/20">
+                <label for="filter-materi-monitoring" class="text-xs font-semibold text-amber-400 px-1">Materi / Topik:</label>
+                <select id="filter-materi-monitoring" onchange="renderMonitoringTable()" class="text-xs font-bold bg-slate-950 border border-amber-500/30 rounded-lg px-2 py-1 text-amber-300 focus:ring-2 focus:ring-amber-500 outline-none">
+                  <option value="SEMUA">-- Semua Materi --</option>
+                </select>
+              </div>
+
               <button onclick="downloadHasilExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow flex items-center gap-2 transition">
                 <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                <span>Download Excel Kelas Ini</span>
+                <span>Download Excel</span>
               </button>
+            </div>
+          </div>
+
+          <!-- RINGKASAN STATUS SISWA IKUT UJIAN SESUAI KELAS -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800">
+            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 text-center">
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Peserta Terdaftar</span>
+              <h4 id="mon-stat-total" class="text-xl font-black text-slate-100 mt-1">0 <span class="text-xs font-semibold text-slate-400">Siswa</span></h4>
+            </div>
+            <div class="bg-emerald-950/30 p-3 rounded-xl border border-emerald-500/30 text-center">
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block">Sedang Mengerjakan</span>
+              <h4 id="mon-stat-aktif" class="text-xl font-black text-emerald-300 mt-1">0 <span class="text-xs font-semibold text-emerald-400">Siswa</span></h4>
+            </div>
+            <div class="bg-rose-950/30 p-3 rounded-xl border border-rose-500/30 text-center">
+              <span class="text-[11px] font-bold text-rose-400 uppercase tracking-wider block">Selesai Mengerjakan</span>
+              <h4 id="mon-stat-selesai" class="text-xl font-black text-rose-300 mt-1">0 <span class="text-xs font-semibold text-rose-400">Siswa</span></h4>
+            </div>
+            <div class="bg-amber-950/30 p-3 rounded-xl border border-amber-500/30 text-center">
+              <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider block">Belum Mengerjakan</span>
+              <h4 id="mon-stat-belum" class="text-xl font-black text-amber-300 mt-1">0 <span class="text-xs font-semibold text-amber-400">Siswa</span></h4>
             </div>
           </div>
 
@@ -736,9 +863,10 @@
                 <tr class="bg-slate-900 text-slate-400 border-b border-slate-800">
                   <th class="p-2.5 text-center w-10">No</th>
                   <th class="p-2.5">Nama Siswa</th>
-                  <th class="p-2.5">Kelas</th>
+                  <th class="p-2.5 text-center">Kelas</th>
+                  <th class="p-2.5 text-center w-48">Materi Ujian</th>
                   <th class="p-2.5 text-center">Status</th>
-                  <th class="p-2.5">Sisa Waktu (Realtime)</th>
+                  <th class="p-2.5">Sisa Waktu / Status</th>
                   <th class="p-2.5 text-center">Nilai</th>
                   <th class="p-2.5 text-center">KKM</th>
                   <th class="p-2.5 text-center">Keterangan</th>
@@ -750,7 +878,120 @@
           </div>
         </div>
 
-        <!-- 6. HASIL ANALISIS ULANGAN & CETAK LAPORAN (Hidden) -->
+        <!-- 6. DAFTAR NILAI UJIAN (Hidden Default) -->
+        <div id="sec-daftar-nilai" class="hidden dark-card p-5 rounded-2xl shadow-xl space-y-4">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 gap-3">
+            <div>
+              <h3 class="font-bold text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>Daftar Nilai Ujian Siswa</span>
+              </h3>
+              <p class="text-xs text-slate-400">Nilai otomatis terisi secara realtime dari hasil pengerjaan siswa maupun riwayat ujian yang telah diselesaikan.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+                <label for="filter-dn-kelas" class="text-xs font-semibold text-slate-400 px-1">Kelas:</label>
+                <select id="filter-dn-kelas" onchange="renderDaftarNilai()" class="text-xs font-bold bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                  <option value="SEMUA">-- Semua Kelas --</option>
+                  <option value="7A">Kelas 7A</option>
+                  <option value="7B">Kelas 7B</option>
+                  <option value="7C">Kelas 7C</option>
+                  <option value="7D">Kelas 7D</option>
+                  <option value="8A">Kelas 8A</option>
+                  <option value="8B">Kelas 8B</option>
+                  <option value="8C">Kelas 8C</option>
+                  <option value="8D">Kelas 8D</option>
+                  <option value="9A">Kelas 9A</option>
+                  <option value="9B">Kelas 9B</option>
+                  <option value="9C">Kelas 9C</option>
+                  <option value="9D">Kelas 9D</option>
+                </select>
+              </div>
+
+              <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+                <label for="filter-dn-jenis" class="text-xs font-semibold text-slate-400 px-1">Jenis Ujian:</label>
+                <select id="filter-dn-jenis" onchange="onDnJenisChange()" class="text-xs font-bold bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-emerald-400 focus:ring-2 focus:ring-emerald-500 outline-none">
+                  <option value="Ulangan Harian">Ulangan Harian</option>
+                  <option value="Penilaian Tengah Semester">Penilaian Tengah Semester</option>
+                  <option value="Ujian Akhir Semester">Ujian Akhir Semester</option>
+                </select>
+              </div>
+
+              <div id="container-dn-materi" class="flex items-center gap-1.5 bg-amber-950/20 p-1.5 rounded-xl border border-amber-500/20">
+                <label for="filter-dn-materi" class="text-xs font-semibold text-amber-400 px-1">Materi / Topik:</label>
+                <select id="filter-dn-materi" onchange="renderDaftarNilai()" class="text-xs font-bold bg-slate-950 border border-amber-500/30 rounded-lg px-2 py-1 text-amber-300 focus:ring-2 focus:ring-amber-500 outline-none">
+                  <option value="SEMUA">-- Semua Materi --</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                  <th class="p-3 text-center w-12">No</th>
+                  <th class="p-3">Nama Siswa</th>
+                  <th class="p-3 text-center w-28">Kelas</th>
+                  <th id="th-dn-materi" class="p-3">Materi / Topik Ujian</th>
+                  <th class="p-3 text-center w-36">Nilai Ujian</th>
+                  <th class="p-3 text-center w-32">Status Ketuntasan</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-daftar-nilai"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 7. REKAPITULASI NILAI (Hidden Default) -->
+        <div id="sec-rekapitulasi-nilai" class="hidden dark-card p-5 rounded-2xl shadow-xl space-y-4">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 gap-3">
+            <div>
+              <h3 class="font-bold text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-yellow-400"></span>
+                <span>Rekapitulasi Nilai Keseluruhan</span>
+              </h3>
+              <p class="text-xs text-slate-400">Rekapitulasi nilai otomatis gabungan Ulangan Harian (Seluruh Materi), Penilaian Tengah Semester (PTS), dan Ujian Akhir Semester (UAS).</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <label for="filter-rekap-kelas" class="text-xs font-semibold text-slate-400">Filter Kelas:</label>
+              <select id="filter-rekap-kelas" onchange="renderRekapitulasiNilai()" class="text-xs font-bold bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-yellow-400 focus:ring-2 focus:ring-yellow-500 outline-none">
+                <option value="SEMUA">-- Semua Kelas --</option>
+                <option value="7A">Kelas 7A</option>
+                <option value="7B">Kelas 7B</option>
+                <option value="7C">Kelas 7C</option>
+                <option value="7D">Kelas 7D</option>
+                <option value="8A">Kelas 8A</option>
+                <option value="8B">Kelas 8B</option>
+                <option value="8C">Kelas 8C</option>
+                <option value="8D">Kelas 8D</option>
+                <option value="9A">Kelas 9A</option>
+                <option value="9B">Kelas 9B</option>
+                <option value="9C">Kelas 9C</option>
+                <option value="9D">Kelas 9D</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                  <th class="p-3 text-center w-12">No</th>
+                  <th class="p-3">Nama Siswa</th>
+                  <th class="p-3 text-center w-24">Kelas</th>
+                  <th class="p-3 text-center">Rata-Rata UH (Semua Materi)</th>
+                  <th class="p-3 text-center">Nilai PTS</th>
+                  <th class="p-3 text-center">Nilai UAS</th>
+                  <th class="p-3 text-center w-32 font-bold text-yellow-400">Nilai Akhir Rata-Rata</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-rekapitulasi-nilai"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 8. HASIL ANALISIS ULANGAN & CETAK LAPORAN (Hidden) -->
         <div id="sec-laporan-analisis" class="hidden dark-card p-6 md:p-8 rounded-2xl shadow-xl border border-slate-800 space-y-6">
           
           <div class="border-b-2 border-slate-700 pb-4 text-center space-y-1">
@@ -932,12 +1173,12 @@
 
         </div>
 
-        <!-- 7. Riwayat Ujian Terarsip Saya (Hidden) -->
+        <!-- 9. Riwayat Ujian Terarsip Saya -->
         <div id="sec-riwayat" class="hidden dark-card p-5 rounded-2xl shadow-xl">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 mb-4 gap-3">
             <div>
               <h3 class="font-bold text-slate-200">Riwayat Hasil Ujian Terarsip Saya</h3>
-              <p class="text-xs text-slate-400">Data hasil ujian dari sesi sebelumnya khusus mata pelajaran Anda.</p>
+              <p class="text-xs text-slate-400">Data rekam jejak pengerjaan siswa yang sudah terarsip berdasarkan kelas dan materi/topik.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
@@ -958,8 +1199,17 @@
                   <option value="9D">Kelas 9D</option>
                 </select>
               </div>
+
+              <!-- FILTER MATERI RIWAYAT -->
+              <div class="flex items-center gap-1.5 bg-amber-950/20 p-1.5 rounded-xl border border-amber-500/20">
+                <label for="filter-riwayat-materi" class="text-xs font-semibold text-amber-400 px-1">Materi / Topik:</label>
+                <select id="filter-riwayat-materi" onchange="renderRiwayatTable()" class="text-xs font-bold bg-slate-950 border border-amber-500/30 rounded-lg px-2 py-1 text-amber-300 outline-none">
+                  <option value="SEMUA">-- Semua Materi --</option>
+                </select>
+              </div>
+
               <button onclick="clearRiwayatTerpilih()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 font-bold px-3 py-1.5 rounded-xl text-xs shadow transition">
-                🗑 Hapus Riwayat Kelas Terpilih
+                🗑 Hapus Riwayat Terfilter
               </button>
             </div>
           </div>
@@ -970,9 +1220,9 @@
                 <tr class="bg-slate-900 text-slate-400 border-b border-slate-800">
                   <th class="p-3 text-center w-12">No</th>
                   <th class="p-3">Nama Siswa</th>
-                  <th class="p-3">Kelas</th>
-                  <th class="p-3">Mata Pelajaran</th>
-                  <th class="p-3">Nilai</th>
+                  <th class="p-3 text-center">Kelas</th>
+                  <th class="p-3">Materi / Topik</th>
+                  <th class="p-3 text-center">Nilai</th>
                   <th class="p-3">Tanggal / Waktu Arsip</th>
                 </tr>
               </thead>
@@ -1068,10 +1318,12 @@
   <script>
     const allDashboardSections = [
       'sec-pengaturan',
-      'sec-impor-siswa',
+      'sec-data-siswa',
       'sec-input-soal',
       'sec-bank-soal',
       'sec-pemantauan',
+      'sec-daftar-nilai',
+      'sec-rekapitulasi-nilai',
       'sec-laporan-analisis',
       'sec-riwayat'
     ];
@@ -1096,6 +1348,14 @@
         }
       });
 
+      if (targetId === 'sec-data-siswa') {
+        renderTabelDataSiswa();
+      } else if (targetId === 'sec-daftar-nilai') {
+        renderDaftarNilai();
+      } else if (targetId === 'sec-rekapitulasi-nilai') {
+        renderRekapitulasiNilai();
+      }
+
       if (window.innerWidth < 768) {
         const sidebar = document.getElementById('sidebar-guru');
         if (sidebar) sidebar.classList.add('hidden');
@@ -1106,6 +1366,25 @@
       const sidebar = document.getElementById('sidebar-guru');
       if(sidebar) {
         sidebar.classList.toggle('hidden');
+      }
+    }
+
+    function switchSubTabSiswa(tab) {
+      const formManual = document.getElementById('subtab-manual-siswa');
+      const formImpor = document.getElementById('subtab-impor-siswa');
+      const btnManual = document.getElementById('btn-tab-manual');
+      const btnImpor = document.getElementById('btn-tab-impor');
+
+      if (tab === 'manual') {
+        formManual.classList.remove('hidden');
+        formImpor.classList.add('hidden');
+        btnManual.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 text-white transition";
+        btnImpor.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition";
+      } else {
+        formManual.classList.add('hidden');
+        formImpor.classList.remove('hidden');
+        btnImpor.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition";
+        btnManual.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition";
       }
     }
 
@@ -1247,6 +1526,7 @@
       switchSection('sec-pengaturan');
     };
 
+    /* UPDATE BRANDING & LABEL GURU AKTIF PADA SUB HEADER */
     function updateLabelGuruAktif() {
       const guruAktifStr = sessionStorage.getItem('guruAktif');
       const labelEl = document.getElementById('label-guru-aktif');
@@ -1258,7 +1538,7 @@
             namaGuru = g.nama || g.username || "Guru";
           } catch(e) { namaGuru = "Guru"; }
         }
-        labelEl.innerText = `${namaGuru} - Mapel: ${currentGuruMapel}`;
+        labelEl.innerHTML = `<span class="text-slate-200 font-bold">${namaGuru}</span> <span class="text-slate-500 mx-1">•</span> <span class="text-emerald-400 font-bold">${currentGuruMapel}</span>`;
       }
     }
 
@@ -1270,26 +1550,52 @@
         }
       });
 
+      if (Array.isArray(appData.riwayat)) {
+        appData.riwayat.forEach(r => {
+          if (r.materi && r.materi.trim()) {
+            materiSet.add(r.materi.trim());
+          }
+        });
+      }
+
       const cfgMateri = document.getElementById('cfg-materi');
       const filterMateri = document.getElementById('filter-materi-soal');
+      const filterMateriMonitoring = document.getElementById('filter-materi-monitoring');
+      const filterMateriRiwayat = document.getElementById('filter-riwayat-materi');
+      const filterDnMateri = document.getElementById('filter-dn-materi');
 
       const currentCfgVal = cfgMateri ? cfgMateri.value : 'SEMUA';
       const currentFilterVal = filterMateri ? filterMateri.value : 'SEMUA';
+      const currentMonVal = filterMateriMonitoring ? filterMateriMonitoring.value : 'SEMUA';
+      const currentRiwVal = filterMateriRiwayat ? filterMateriRiwayat.value : 'SEMUA';
+      const currentDnVal = filterDnMateri ? filterDnMateri.value : 'SEMUA';
+
+      const optionsHtml = '<option value="SEMUA">-- Semua Materi --</option>' + 
+        Array.from(materiSet).map(m => `<option value="${m}">${m}</option>`).join('');
 
       if (cfgMateri) {
-        cfgMateri.innerHTML = '<option value="SEMUA">-- Semua Materi --</option>';
-        materiSet.forEach(m => {
-          cfgMateri.innerHTML += `<option value="${m}">${m}</option>`;
-        });
+        cfgMateri.innerHTML = optionsHtml;
         cfgMateri.value = (appData.config && appData.config.materiAktif) ? appData.config.materiAktif : currentCfgVal;
       }
 
       if (filterMateri) {
-        filterMateri.innerHTML = '<option value="SEMUA">-- Semua Materi --</option>';
-        materiSet.forEach(m => {
-          filterMateri.innerHTML += `<option value="${m}">${m}</option>`;
-        });
+        filterMateri.innerHTML = optionsHtml;
         filterMateri.value = currentFilterVal;
+      }
+
+      if (filterMateriMonitoring) {
+        filterMateriMonitoring.innerHTML = optionsHtml;
+        filterMateriMonitoring.value = currentMonVal;
+      }
+
+      if (filterMateriRiwayat) {
+        filterMateriRiwayat.innerHTML = optionsHtml;
+        filterMateriRiwayat.value = currentRiwVal;
+      }
+
+      if (filterDnMateri) {
+        filterDnMateri.innerHTML = optionsHtml;
+        filterDnMateri.value = currentDnVal;
       }
     }
 
@@ -1368,6 +1674,9 @@
         if (document.getElementById('cfg-materi')) document.getElementById('cfg-materi').value = appData.config.materiAktif || 'SEMUA';
 
         renderMonitoringTable();
+        renderTabelDataSiswa();
+        renderDaftarNilai();
+        renderRekapitulasiNilai();
       });
 
       db.ref(`${pathGuru}/siswa`).on('value', snap => {
@@ -1379,6 +1688,9 @@
           });
         }
         renderMonitoringTable();
+        renderTabelDataSiswa();
+        renderDaftarNilai();
+        renderRekapitulasiNilai();
       });
 
       db.ref(`${pathGuru}/soal`).on('value', snap => {
@@ -1403,7 +1715,11 @@
             appData.riwayat.push({ key: k, ...val[k] });
           });
         }
+        populateMateriDropdowns();
         renderRiwayatTable();
+        renderMonitoringTable();
+        renderDaftarNilai();
+        renderRekapitulasiNilai();
       });
     }
 
@@ -1457,7 +1773,10 @@
           setupGuruRealtimeListeners();
           simpanPengaturan();
           switchSection('sec-pengaturan');
-          showToast(`Selamat Datang, ${dataGuru.nama || dataGuru.username} (Mapel: ${currentGuruMapel})!`);
+          showToast(`Selamat Datang, ${dataGuru.nama || dataGuru.username} (${currentGuruMapel})!`);
+          
+          /* MEMICU FULLSCREEN OTOMATIS SAAT LOGIN BERHASIL */
+          launchFullscreen(document.documentElement);
         }
       }).catch(err => {
         currentGuruKey = sanitizeKey(u);
@@ -1476,7 +1795,10 @@
         setupGuruRealtimeListeners();
         simpanPengaturan();
         switchSection('sec-pengaturan');
-        showToast(`Selamat Datang, ${dataGuru.nama} (Mapel: ${currentGuruMapel})!`);
+        showToast(`Selamat Datang, ${dataGuru.nama} (${currentGuruMapel})!`);
+
+        /* MEMICU FULLSCREEN OTOMATIS SAAT LOGIN BERHASIL */
+        launchFullscreen(document.documentElement);
       });
     }
 
@@ -1489,6 +1811,7 @@
       currentGuruMapel = '';
       appData.soal = [];
       appData.siswa = [];
+      exitFullscreenSafely();
       document.getElementById('page-guru').classList.add('hidden');
       document.getElementById('page-login').classList.remove('hidden');
     }
@@ -1498,7 +1821,93 @@
       renderSoalList();
       renderMonitoringTable();
       renderRiwayatTable();
+      renderTabelDataSiswa();
+      renderDaftarNilai();
+      renderRekapitulasiNilai();
       showToast("Data dashboard berhasil diperbarui!");
+    }
+
+    function tambahSiswaManual(e) {
+      e.preventDefault();
+      if (!currentGuruKey || !currentGuruMapel) return alert("Anda harus login sebagai guru terlebih dahulu!");
+
+      const namaEl = document.getElementById('manual-nama-siswa');
+      const kelasEl = document.getElementById('manual-kelas-siswa');
+
+      const nama = namaEl.value.trim();
+      const kelas = kelasEl.value;
+
+      if (!nama) return alert("Nama siswa tidak boleh kosong!");
+
+      const pathGuru = getGuruPath();
+      db.ref(`${pathGuru}/siswa`).push({
+        nama: nama,
+        kelas: kelas,
+        status: 'Belum Ujian',
+        nilai: 0,
+        jawaban: {},
+        ragu: {}
+      }).then(() => {
+        namaEl.value = '';
+        showToast(`Siswa "${nama}" berhasil ditambahkan ke ${kelas}!`);
+        const filterEl = document.getElementById('filter-view-kelas-siswa');
+        if (filterEl) filterEl.value = kelas;
+        renderTabelDataSiswa();
+      });
+    }
+
+    function renderTabelDataSiswa() {
+      const tbody = document.getElementById('tbody-data-siswa-kelas');
+      if (!tbody) return;
+
+      const filterKelas = document.getElementById('filter-view-kelas-siswa') ? document.getElementById('filter-view-kelas-siswa').value : 'SEMUA';
+      tbody.innerHTML = '';
+
+      let listSiswa = [...(appData.siswa || [])];
+
+      if (filterKelas !== 'SEMUA') {
+        listSiswa = listSiswa.filter(s => {
+          const kSiswa = String(s.kelas || '').toUpperCase().trim();
+          const kFilter = String(filterKelas).toUpperCase().trim();
+          return kSiswa === kFilter || kSiswa.includes(kFilter);
+        });
+      }
+
+      listSiswa.sort((a, b) => {
+        const namaA = (a.nama || '').toLowerCase();
+        const namaB = (b.nama || '').toLowerCase();
+        return namaA.localeCompare(namaB, 'id', { sensitivity: 'base' });
+      });
+
+      if (listSiswa.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-xs text-slate-500 italic">Belum ada data siswa ${filterKelas !== 'SEMUA' ? 'untuk kelas ' + filterKelas : ''}. Silakan tambah manual atau impor data siswa di atas.</td></tr>`;
+        return;
+      }
+
+      listSiswa.forEach((s, idx) => {
+        const status = s.status || 'Belum Ujian';
+        let badgeStatus = `<span class="bg-slate-900 text-slate-400 border border-slate-800 px-2 py-0.5 rounded-full text-[10px]">Belum Ujian</span>`;
+        
+        if (status === 'Selesai') {
+          badgeStatus = `<span class="bg-rose-950/40 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold">Selesai</span>`;
+        } else if (status === 'Sedang Mengerjakan' || s.mengerjakan === true) {
+          badgeStatus = `<span class="bg-emerald-950/40 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold">Berlangsung</span>`;
+        }
+
+        tbody.innerHTML += `
+          <tr class="border-b border-slate-800 text-xs hover:bg-slate-900/40 text-slate-300">
+            <td class="p-2.5 text-center font-bold text-slate-500">${idx + 1}</td>
+            <td class="p-2.5 font-bold text-slate-200 capitalize">${s.nama}</td>
+            <td class="p-2.5 text-center"><span class="bg-blue-950/40 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-lg font-bold">${s.kelas}</span></td>
+            <td class="p-2.5 text-center">${badgeStatus}</td>
+            <td class="p-2.5 text-center">
+              <button onclick="hapusDataSiswa('${s.key}')" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-[10px] font-semibold px-2.5 py-1 rounded-lg transition shadow-sm">
+                🗑 Hapus
+              </button>
+            </td>
+          </tr>
+        `;
+      });
     }
 
     function updateLiveTimersMonitoring() {
@@ -1625,6 +2034,8 @@
 
       showToast("Pengaturan Ujian Berhasil Disimpan!");
       renderMonitoringTable();
+      renderDaftarNilai();
+      renderRekapitulasiNilai();
     }
 
     function prosesImportSiswa() {
@@ -1678,10 +2089,11 @@
 
       document.getElementById('import-siswa-raw').value = '';
       
-      const filterSelect = document.getElementById('filter-kelas-monitoring');
+      const filterSelect = document.getElementById('filter-view-kelas-siswa');
       if (filterSelect) filterSelect.value = 'SEMUA';
 
-      showToast(`Berhasil menyimpan ${importedCount} data siswa untuk Mata Pelajaran ${currentGuruMapel}!`);
+      renderTabelDataSiswa();
+      showToast(`Berhasil mengimpor ${importedCount} data siswa!`);
     }
 
     function downloadTemplateSoal() {
@@ -1900,7 +2312,6 @@
       document.getElementById('manual-teks-lanjutan').value = stripHtmlToText(s.teksLanjutan);
       document.getElementById('manual-kunci').value = s.kunci || 'A';
 
-      // SET Gambar Stimulus/Soal jika ada
       const boxImgSoal = document.getElementById('preview-container-img-soal');
       const imgSoalPreview = document.getElementById('img-preview-soal');
       if (s.imgSoal) {
@@ -1911,7 +2322,6 @@
         imgSoalPreview.src = '';
       }
 
-      // SET Teks & Gambar Opsi
       ['A', 'B', 'C', 'D'].forEach(k => {
         document.getElementById(`manual-opt-text-${k}`).value = (s.opsi && s.opsi[k]) ? stripHtmlToText(s.opsi[k]) : '';
         const boxOptImg = document.getElementById(`preview-container-img-${k}`);
@@ -1988,7 +2398,6 @@
       document.getElementById('manual-preview-box').classList.add('hidden');
     }
 
-    /* FUNGSI SIMPAN SOAL TERINTEGRASI - MEMPERTAHANKAN GAMBAR TERPASANG */
     async function simpanSoalManual() {
       const noVal = parseInt(document.getElementById('manual-no').value) || (appData.soal.length + 1);
       const targetKelas = document.getElementById('manual-kelas').value;
@@ -1998,20 +2407,17 @@
       const teksLanjutan = document.getElementById('manual-teks-lanjutan').value.trim().replace(/\n/g, '<br>');
       const kunci = document.getElementById('manual-kunci').value;
 
-      // 1. Ambil data eksisting jika sedang dalam mode edit
       let existingData = {};
       if (editingSoalKey) {
         const found = appData.soal.find(item => item.key === editingSoalKey);
         if (found) existingData = found;
       }
 
-      // 2. Pertahankan gambar soal lama jika tidak ada file baru yang diunggah
       let imgSoalBase64 = existingData.imgSoal || '';
       if (fileImgSoal) {
         imgSoalBase64 = await readFileAsDataURL(fileImgSoal);
       }
 
-      // 3. Pertahankan gambar opsi lama jika tidak ada file opsi baru yang diunggah
       const opsiData = {}, opsiImgData = {};
       for (let k of ['A', 'B', 'C', 'D']) {
         const optTxt = document.getElementById(`manual-opt-text-${k}`).value.trim().replace(/\n/g, '<br>');
@@ -2137,7 +2543,7 @@
       if (confirm(pesanKonfirmasi)) {
         const pathGuru = getGuruPath();
         targetSoal.forEach(s => db.ref(`${pathGuru}/soal/${s.key}`).remove());
-        showToast(`Berhasil menghapus ${targetSoal.length} soal (${infoDetail.join(' & ')})!`);
+        showToast(`Berhasil menghapus ${targetSoal.length} soal (${infoDetail.join(' & ')} )!`);
       }
     }
 
@@ -2157,71 +2563,212 @@
       }
     }
 
+    /* FUNGSI PEMANTAUAN DENGAN STATISTIK JUMLAH SISWA DENGAN RATA JUSTIFY MATERI */
     function renderMonitoringTable() {
       const tbody = document.getElementById('table-monitoring');
       if (!tbody) return;
 
-      const filterElement = document.getElementById('filter-kelas-monitoring');
-      const filterKelas = filterElement ? filterElement.value : 'SEMUA';
+      const filterKelasElement = document.getElementById('filter-kelas-monitoring');
+      const filterKelas = filterKelasElement ? filterKelasElement.value : 'SEMUA';
+
+      const filterMateriElement = document.getElementById('filter-materi-monitoring');
+      const selectedMateri = filterMateriElement ? filterMateriElement.value : 'SEMUA';
+
       tbody.innerHTML = '';
 
-      let filtered = appData.siswa || [];
-      
+      let baseSiswa = [...(appData.siswa || [])];
+      let riwayatList = Array.isArray(appData.riwayat) ? [...appData.riwayat] : [];
+
+      const mapSiswaPemantauan = new Map();
+
+      baseSiswa.forEach(s => {
+        const keyIdentity = `${(s.nama || '').toLowerCase().trim()}_${(s.kelas || '').toUpperCase().trim()}`;
+        mapSiswaPemantauan.set(keyIdentity, {
+          key: s.key,
+          nama: s.nama,
+          kelas: s.kelas,
+          statusRealtime: s.status || 'Belum Ujian',
+          nilaiRealtime: s.nilai !== undefined ? s.nilai : 0,
+          materiRealtime: s.materiUjian || '',
+          mengerjakan: s.mengerjakan || false,
+          waktuSelesaiTimestamp: s.waktuSelesaiTimestamp,
+          waktuSelesai: s.waktuSelesai,
+          historyData: null
+        });
+      });
+
+      riwayatList.forEach(r => {
+        const rMateri = (r.materi || '').toLowerCase().trim();
+        const rKelas = (r.kelas || '').toUpperCase().trim();
+        const rNama = (r.nama || '').toLowerCase().trim();
+
+        const matchMateri = (selectedMateri === 'SEMUA' || rMateri === selectedMateri.toLowerCase().trim());
+        const matchKelas = (filterKelas === 'SEMUA' || rKelas === filterKelas.toUpperCase().trim() || rKelas.includes(filterKelas.toUpperCase().trim()));
+
+        if (matchMateri && matchKelas) {
+          const keyIdentity = `${rNama}_${rKelas}`;
+          if (mapSiswaPemantauan.has(keyIdentity)) {
+            const existing = mapSiswaPemantauan.get(keyIdentity);
+            existing.historyData = r;
+          } else {
+            mapSiswaPemantauan.set(keyIdentity, {
+              key: r.siswaKey || `riwayat_${r.key}`,
+              nama: r.nama,
+              kelas: r.kelas,
+              statusRealtime: 'Belum Ujian',
+              nilaiRealtime: 0,
+              materiRealtime: '',
+              mengerjakan: false,
+              historyData: r
+            });
+          }
+        }
+      });
+
+      let listSiswaGabungan = Array.from(mapSiswaPemantauan.values());
+
       if (filterKelas !== 'SEMUA') {
-        filtered = filtered.filter(s => {
-          const kSiswa = String(s.kelas || '').toUpperCase().trim();
-          const kFilter = String(filterKelas).toUpperCase().trim();
-          return kSiswa === kFilter || kSiswa.includes(kFilter) || kFilter.includes(kSiswa);
+        listSiswaGabungan = listSiswaGabungan.filter(s => {
+          const kS = String(s.kelas || '').toUpperCase().trim();
+          const kF = String(filterKelas).toUpperCase().trim();
+          return kS === kF || kS.includes(kF) || kF.includes(kS);
         });
       }
 
-      if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="p-4 text-center text-xs text-slate-500 italic">Belum ada data siswa yang diimport untuk mata pelajaran ini (Atau ubah filter kelas ke "Semua Kelas").</td></tr>';
-        renderAnalisisUjian(filtered);
+      if (listSiswaGabungan.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="p-4 text-center text-xs text-slate-500 italic">Belum ada data pengerjaan atau siswa untuk filter kriteria ini.</td></tr>';
+        
+        // Update Statistik Ke 0 jika Kosong
+        document.getElementById('mon-stat-total').innerText = '0 Siswa';
+        document.getElementById('mon-stat-aktif').innerText = '0 Siswa';
+        document.getElementById('mon-stat-selesai').innerText = '0 Siswa';
+        document.getElementById('mon-stat-belum').innerText = '0 Siswa';
+
+        renderAnalisisUjian([]);
         return;
       }
 
       const currentKkm = parseInt(appData.config.kkm) || 75;
+      const listCalculated = [];
 
-      filtered.forEach((s, idx) => {
+      let statTotal = listSiswaGabungan.length;
+      let statAktif = 0;
+      let statSelesai = 0;
+      let statBelum = 0;
+
+      listSiswaGabungan.forEach((s) => {
+        let statusFinal = 'Belum Ujian';
+        let materiDisplay = selectedMateri !== 'SEMUA' ? selectedMateri : (s.materiRealtime || (s.historyData ? s.historyData.materi : 'SEMUA'));
+        let nilaiFinal = 0;
+        let sisaWaktuMarkup = '-';
+        let ketBadge = '-';
+
+        const hasHistory = !!s.historyData;
+        const isRealtimeFinished = s.statusRealtime === 'Selesai';
+        const isRealtimeActive = s.mengerjakan === true || s.statusRealtime === 'Sedang Mengerjakan';
+
+        if (selectedMateri !== 'SEMUA') {
+          if (hasHistory) {
+            statusFinal = 'Selesai';
+            nilaiFinal = s.historyData.nilai !== undefined ? s.historyData.nilai : 0;
+            materiDisplay = s.historyData.materi || selectedMateri;
+          } else if (isRealtimeFinished && s.materiRealtime && s.materiRealtime.toLowerCase().trim() === selectedMateri.toLowerCase().trim()) {
+            statusFinal = 'Selesai';
+            nilaiFinal = s.nilaiRealtime;
+            materiDisplay = s.materiRealtime;
+          } else if (isRealtimeActive && s.materiRealtime && s.materiRealtime.toLowerCase().trim() === selectedMateri.toLowerCase().trim()) {
+            statusFinal = 'Sedang Mengerjakan';
+            materiDisplay = s.materiRealtime;
+          } else {
+            statusFinal = 'Belum Ujian';
+            nilaiFinal = 0;
+          }
+        } else {
+          if (isRealtimeActive) {
+            statusFinal = 'Sedang Mengerjakan';
+            materiDisplay = s.materiRealtime || 'Sesi Aktif';
+          } else if (isRealtimeFinished) {
+            statusFinal = 'Selesai';
+            nilaiFinal = s.nilaiRealtime;
+            materiDisplay = s.materiRealtime || 'Sesi Aktif';
+          } else if (hasHistory) {
+            statusFinal = 'Selesai (Terarsip)';
+            nilaiFinal = s.historyData.nilai !== undefined ? s.historyData.nilai : 0;
+            materiDisplay = s.historyData.materi || 'Arsip';
+          } else {
+            statusFinal = 'Belum Ujian';
+            nilaiFinal = 0;
+          }
+        }
+
+        // Kalkulasi Statistik
+        if (statusFinal.includes('Selesai')) {
+          statSelesai++;
+        } else if (statusFinal === 'Sedang Mengerjakan') {
+          statAktif++;
+        } else {
+          statBelum++;
+        }
+
         let statusBadge = '';
-        let waktuText = '-';
-        let keteranganBadge = '-';
-
-        const status = s.status || 'Belum Ujian';
-        const nilai = s.nilai !== undefined ? s.nilai : 0;
-
-        if (status === 'Selesai') {
+        if (statusFinal.includes('Selesai')) {
           statusBadge = `<span class="bg-rose-950/40 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold inline-block">Selesai</span>`;
-          waktuText = `<span class="text-xs text-slate-400 font-semibold">Selesai (${s.waktuSelesai || '-'})</span>`;
-          keteranganBadge = nilai < currentKkm ? 
+          sisaWaktuMarkup = `<span class="text-xs text-slate-400 font-semibold">${s.waktuSelesai || (s.historyData ? s.historyData.waktuArsip : 'Selesai')}</span>`;
+          ketBadge = nilaiFinal < currentKkm ? 
             `<span class="bg-rose-950/40 text-rose-400 border border-rose-500/30 font-bold px-2 py-0.5 rounded text-[10px] inline-block">Remedi</span>` :
             `<span class="bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 font-bold px-2 py-0.5 rounded text-[10px] inline-block">Tuntas</span>`;
-        } else if (status === 'Sedang Mengerjakan' || s.mengerjakan === true) {
-          statusBadge = `<span class="bg-emerald-950/40 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold inline-block">Berlangsung</span>`;
+        } else if (statusFinal === 'Sedang Mengerjakan') {
+          statusBadge = `<span class="bg-emerald-950/40 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold inline-block animate-pulse">Berlangsung</span>`;
           const endTime = s.waktuSelesaiTimestamp;
           if (endTime) {
             const diff = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
             const m = Math.floor(diff / 60), sSec = diff % 60;
-            waktuText = `<span class="font-mono font-bold text-amber-400 live-timer-monitoring" data-endtime="${endTime}">${m < 10 ? '0'+m : m}:${sSec < 10 ? '0'+sSec : sSec}</span>`;
+            sisaWaktuMarkup = `<span class="font-mono font-bold text-amber-400 live-timer-monitoring" data-endtime="${endTime}">${m < 10 ? '0'+m : m}:${sSec < 10 ? '0'+sSec : sSec}</span>`;
           } else {
-            waktuText = `<span class="font-mono font-bold text-amber-400">${appData.config.waktu || 60}:00</span>`;
+            sisaWaktuMarkup = `<span class="font-mono font-bold text-amber-400">${appData.config.waktu || 60}:00</span>`;
           }
         } else {
           statusBadge = `<span class="bg-slate-900 text-slate-400 border border-slate-800 px-2 py-0.5 rounded-full text-[10px] inline-block">Belum Ujian</span>`;
-          waktuText = `<span class="text-xs text-slate-500">${appData.config.waktu || 60} Menit</span>`;
+          sisaWaktuMarkup = `<span class="text-xs text-slate-500">${appData.config.waktu || 60} Menit</span>`;
         }
 
+        listCalculated.push({
+          ...s,
+          calculatedStatus: statusFinal,
+          calculatedMateri: materiDisplay,
+          calculatedNilai: nilaiFinal,
+          statusBadgeMarkup: statusBadge,
+          sisaWaktuMarkup: sisaWaktuMarkup,
+          ketBadgeMarkup: ketBadge
+        });
+      });
+
+      // Update Tampilan Kotak Statistik Monitoring Realtime
+      document.getElementById('mon-stat-total').innerHTML = `${statTotal} <span class="text-xs font-semibold text-slate-400">Siswa</span>`;
+      document.getElementById('mon-stat-aktif').innerHTML = `${statAktif} <span class="text-xs font-semibold text-emerald-400">Siswa</span>`;
+      document.getElementById('mon-stat-selesai').innerHTML = `${statSelesai} <span class="text-xs font-semibold text-rose-400">Siswa</span>`;
+      document.getElementById('mon-stat-belum').innerHTML = `${statBelum} <span class="text-xs font-semibold text-amber-400">Siswa</span>`;
+
+      listCalculated.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
+
+      listCalculated.forEach((s, idx) => {
         tbody.innerHTML += `
           <tr class="border-b border-slate-800 text-xs hover:bg-slate-900/40 text-slate-300">
             <td class="p-2.5 text-center font-bold text-slate-500">${idx + 1}</td>
-            <td class="p-2.5 font-semibold text-slate-200">${s.nama}</td>
-            <td class="p-2.5"><span class="bg-blue-950/40 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-lg font-bold">${s.kelas}</span></td>
-            <td class="p-2.5 text-center">${statusBadge}</td>
-            <td class="p-2.5 font-semibold">${waktuText}</td>
-            <td class="p-2.5 text-center font-bold text-slate-100">${status === 'Selesai' ? nilai : '-'}</td>
+            <td class="p-2.5 font-semibold text-slate-200 capitalize">${s.nama}</td>
+            <td class="p-2.5 text-center"><span class="bg-blue-950/40 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-lg font-bold">${s.kelas}</span></td>
+            
+            <td class="p-2.5 text-justify leading-relaxed">
+              <div class="bg-amber-950/30 text-amber-300 border border-amber-500/30 p-2 rounded-xl font-semibold text-[11px] text-justify text-justify-inter-word block break-words">
+                ${s.calculatedMateri || 'SEMUA'}
+              </div>
+            </td>
+
+            <td class="p-2.5 text-center">${s.statusBadgeMarkup}</td>
+            <td class="p-2.5 font-semibold">${s.sisaWaktuMarkup}</td>
+            <td class="p-2.5 text-center font-bold text-slate-100">${s.calculatedStatus.includes('Selesai') ? s.calculatedNilai : '-'}</td>
             <td class="p-2.5 text-center font-bold text-slate-400">${currentKkm}</td>
-            <td class="p-2.5 text-center">${keteranganBadge}</td>
+            <td class="p-2.5 text-center">${s.ketBadgeMarkup}</td>
             <td class="p-2.5 text-center">
               <div class="flex items-center justify-center gap-1.5">
                 <button onclick="resetAksesSiswa('${s.key}')" class="bg-amber-600/20 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/30 text-[10px] font-semibold px-2 py-1 rounded-lg transition shadow-sm">Reset Akses</button>
@@ -2232,16 +2779,270 @@
         `;
       });
 
-      renderAnalisisUjian(filtered);
+      renderAnalisisUjian(listCalculated);
+    }
+
+    /* FUNGSI: DAFTAR NILAI UJIAN SESUAI FILTER (UH/PTS/UAS & MATERI) */
+    function onDnJenisChange() {
+      const jenisSelect = document.getElementById('filter-dn-jenis').value;
+      const containerMateri = document.getElementById('container-dn-materi');
+      if (jenisSelect === 'Ulangan Harian') {
+        containerMateri.classList.remove('hidden');
+      } else {
+        containerMateri.classList.add('hidden');
+      }
+      renderDaftarNilai();
+    }
+
+    function renderDaftarNilai() {
+      const tbody = document.getElementById('tbody-daftar-nilai');
+      if (!tbody) return;
+
+      const filterKelas = document.getElementById('filter-dn-kelas').value;
+      const filterJenis = document.getElementById('filter-dn-jenis').value;
+      const filterMateri = document.getElementById('filter-dn-materi') ? document.getElementById('filter-dn-materi').value : 'SEMUA';
+      const currentKkm = parseInt(appData.config.kkm) || 75;
+
+      tbody.innerHTML = '';
+
+      let baseSiswa = [...(appData.siswa || [])];
+      let riwayatList = Array.isArray(appData.riwayat) ? [...appData.riwayat] : [];
+
+      const mapDaftarNilai = new Map();
+
+      baseSiswa.forEach(s => {
+        const keyIdentity = `${(s.nama || '').toLowerCase().trim()}_${(s.kelas || '').toUpperCase().trim()}`;
+        mapDaftarNilai.set(keyIdentity, {
+          nama: s.nama,
+          kelas: s.kelas,
+          scores: []
+        });
+      });
+
+      // Kumpulkan data nilai dari siswa realtime jika selesai
+      baseSiswa.forEach(s => {
+        if (s.status === 'Selesai' || s.nilai !== undefined) {
+          const keyIdentity = `${(s.nama || '').toLowerCase().trim()}_${(s.kelas || '').toUpperCase().trim()}`;
+          const jenisRealtime = appData.config.jenis || 'Ulangan Harian';
+          const materiRealtime = s.materiUjian || appData.config.materiAktif || 'Umum';
+
+          if (mapDaftarNilai.has(keyIdentity)) {
+            mapDaftarNilai.get(keyIdentity).scores.push({
+              jenis: jenisRealtime,
+              materi: materiRealtime,
+              nilai: s.nilai !== undefined ? s.nilai : 0
+            });
+          }
+        }
+      });
+
+      // Kumpulkan data nilai dari riwayat
+      riwayatList.forEach(r => {
+        const keyIdentity = `${(r.nama || '').toLowerCase().trim()}_${(r.kelas || '').toUpperCase().trim()}`;
+        if (!mapDaftarNilai.has(keyIdentity)) {
+          mapDaftarNilai.set(keyIdentity, {
+            nama: r.nama,
+            kelas: r.kelas,
+            scores: []
+          });
+        }
+        mapDaftarNilai.get(keyIdentity).scores.push({
+          jenis: r.jenis || 'Ulangan Harian',
+          materi: r.materi || 'Umum',
+          nilai: r.nilai !== undefined ? r.nilai : 0
+        });
+      });
+
+      let listSiswa = Array.from(mapDaftarNilai.values());
+
+      if (filterKelas !== 'SEMUA') {
+        listSiswa = listSiswa.filter(s => {
+          const kS = String(s.kelas || '').toUpperCase().trim();
+          const kF = String(filterKelas).toUpperCase().trim();
+          return kS === kF || kS.includes(kF);
+        });
+      }
+
+      listSiswa.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
+
+      if (listSiswa.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-xs text-slate-500 italic">Belum ada data nilai untuk filter yang dipilih.</td></tr>';
+        return;
+      }
+
+      let rowNo = 1;
+      listSiswa.forEach(s => {
+        let matchingScores = s.scores.filter(sc => sc.jenis === filterJenis);
+
+        if (filterJenis === 'Ulangan Harian' && filterMateri !== 'SEMUA') {
+          matchingScores = matchingScores.filter(sc => sc.materi.toLowerCase().trim() === filterMateri.toLowerCase().trim());
+        }
+
+        let nilaiDisplay = '-';
+        let materiDisplay = filterJenis === 'Ulangan Harian' ? (filterMateri !== 'SEMUA' ? filterMateri : 'Semua Materi') : filterJenis;
+        let ketBadge = `<span class="bg-slate-900 text-slate-500 border border-slate-800 px-2 py-0.5 rounded-full text-[10px]">Belum Ada Nilai</span>`;
+
+        if (matchingScores.length > 0) {
+          const lastScore = matchingScores[matchingScores.length - 1];
+          nilaiDisplay = lastScore.nilai;
+          if (filterJenis === 'Ulangan Harian') {
+            materiDisplay = lastScore.materi || 'Umum';
+          }
+
+          if (lastScore.nilai >= currentKkm) {
+            ketBadge = `<span class="bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 font-bold px-2.5 py-1 rounded-lg text-[10px]">Tuntas</span>`;
+          } else {
+            ketBadge = `<span class="bg-rose-950/40 text-rose-400 border border-rose-500/30 font-bold px-2.5 py-1 rounded-lg text-[10px]">Remedi</span>`;
+          }
+        }
+
+        tbody.innerHTML += `
+          <tr class="border-b border-slate-800 text-xs hover:bg-slate-900/40 text-slate-300">
+            <td class="p-3 text-center font-bold text-slate-500">${rowNo++}</td>
+            <td class="p-3 font-semibold text-slate-200 capitalize">${s.nama}</td>
+            <td class="p-3 text-center"><span class="bg-blue-950/40 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-lg font-bold">${s.kelas}</span></td>
+            <td class="p-3 font-semibold text-amber-300">${materiDisplay}</td>
+            <td class="p-3 text-center font-black text-sm text-slate-100">${nilaiDisplay !== '-' ? nilaiDisplay : '<span class="text-slate-600 font-normal">-</span>'}</td>
+            <td class="p-3 text-center">${ketBadge}</td>
+          </tr>
+        `;
+      });
+    }
+
+    /* FUNGSI: REKAPITULASI NILAI ULANGAN HARIAN, PTS, DAN UAS */
+    function renderRekapitulasiNilai() {
+      const tbody = document.getElementById('tbody-rekapitulasi-nilai');
+      if (!tbody) return;
+
+      const filterKelas = document.getElementById('filter-rekap-kelas').value;
+      tbody.innerHTML = '';
+
+      let baseSiswa = [...(appData.siswa || [])];
+      let riwayatList = Array.isArray(appData.riwayat) ? [...appData.riwayat] : [];
+
+      const mapRekap = new Map();
+
+      baseSiswa.forEach(s => {
+        const keyIdentity = `${(s.nama || '').toLowerCase().trim()}_${(s.kelas || '').toUpperCase().trim()}`;
+        mapRekap.set(keyIdentity, {
+          nama: s.nama,
+          kelas: s.kelas,
+          uhScores: [],
+          ptsScore: null,
+          uasScore: null
+        });
+      });
+
+      // Proses data realtime jika selesai
+      baseSiswa.forEach(s => {
+        if (s.status === 'Selesai' || s.nilai !== undefined) {
+          const keyIdentity = `${(s.nama || '').toLowerCase().trim()}_${(s.kelas || '').toUpperCase().trim()}`;
+          const jenis = appData.config.jenis || 'Ulangan Harian';
+          const val = s.nilai !== undefined ? s.nilai : 0;
+
+          if (mapRekap.has(keyIdentity)) {
+            const item = mapRekap.get(keyIdentity);
+            if (jenis === 'Ulangan Harian') {
+              item.uhScores.push(val);
+            } else if (jenis === 'Penilaian Tengah Semester') {
+              item.ptsScore = val;
+            } else if (jenis === 'Ujian Akhir Semester') {
+              item.uasScore = val;
+            }
+          }
+        }
+      });
+
+      // Proses data riwayat
+      riwayatList.forEach(r => {
+        const keyIdentity = `${(r.nama || '').toLowerCase().trim()}_${(r.kelas || '').toUpperCase().trim()}`;
+        if (!mapRekap.has(keyIdentity)) {
+          mapRekap.set(keyIdentity, {
+            nama: r.nama,
+            kelas: r.kelas,
+            uhScores: [],
+            ptsScore: null,
+            uasScore: null
+          });
+        }
+
+        const item = mapRekap.get(keyIdentity);
+        const jenis = r.jenis || 'Ulangan Harian';
+        const val = r.nilai !== undefined ? r.nilai : 0;
+
+        if (jenis === 'Ulangan Harian') {
+          item.uhScores.push(val);
+        } else if (jenis === 'Penilaian Tengah Semester') {
+          item.ptsScore = val;
+        } else if (jenis === 'Ujian Akhir Semester') {
+          item.uasScore = val;
+        }
+      });
+
+      let listSiswa = Array.from(mapRekap.values());
+
+      if (filterKelas !== 'SEMUA') {
+        listSiswa = listSiswa.filter(s => {
+          const kS = String(s.kelas || '').toUpperCase().trim();
+          const kF = String(filterKelas).toUpperCase().trim();
+          return kS === kF || kS.includes(kF);
+        });
+      }
+
+      listSiswa.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
+
+      if (listSiswa.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-xs text-slate-500 italic">Belum ada rekapitulasi data nilai siswa.</td></tr>';
+        return;
+      }
+
+      listSiswa.forEach((s, idx) => {
+        // Hitung Rata-Rata Ulangan Harian
+        let avgUH = '-';
+        let numAvgUH = 0;
+        if (s.uhScores.length > 0) {
+          const sum = s.uhScores.reduce((a, b) => a + b, 0);
+          numAvgUH = sum / s.uhScores.length;
+          avgUH = numAvgUH.toFixed(1);
+        }
+
+        const ptsVal = s.ptsScore !== null ? s.ptsScore : '-';
+        const uasVal = s.uasScore !== null ? s.uasScore : '-';
+
+        // Hitung Nilai Akhir Rata-Rata
+        let komponenNilai = [];
+        if (s.uhScores.length > 0) komponenNilai.push(numAvgUH);
+        if (s.ptsScore !== null) komponenNilai.push(s.ptsScore);
+        if (s.uasScore !== null) komponenNilai.push(s.uasScore);
+
+        let nilaiAkhirDisplay = '-';
+        if (komponenNilai.length > 0) {
+          const sumKomponen = komponenNilai.reduce((a, b) => a + b, 0);
+          nilaiAkhirDisplay = (sumKomponen / komponenNilai.length).toFixed(1);
+        }
+
+        tbody.innerHTML += `
+          <tr class="border-b border-slate-800 text-xs hover:bg-slate-900/40 text-slate-300">
+            <td class="p-3 text-center font-bold text-slate-500">${idx + 1}</td>
+            <td class="p-3 font-semibold text-slate-200 capitalize">${s.nama}</td>
+            <td class="p-3 text-center"><span class="bg-blue-950/40 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-lg font-bold">${s.kelas}</span></td>
+            <td class="p-3 text-center font-bold text-emerald-400">${avgUH !== '-' ? avgUH : '<span class="text-slate-600 font-normal">-</span>'}</td>
+            <td class="p-3 text-center font-bold text-cyan-400">${ptsVal !== '-' ? ptsVal : '<span class="text-slate-600 font-normal">-</span>'}</td>
+            <td class="p-3 text-center font-bold text-purple-400">${uasVal !== '-' ? uasVal : '<span class="text-slate-600 font-normal">-</span>'}</td>
+            <td class="p-3 text-center font-black text-sm text-yellow-400 bg-yellow-950/20 border-x border-yellow-500/10">${nilaiAkhirDisplay !== '-' ? nilaiAkhirDisplay : '<span class="text-slate-600 font-normal">-</span>'}</td>
+          </tr>
+        `;
+      });
     }
 
     function renderAnalisisUjian(listSiswa) {
       const currentKkm = parseInt(appData.config.kkm) || 75;
       const filterKelas = document.getElementById('filter-kelas-monitoring') ? document.getElementById('filter-kelas-monitoring').value : 'SEMUA';
+      const filterMateri = document.getElementById('filter-materi-monitoring') ? document.getElementById('filter-materi-monitoring').value : 'SEMUA';
       
       document.getElementById('pdf-meta-mapel').innerText = currentGuruMapel || '-';
       document.getElementById('pdf-meta-jenis').innerText = appData.config.jenis || 'Ulangan Harian';
-      document.getElementById('pdf-meta-materi').innerText = appData.config.materiAktif || 'SEMUA';
+      document.getElementById('pdf-meta-materi').innerText = filterMateri !== 'SEMUA' ? filterMateri : (appData.config.materiAktif || 'SEMUA');
       document.getElementById('pdf-meta-tp').innerText = `${appData.config.tp || '2025/2026'} (${appData.config.semester || 'Ganjil'})`;
       document.getElementById('pdf-meta-kkm').innerText = currentKkm;
       document.getElementById('pdf-meta-kelas').innerText = filterKelas;
@@ -2256,7 +3057,8 @@
       const listTuntas = [];
 
       listSiswa.forEach(s => {
-        const nilai = s.nilai !== undefined ? s.nilai : 0;
+        const nilai = s.calculatedNilai !== undefined ? s.calculatedNilai : 0;
+        const status = s.calculatedStatus || 'Belum Ujian';
         const kls = s.kelas || 'Umum';
         
         if (!kelasMap[kls]) {
@@ -2266,7 +3068,7 @@
         kelasMap[kls].total += 1;
         kelasMap[kls].sumNilai += nilai;
 
-        if (s.status === 'Selesai' || nilai > 0) {
+        if (status.includes('Selesai')) {
           totalNilai += nilai;
           if (nilai >= currentKkm) {
             tuntasSiswa++;
@@ -2344,7 +3146,7 @@
           tbodyRemedi.innerHTML += `
             <tr class="border-b border-slate-800/60 text-xs text-slate-300">
               <td class="p-1.5 border-r border-slate-800 text-center font-semibold text-slate-500">${idx + 1}</td>
-              <td class="p-1.5 border-r border-slate-800 font-semibold text-slate-200 truncate">${r.nama}</td>
+              <td class="p-1.5 border-r border-slate-800 font-semibold text-slate-200 truncate capitalize">${r.nama}</td>
               <td class="p-1.5 border-r border-slate-800 text-center font-bold text-blue-400">${r.kelas}</td>
               <td class="p-1.5 text-center font-bold text-rose-400">${r.nilai}</td>
             </tr>
@@ -2361,7 +3163,7 @@
           tbodyTuntas.innerHTML += `
             <tr class="border-b border-slate-800/60 text-xs text-slate-300">
               <td class="p-1.5 border-r border-slate-800 text-center font-semibold text-slate-500">${idx + 1}</td>
-              <td class="p-1.5 border-r border-slate-800 font-semibold text-slate-200 truncate">${t.nama}</td>
+              <td class="p-1.5 border-r border-slate-800 font-semibold text-slate-200 truncate capitalize">${t.nama}</td>
               <td class="p-1.5 border-r border-slate-800 text-center font-bold text-blue-400">${t.kelas}</td>
               <td class="p-1.5 text-center font-bold text-emerald-400">${t.nilai}</td>
             </tr>
@@ -2396,81 +3198,49 @@
       }
     }
 
-    function hapusSiswaSesuaiKelas() {
-      const filterKelas = document.getElementById('filter-kelas-monitoring').value;
-      if (filterKelas === 'SEMUA') return alert("Pilih kelas spesifik pada dropdown 'Kelas Ujian' terlebih dahulu!");
-
-      const targetSiswa = appData.siswa.filter(s => {
-        const kSiswa = String(s.kelas || '').toUpperCase().trim();
-        const kFilter = String(filterKelas).toUpperCase().trim();
-        return kSiswa === kFilter || kSiswa.includes(kFilter) || kFilter.includes(kSiswa);
-      });
-
-      if (targetSiswa.length === 0) return alert(`Tidak ada data siswa untuk Kelas ${filterKelas}`);
-
-      if (confirm(`⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus ${targetSiswa.length} data siswa khusus Kelas ${filterKelas}?`)) {
-        const pathGuru = getGuruPath();
-        targetSiswa.forEach(s => db.ref(`${pathGuru}/siswa/${s.key}`).remove());
-        showToast(`Data siswa Kelas ${filterKelas} berhasil dihapus!`);
-      }
-    }
-
-    function kosongkanSemuaSiswa() {
-      if (appData.siswa.length === 0) return alert("Belum ada data siswa untuk dihapus!");
-
-      if (confirm(`⚠️ PERINGATAN KETAT: Apakah Anda yakin ingin MENGHAPUS SEMUA (${appData.siswa.length}) data siswa untuk mata pelajaran ${currentGuruMapel}?`)) {
-        const pathGuru = getGuruPath();
-        db.ref(`${pathGuru}/siswa`).remove();
-        showToast(`Semua data siswa untuk ${currentGuruMapel} telah dikosongkan!`);
-      }
-    }
-
-    function hapusSiswaDuplikat() {
-      if (confirm("Hapus data siswa duplikat berdasarkan Nama dan Kelas?")) {
-        const pathGuru = getGuruPath();
-        const seen = new Set();
-        let deleted = 0;
-        appData.siswa.forEach(s => {
-          const identifier = `${s.nama.toLowerCase().trim()}_${s.kelas.toLowerCase().trim()}`;
-          if (seen.has(identifier)) {
-            db.ref(`${pathGuru}/siswa/${s.key}`).remove();
-            deleted++;
-          } else { seen.add(identifier); }
-        });
-        showToast(`Dihapus ${deleted} data siswa duplikat.`);
-      }
-    }
-
     function downloadHasilExcel() {
       const filterKelas = document.getElementById('filter-kelas-monitoring').value;
+      const filterMateri = document.getElementById('filter-materi-monitoring') ? document.getElementById('filter-materi-monitoring').value : 'SEMUA';
       const currentKkm = parseInt(appData.config.kkm) || 75;
 
-      let filtered = appData.siswa;
-      if (filterKelas !== 'SEMUA') {
-        filtered = appData.siswa.filter(s => {
-          const kSiswa = String(s.kelas || '').toUpperCase().trim();
-          const kFilter = String(filterKelas).toUpperCase().trim();
-          return kSiswa === kFilter || kSiswa.includes(kFilter);
-        });
-      }
+      const domTable = document.getElementById('table-monitoring');
+      const rows = domTable.querySelectorAll('tr');
 
-      if (filtered.length === 0) return alert("Tidak ada data untuk dieksport!");
+      if (!rows || rows.length === 0) return alert("Tidak ada data untuk dieksport!");
 
-      const exportData = filtered.map((s, idx) => {
-        const nil = s.nilai !== undefined ? s.nilai : 0;
-        const stat = s.status || 'Belum Ujian';
-        const ket = nil >= currentKkm ? 'Tuntas' : (stat === 'Selesai' ? 'Remedi' : 'Belum');
+      const exportData = [];
 
-        return {
-          No: idx + 1, 'Nama Siswa': s.nama, Kelas: s.kelas,
-          'Mata Pelajaran': currentGuruMapel, Status: stat, Nilai: nil, KKM: currentKkm, Keterangan: ket
-        };
+      rows.forEach((tr, idx) => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length >= 8) {
+          const nama = tds[1].innerText.trim();
+          const kelas = tds[2].innerText.trim();
+          const materi = tds[3].innerText.trim();
+          const status = tds[4].innerText.trim();
+          const nilai = parseInt(tds[6].innerText.trim()) || 0;
+          const kkm = parseInt(tds[7].innerText.trim()) || currentKkm;
+          const ket = nilai >= kkm ? 'Tuntas' : (status.includes('Selesai') ? 'Remedi' : 'Belum Ujian');
+
+          exportData.push({
+            No: idx + 1,
+            'Nama Siswa': nama,
+            Kelas: kelas,
+            'Mata Pelajaran': currentGuruMapel,
+            'Materi Ujian': materi,
+            Status: status,
+            Nilai: status.includes('Selesai') ? nilai : 0,
+            KKM: kkm,
+            Keterangan: ket
+          });
+        }
       });
+
+      if (exportData.length === 0) return alert("Data ekspor tidak valid!");
 
       const ws = XLSX.utils.json_to_sheet(exportData);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Hasil Ujian");
-      XLSX.writeFile(wb, `Hasil_Ujian_${currentGuruMapel}_Kelas_${filterKelas}.xlsx`);
+      XLSX.writeFile(wb, `Hasil_Ujian_${currentGuruMapel}_Materi_${filterMateri}_Kelas_${filterKelas}.xlsx`);
     }
 
     function arsipkanDanBersihkanSesi() {
@@ -2486,7 +3256,9 @@
 
       if (targetSiswa.length === 0) return alert("Tidak ada data siswa!");
 
-      if (!confirm(`Arsipkan hasil ujian ${currentGuruMapel} dan bersihkan sesi kelas ini?`)) return;
+      const materiSaatIni = appData.config.materiAktif || 'Umum';
+
+      if (!confirm(`Arsipkan hasil ujian ${currentGuruMapel} (Materi: ${materiSaatIni}) dan bersihkan sesi kelas ini?`)) return;
 
       const timestamp = new Date().toLocaleString('id-ID');
       let count = 0;
@@ -2502,6 +3274,7 @@
             nama: s.nama || '-',
             kelas: s.kelas || '-',
             mapel: currentGuruMapel,
+            materi: s.materiUjian || materiSaatIni,
             nilai: nilaiAksen,
             jenis: appData.config.jenis || 'Ulangan Harian',
             waktuArsip: timestamp
@@ -2515,12 +3288,13 @@
           jawaban: null,
           ragu: null,
           mengerjakan: false,
+          materiUjian: null,
           waktuSelesaiTimestamp: null,
           waktuSelesai: null
         });
       });
 
-      showToast(`Berhasil mengarsipkan ${count} data ujian untuk ${currentGuruMapel}!`);
+      showToast(`Berhasil mengarsipkan ${count} data ujian untuk ${currentGuruMapel} (${materiSaatIni})!`);
     }
 
     function renderRiwayatTable() {
@@ -2528,9 +3302,12 @@
       if (!tbody) return;
 
       const filterKelas = document.getElementById('filter-riwayat-kelas').value;
+      const filterMateri = document.getElementById('filter-riwayat-materi') ? document.getElementById('filter-riwayat-materi').value : 'SEMUA';
+      
       tbody.innerHTML = '';
 
-      let riwayatList = Array.isArray(appData.riwayat) ? appData.riwayat : [];
+      let riwayatList = Array.isArray(appData.riwayat) ? [...appData.riwayat] : [];
+      
       if (filterKelas !== 'SEMUA') {
         riwayatList = riwayatList.filter(r => {
           const kSiswa = String(r.kelas || '').toUpperCase().trim();
@@ -2539,8 +3316,17 @@
         });
       }
 
+      if (filterMateri !== 'SEMUA') {
+        riwayatList = riwayatList.filter(r => {
+          const mRiwayat = String(r.materi || 'Umum').toLowerCase().trim();
+          return mRiwayat === String(filterMateri).toLowerCase().trim();
+        });
+      }
+
+      riwayatList.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
+
       if (riwayatList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-xs text-slate-500 italic">Belum ada riwayat ujian terarsip di akun Anda.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-xs text-slate-500 italic">Belum ada riwayat ujian terarsip untuk filter kriteria ini.</td></tr>';
         return;
       }
 
@@ -2548,10 +3334,10 @@
         tbody.innerHTML += `
           <tr class="border-b border-slate-800 hover:bg-slate-900/40 text-xs text-slate-300">
             <td class="p-3 text-center font-bold text-slate-500">${idx + 1}</td>
-            <td class="p-3 font-bold text-slate-200">${r.nama || '-'}</td>
-            <td class="p-3 font-semibold text-blue-400">${r.kelas || '-'}</td>
-            <td class="p-3 font-semibold text-emerald-400">${r.mapel || '-'}</td>
-            <td class="p-3 font-bold text-slate-100">${r.nilai !== undefined ? r.nilai : 0}</td>
+            <td class="p-3 font-bold text-slate-200 capitalize">${r.nama || '-'}</td>
+            <td class="p-3 text-center font-semibold text-blue-400">${r.kelas || '-'}</td>
+            <td class="p-3 font-semibold text-amber-300">${r.materi || 'SEMUA'}</td>
+            <td class="p-3 text-center font-bold text-slate-100">${r.nilai !== undefined ? r.nilai : 0}</td>
             <td class="p-3 text-slate-400">${r.waktuArsip || '-'}</td>
           </tr>
         `;
@@ -2560,23 +3346,30 @@
 
     function clearRiwayatTerpilih() {
       const filterKelas = document.getElementById('filter-riwayat-kelas').value;
+      const filterMateri = document.getElementById('filter-riwayat-materi') ? document.getElementById('filter-riwayat-materi').value : 'SEMUA';
       const pathGuru = getGuruPath();
 
-      if (filterKelas === 'SEMUA') {
+      if (filterKelas === 'SEMUA' && filterMateri === 'SEMUA') {
         if (confirm("Hapus semua riwayat ujian Anda?")) {
           db.ref(`${pathGuru}/riwayat_ujian`).remove().then(() => showToast("Riwayat ujian berhasil dihapus!"));
         }
         return;
       }
 
-      if (confirm(`Hapus riwayat ujian khusus Kelas ${filterKelas}?`)) {
+      let infoText = [];
+      if (filterKelas !== 'SEMUA') infoText.push(`Kelas ${filterKelas}`);
+      if (filterMateri !== 'SEMUA') infoText.push(`Materi "${filterMateri}"`);
+
+      if (confirm(`Hapus riwayat ujian khusus kriteria: ${infoText.join(' & ')}?`)) {
         if (Array.isArray(appData.riwayat)) {
           appData.riwayat.forEach(item => {
-            if (item.kelas === filterKelas) {
+            const matchKelas = (filterKelas === 'SEMUA' || item.kelas === filterKelas);
+            const matchMateri = (filterMateri === 'SEMUA' || String(item.materi || '').toLowerCase().trim() === filterMateri.toLowerCase().trim());
+            if (matchKelas && matchMateri) {
               db.ref(`${pathGuru}/riwayat_ujian/${item.key}`).remove();
             }
           });
-          showToast(`Riwayat Kelas ${filterKelas} berhasil dihapus!`);
+          showToast(`Riwayat ${infoText.join(' & ')} berhasil dihapus!`);
         }
       }
     }
@@ -2729,10 +3522,12 @@
       const keySiswa = stateUjianSiswa.currentSiswaKey;
 
       const nowStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      const materiSiswa = appData.config.materiAktif || 'Umum';
 
       db.ref(`${pathGuru}/siswa/${keySiswa}`).update({
         status: 'Selesai',
         mengerjakan: false,
+        materiUjian: materiSiswa,
         nilai: nilaiAkhir,
         waktuSelesai: nowStr
       });
